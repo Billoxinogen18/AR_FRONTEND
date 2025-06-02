@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #000000;
+}
+
+#root {
+  background-color: #000000;
+}
+
+.ant-menu-dark.ant-menu-inline .ant-menu-item,
+.ant-menu-dark.ant-menu-vertical .ant-menu-item,
+.ant-menu-dark.ant-menu-vertical-left .ant-menu-item,
+.ant-menu-dark.ant-menu-vertical-right .ant-menu-item {
+  background-color: #1f1f1f; /* Ensure item background matches sider */
+}
+
+.ant-menu-dark .ant-menu-item a {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected a,
+.ant-menu-dark .ant-menu-item a:hover {
+  color: white !important;
+}
+
+.ant-menu-item a.active {
+  font-weight: bold;
+}
