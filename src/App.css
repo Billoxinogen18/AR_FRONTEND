@@ -10,264 +10,246 @@
   background: transparent !important; /* Ensure it's transparent to show body background */
 }
 
-.ant-layout-content {
-    /* Adjust padding/margin as needed, background should be transparent */
-    padding: 24px !important;
-    margin: 0 !important;
-    background: transparent !important;
+.ant-layout-content { /* This is a general AntD class, use with caution or more specificity */
+    /* Our App.jsx uses className="app-content" for targeted styling */
 }
 
 
 /* Neumorphic & Glassmorphic Card Base Style */
 .neumorphic-glass-card {
-  /* Base background is semi-transparent to allow glass effect */
-  background: rgba(40, 42, 58, 0.4) !important; /* Slightly bluish dark transparent */
-  backdrop-filter: blur(15px) !important;
-  -webkit-backdrop-filter: blur(15px) !important;
-  border-radius: 20px !important;
+  background: rgba(40, 42, 58, 0.5) !important; /* Slightly more transparent for glass */
+  backdrop-filter: blur(12px) !important; /* Adjusted blur */
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important; /* Softer radius */
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  /* Neumorphic shadows for dark theme */
   box-shadow:
-    /* Outer light (top-left) - subtle, brighter for dark theme */
-    -7px -7px 14px rgba(55, 58, 78, 0.9),
-    /* Outer dark (bottom-right) */
-    7px 7px 14px rgba(12, 12, 18, 0.9) !important;
-  transition: all 0.3s ease-in-out !important;
-  color: #e0e0e0 !important; /* Light text on dark card */
-  overflow: hidden; /* Ensure children don't break rounded corners */
+    -6px -6px 12px rgba(55, 58, 78, 0.8), /* Dark theme outer light */
+    6px 6px 12px rgba(12, 12, 18, 0.8) !important; /* Dark theme outer dark */
+  transition: all 0.25s ease-in-out !important;
+  color: #e0e0e0 !important; 
+  overflow: hidden; 
 }
 
 .neumorphic-glass-card:hover {
-  transform: translateY(-4px) scale(1.01);
+  transform: translateY(-3px); /* Subtle hover lift */
   box-shadow:
-    -9px -9px 18px rgba(55, 58, 78, 1),
-    9px 9px 18px rgba(12, 12, 18, 1) !important;
+    -8px -8px 16px rgba(60, 63, 83, 0.9),
+    8px 8px 16px rgba(10, 10, 15, 0.9) !important;
 }
 
 .neumorphic-glass-card .ant-card-head {
   background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  padding: 16px 24px !important; /* Consistent padding */
-  border-top-left-radius: 20px; /* Match card radius */
-  border-top-right-radius: 20px;
+  padding: 16px 20px !important; /* Adjusted padding */
+  border-top-left-radius: 16px; 
+  border-top-right-radius: 16px;
 }
 .neumorphic-glass-card .ant-card-head-title {
-  color: #00adee !important; /* ARIX primary for titles */
+  color: #00adee !important; 
   font-weight: 600 !important;
-  font-size: 1.1em !important;
+  font-size: 1.15em !important; /* Slightly larger */
 }
 
 .neumorphic-glass-card .ant-card-body {
-    padding: 24px !important; /* Consistent padding */
+    padding: 20px !important; /* Adjusted padding */
 }
 
 .neumorphic-glass-card .ant-card-actions {
   background: transparent !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  padding: 16px 24px !important;
-  margin-top: 16px !important; /* Add space above actions */
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important; /* Softer top border */
+  padding: 12px 20px !important; /* Adjusted padding */
+  margin-top: 0px !important; /* Usually actions are flush or part of body padding flow */
 }
-.neumorphic-glass-card .ant-card-actions > li {
-    margin: 0 !important; /* Remove default action list margin */
-    padding: 0 !important; /* Remove default action list padding */
-}
-.neumorphic-glass-card .ant-card-actions > li > span {
-    width: 100%; /* Make the button span the full width */
-    display: block; /* Ensure span containing button is block for width */
-}
-.neumorphic-glass-card .ant-card-actions .ant-btn {
-     margin: 0 auto; /* Center the button within the action span */
-     display: block; /* Ensure button is block for centering */
-}
+.neumorphic-glass-card .ant-card-actions > li { margin: 0 4px !important; padding: 0 !important; }
+.neumorphic-glass-card .ant-card-actions > li > span { width: 100%; display: block; }
+.neumorphic-glass-card .ant-card-actions .ant-btn { margin: 0 auto; display: block; }
 
 
 /* General Button Styling (Neumorphic Inspired) */
-/* Applied to all AntD buttons via ConfigProvider, refine here */
-.ant-btn {
+.ant-btn { /* Theme tokens should primarily handle this */ }
+
+.ant-btn-primary { /* Theme tokens should primarily handle this */ }
+.ant-btn-primary:hover { /* Theme tokens */ }
+.ant-btn-primary:active, .ant-btn-primary:focus { /* Theme tokens */ }
+.ant-btn-primary:disabled { /* Theme tokens */ }
+
+.ant-btn-default { /* Theme tokens */ }
+.ant-btn-default:hover { /* Theme tokens */ }
+.ant-btn-default:active, .ant-btn-default:focus { /* Theme tokens */ }
+.ant-btn-default:disabled { /* Theme tokens */ }
+
+/* Input Number specific styling if theme tokens are not enough */
+.neumorphic-input-number.ant-input-number { /* Custom class for targeted styling */
+  background: rgba(20, 22, 30, 0.6) !important;
   border-radius: 10px !important;
-  font-weight: 500 !important;
-  border: none !important; /* Neumorphism often avoids hard borders */
-  transition: all 0.2s ease-in-out !important;
-  /* Ensure default button background and text color from theme token */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 3px 3px 6px rgba(12,12,18,0.6), inset -3px -3px 6px rgba(45,48,68,0.6) !important;
 }
-
-.ant-btn-primary {
-  background: linear-gradient(145deg, #00b7ff, #008cdd) !important; /* ARIX blue gradient */
-  color: white !important;
-  box-shadow: -5px -5px 10px rgba(55, 58, 78, 0.7), 5px 5px 10px rgba(12, 12, 18, 0.7) !important;
-}
-.ant-btn-primary:hover {
-  background: linear-gradient(145deg, #00c8ff, #009eff) !important;
-  color: white !important; /* Keep text white on hover */
-  box-shadow: -3px -3px 7px rgba(55, 58, 78, 0.8), 3px 3px 7px rgba(12, 12, 18, 0.8) !important;
-}
-.ant-btn-primary:active, .ant-btn-primary:focus {
-  box-shadow: inset 3px 3px 6px rgba(0, 100, 150, 0.6), inset -3px -3px 6px rgba(0, 200, 255, 0.4) !important;
-  background: linear-gradient(145deg, #008cdd, #00b7ff) !important; /* Reverse gradient on press */
-}
-.ant-btn-primary:disabled {
-  background: #303030 !important;
-  color: #777 !important;
-  box-shadow: none !important;
-}
-
-
-.ant-btn-default {
-  background: #1e1e28 !important; /* Darker neumorphic base for default buttons */
-  color: #b0b0c0 !important;
-  box-shadow: -4px -4px 8px rgba(55, 58, 78, 0.6), 4px 4px 8px rgba(12, 12, 18, 0.6) !important;
-}
-.ant-btn-default:hover {
-  background: #242430 !important;
-  color: #00adee !important;
-  box-shadow: -2px -2px 5px rgba(55, 58, 78, 0.7), 2px 2px 5px rgba(12, 12, 18, 0.7) !important;
-}
-.ant-btn-default:active, .ant-btn-default:focus {
-   box-shadow: inset 2px 2px 4px rgba(12,12,18,0.7), inset -2px -2px 4px rgba(55,58,78,0.7) !important;
-   background: #1e1e28 !important; /* Keep base background on press */
-}
-.ant-btn-default:disabled {
-  background: #303030 !important;
-  color: #777 !important;
-  box-shadow: none !important;
-}
-
-/* Input Number Neumorphic/Glass Styling */
-/* Use theme tokens where possible, manual overrides here */
-.ant-input-number {
-  /* Background, border, color from theme token */
-  border-radius: 10px !important;
-  box-shadow: inset 2px 2px 5px rgba(12,12,18,0.7), inset -2px -2px 5px rgba(55,58,78,0.7) !important; /* Inset effect */
-  overflow: hidden; /* Hide default internal borders */
-}
-.ant-input-number-focused {
-   /* Border color and glow from theme token and custom box-shadow */
-   border-color: #00adee !important; /* Ensure border changes on focus */
-   box-shadow: inset 2px 2px 5px rgba(12,12,18,0.7), inset -2px -2px 5px rgba(55,58,78,0.7), 0 0 0 2px rgba(0,173,238,0.2) !important; /* Add glow */
-}
-.ant-input-number-group-addon {
-    background: rgba(20, 22, 30, 0.7) !important; /* Glass effect for addon */
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #aaa !important;
-    border-right: none !important; /* Remove border between addon and input */
-    padding: 0 12px; /* Adjust padding */
-}
-.ant-input-number-group-addon:first-child {
-    border-top-left-radius: 10px !important;
-    border-bottom-left-radius: 10px !important;
-    border-right: none !important;
-}
-.ant-input-number-group-addon:last-child {
-    border-top-right-radius: 10px !important;
-    border-bottom-right-radius: 10px !important;
-    border-left: none !important;
-}
-.ant-input-number-input-wrap {
-    background: transparent !important; /* Ensure wrap is transparent */
-}
-.ant-input-number-input {
-    background: transparent !important; /* Ensure input is transparent */
-    color: #e0e0e0 !important; /* Input text color */
-    padding: 0 11px !important; /* Adjust padding to match default AntD input */
-}
-
-.ant-input-number-handler-wrap {
-  background: transparent !important;
-  border: none !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.1) !important; /* Separator line */
-}
-.ant-input-number-handler {
-  color: #00adee !important;
-  border: none !important;
-  transition: background-color 0.2s ease !important;
-}
-.ant-input-number-handler:hover {
-  background: rgba(0, 173, 238, 0.1) !important;
-}
-.ant-input-number-handler-down-inner,
-.ant-input-number-handler-up-inner {
-    color: #00adee !important; /* Ensure arrow color */
-}
-.ant-input-number:hover .ant-input-number-handler-wrap {
-     opacity: 1 !important; /* Always show handlers on hover */
-}
-
-
-/* Modal styling */
-/* Applied via className="glass-pane" and theme tokens */
-.glass-pane.ant-modal .ant-modal-content {
-  /* Background, border, backdrop-filter from .glass-pane utility or theme token */
-  /* Box-shadow specific for modals */
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important; /* Stronger shadow for modal pop-out */
-}
-
-/* Alert Styling */
-.glass-pane.ant-alert {
-    background: rgba(40, 42, 58, 0.4) !important; /* Match card background */
-    border-color: rgba(255, 255, 255, 0.1) !important;
+.neumorphic-input-number .ant-input-number-input {
+    text-align: center;
     color: #e0e0e0 !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: transparent !important;
+    height: 46px !important; /* For size="large" */
+    line-height: 46px !important;
+    font-size: 1.1em;
+}
+/* AntD InputNumber Handlers (Up/Down arrows) */
+.ant-input-number-handler-wrap { background: transparent !important; border-left: 1px solid rgba(255, 255, 255, 0.1) !important; }
+.ant-input-number-handler { color: #00adee !important; border: none !important; }
+.ant-input-number-handler:hover { background: rgba(0, 173, 238, 0.1) !important; }
+
+
+/* Modal styling (className="glass-pane" and theme tokens) */
+.glass-pane.ant-modal .ant-modal-content { /* Theme tokens should handle this */ }
+
+/* Alert Styling (className="glass-pane-alert") */
+.glass-pane-alert.ant-alert {
+    background: rgba(40, 42, 58, 0.6) !important; /* Darker, more consistent glass */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #e0e0e0 !important;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-radius: 10px;
 }
-.glass-pane.ant-alert-info {
-     /* Use ARIX blue tint */
-    background-color: rgba(0, 173, 238, 0.1) !important;
-    border-color: rgba(0, 173, 238, 0.3) !important;
+.glass-pane-alert.ant-alert-info {
+    background-color: rgba(0, 173, 238, 0.2) !important; /* ARIX blue tint */
+    border-color: rgba(0, 173, 238, 0.4) !important;
 }
-.glass-pane.ant-alert .ant-alert-message {
-    color: #e0e0e0 !important;
+.glass-pane-alert .ant-alert-message { color: #e0e0e0 !important; font-weight: 500; }
+.glass-pane-alert .ant-alert-description { color: #b0b0c0 !important; }
+.glass-pane-alert .ant-alert-icon { font-size: 1.2em; margin-top: 2px; }
+.glass-pane-alert.ant-alert-info .ant-alert-icon { color: #00adee !important; }
+.glass-pane-alert.ant-alert-warning .ant-alert-icon { color: #faad14 !important; }
+
+
+/* Menu Item Styling (Desktop Sider) - Theme tokens should handle most */
+/* App.jsx provides inline styles for sider menu items */
+
+/* Typography Copy Icon */
+.ant-typography-copy { color: #00adee; margin-left: 8px; }
+.ant-typography-copy:hover { color: #3cf4ff; }
+
+/* Spin color - Theme tokens */
+.ant-spin-dot-item { /* Theme tokens */ }
+
+
+/* --- App.jsx Responsive Layout Specific Styles --- */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; /* Default padding */
+  position: sticky !important; top: 0; z-index: 1001;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  /* Background and border from theme */
 }
-.glass-pane.ant-alert .ant-alert-icon {
-    color: #00adee !important; /* ARIX blue icon */
+@media (max-width: 767px) {
+  .app-header { padding: 0 16px; }
+}
+
+.app-content {
+  padding: 24px; margin: 0;
+  min-height: calc(100vh - 64px); /* Header height */
+  /* Background from theme */
+  overflow-y: auto; 
+}
+
+.mobile-view .app-content {
+  padding: 16px;
+  padding-bottom: 70px; /* Space for bottom nav */
+  min-height: calc(100vh - 64px - 60px); /* Header & bottom nav height */
+}
+
+.mobile-bottom-nav {
+  position: fixed !important; bottom: 0; left: 0; right: 0; z-index: 1000;
+  display: flex !important; justify-content: space-around !important;
+  background: rgba(20, 20, 30, 0.95) !important; /* Darker, more opaque for nav */
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 -2px 15px rgba(0,0,0,0.25);
+}
+
+.mobile-bottom-nav .ant-menu-item {
+  flex-grow: 1; text-align: center;
+  padding: 4px 0 !important; /* Reduced padding for compact look */
+  height: 60px !important; /* Fixed height for bottom nav items */
+  display: flex !important; flex-direction: column !important;
+  justify-content: center !important; align-items: center !important;
+  line-height: 1.3 !important; /* Adjust line height for icon + text */
+  color: rgba(220, 220, 230, 0.75) !important; /* Default item color from theme */
+}
+.mobile-bottom-nav .ant-menu-item .anticon {
+  font-size: 22px !important; margin-bottom: 3px !important;
+}
+.mobile-bottom-nav .mobile-menu-label {
+  font-size: 10px !important; display: block; /* Ensure label text is block */
+  /* color: inherit; */ /* Inherit from .ant-menu-item */
+}
+.mobile-bottom-nav .ant-menu-item-selected {
+  background-color: transparent !important; /* No distinct background for selected item itself */
+}
+.mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
+.mobile-bottom-nav .ant-menu-item-selected .anticon {
+  color: #00adee !important; /* Active color from theme */
+}
+.mobile-bottom-nav .ant-menu-item::after {
+    border-bottom: none !important; /* Remove underline for horizontal mobile nav */
 }
 
 
-/* Menu Item Styling */
-.ant-menu-dark.ant-menu-inline .ant-menu-item,
-.ant-menu-dark.ant-menu-vertical .ant-menu-item {
-  /* Background handled by theme token darkItemBg (transparent) */
-  margin: 8px !important; /* Add margin between items */
-  width: auto !important; /* Allow item to size based on content + padding */
-  border-radius: 10px !important; /* Rounded corners for menu items */
-  padding: 12px 16px !important; /* Adjust padding */
-  /* color handled by theme token darkItemColor */
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 2px 2px 5px rgba(12,12,18,0.5), -2px -2px 5px rgba(55,58,78,0.5); /* Subtle neumorphic inset/outset */
+/* --- CoinflipGame.jsx Responsive Styles --- */
+.coinflip-card .ant-card-body { padding: 16px !important; }
+@media (min-width: 768px) { .coinflip-card .ant-card-body { padding: 24px !important; } }
+
+.coin-display-container {
+  width: 120px; height: 120px; border-radius: 50%; background: #2a2d3a; 
+  margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.25); border: 2px solid #333749;
+  overflow: hidden;
+}
+@media (min-width: 768px) { 
+  .coin-display-container { width: 160px; height: 160px; margin-bottom: 20px; }
+}
+.coin-image { width: 85%; height: 85%; object-fit: contain; }
+
+.game-result-info { padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; text-align: center; }
+.game-result-info.win { background: rgba(82, 196, 26, 0.15); border: 1px solid rgba(82, 196, 26, 0.3); }
+.game-result-info.loss { background: rgba(255, 77, 79, 0.15); border: 1px solid rgba(255, 77, 79, 0.3); }
+.game-result-info .result-title { margin: 0 0 5px 0; font-size: 1.1em; }
+.game-result-info .result-text { color: #ccc; display: block; margin-bottom: 2px; font-size: 0.85em;}
+.game-result-info .result-text strong { color: #00adee; }
+.game-result-info .result-text.delta { margin-top: 5px; font-size: 1em; }
+.game-result-info .game-id-text { font-size: 0.7em; color: #777; margin-top: 5px; }
+
+.coinflip-controls .input-label { color: #aaa; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9em; }
+.coinflip-radio-group { width: 100%; display: flex; }
+.coinflip-radio-button { 
+    flex: 1; text-align: center; height: 44px !important; line-height: 42px !important; font-size: 1em;
+}
+.flip-button { height: 48px !important; font-size: 1.05em !important; font-weight: 500; }
+
+/* --- UserProfileCard.jsx Responsive Styles --- */
+.profile-card .ant-card-body { padding: 16px !important; }
+@media (min-width: 768px) { .profile-card .ant-card-body { padding: 20px !important; } }
+.profile-text-item { margin-bottom: 10px !important; word-break: break-word; font-size: 0.95em; }
+.profile-text-label { color: #aaa; font-weight: 500; }
+.copy-button-inline { color: #00adee; margin-left: 6px; padding: 0 4px !important; height: auto !important; }
+.balances-col .balance-item { margin-bottom: 12px; }
+.balances-col .ant-statistic-title { font-size: 0.9em !important; color: #aaa !important; }
+.balances-col .ant-statistic-content { font-size: 1.2em !important; line-height: 1.2; font-weight: 500; }
+@media (min-width: 768px) { 
+    .balances-col .ant-statistic-content { font-size: 1.4em !important; }
 }
 
-.ant-menu-dark.ant-menu-inline .ant-menu-item:not(.ant-menu-item-selected):hover {
-   /* Hover background handled by theme token darkItemHoverBg */
-   /* Hover color handled by theme token darkItemHoverColor */
-   box-shadow: 1px 1px 3px rgba(12,12,18,0.6), -1px -1px 3px rgba(55,58,78,0.6); /* Subtle press effect */
-}
+/* --- TransactionList.jsx Responsive Styles --- */
+.transaction-list-card .ant-card-head-title { font-size: 1.1em; }
+.transaction-list-item { padding: 12px 0px !important; } /* Mobile first padding */
+@media (min-width: 768px) { .transaction-list-item { padding: 16px 0px !important; } }
 
-.ant-menu-dark .ant-menu-item-selected {
-  /* Background handled by theme token darkItemSelectedBg (transparent with alpha) */
-  /* color handled by theme token darkItemSelectedColor */
-  font-weight: bold !important;
-  box-shadow: inset 2px 2px 5px rgba(0, 100, 150, 0.6), inset -2px -2px 5px rgba(0, 200, 255, 0.4) !important; /* Inset effect for selected */
-}
+.stake-history-item .ant-tag, .game-history-item .ant-tag { margin-right: 0; font-size: 0.8em; padding: 2px 6px;}
+.history-text-item { color: #b0b0b0; font-size: 0.9em; margin-bottom: 5px !important; line-height: 1.4;}
+.history-text-item.small-text { font-size: 0.8em; color: #888; }
+.history-text-item.tx-hash { word-break: break-all; }
+.history-text-item strong { color: #f0f0f0; }
 
-.ant-menu-dark .ant-menu-item a {
-  /* color handled by theme token darkItemColor */
-  transition: color 0.2s ease !important;
-}
+.game-history-item .game-win { color: #52c41a !important; font-weight: bold; }
+.game-history-item .game-loss { color: #ff4d4f !important; font-weight: bold; }
 
-.ant-menu-dark .ant-menu-item-selected a {
-  /* color handled by theme token darkItemSelectedColor */
-}
-
-.ant-menu-dark .ant-menu-item a.active {
-  font-weight: bold; /* Keep font-weight for active link */
-}
-
-/* Style for copyable text */
-.ant-typography-copy {
-    color: #00adee; /* ARIX blue for copy icon */
-}
-
-/* Adjust Spin color if needed */
-.ant-spin-dot-item {
-    background-color: #00adee !important;
-}
+.status-tag { font-weight: bold; }

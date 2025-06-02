@@ -1,163 +1,175 @@
-// File: AR_Proj/AR_FRONTEND/src/pages/EarnPage.jsx
+// File: AR_FRONTEND/src/pages/EarnPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider } from 'antd';
-import { useTonConnectUI, useTonWallet, useTonAddress } from '@tonconnect/ui-react';
-import { CheckCircleOutlined } from '@ant-design/icons'; // Added icon
+import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic } from 'antd';
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { CheckCircleOutlined, RedoOutlined, InfoCircleOutlined, DollarCircleOutlined } from '@ant-design/icons';
 
 import StakingPlans from '../components/earn/StakingPlans';
-// Correctly importing recordUserStake:
-import { getStakingConfig, recordUserStake, getUserStakes, initiateUnstake, confirmUnstake } from '../services/api'; // Updated import name
+import { 
+    getStakingConfig, 
+    recordUserStake, 
+    getUserStakes, 
+    initiateUnstake, 
+    confirmUnstake,
+    // requestUsdtWithdrawal // Assuming you'll add this to your api.js
+} from '../services/api'; 
 import {
   getJettonWalletAddress,
   getJettonBalance,
   createJettonTransferMessage,
+  createStakeForwardPayload,
   toArixSmallestUnits,
   fromArixSmallestUnits,
   ARIX_DECIMALS
 } from '../utils/tonUtils';
-import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend.js'; // For fallback
+import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 
 const { Title, Text, Paragraph } = Typography;
 
-// These will be populated from environment variables by Vite
+// These will be populated from environment variables by Vite or updated from backend
 const ARIX_JETTON_MASTER_ADDRESS = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
-let STAKING_CONTRACT_ADDRESS = import.meta.env.VITE_STAKING_CONTRACT_ADDRESS; // Can be updated by config
+let STAKING_CONTRACT_ADDRESS = import.meta.env.VITE_STAKING_CONTRACT_ADDRESS; 
+let STAKING_CONTRACT_JETTON_WALLET_ADDRESS = import.meta.env.VITE_STAKING_CONTRACT_JETTON_WALLET_ADDRESS;
+
+// Placeholder for getting referrer - implement your actual logic
+const getReferrerAddress = () => {
+    // Example: Read from localStorage or URL query param
+    // const urlParams = new URLSearchParams(window.location.search);
+    // return urlParams.get('ref') || localStorage.getItem('referrerAddress');
+    return null; // Placeholder
+};
 
 const EarnPage = () => {
   const [stakingConfigData, setStakingConfigData] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [inputUsdtAmount, setInputUsdtAmount] = useState(null);
   const [calculatedArixAmount, setCalculatedArixAmount] = useState(0);
+  
   const [currentArxPrice, setCurrentArxPrice] = useState(null);
   const [arixBalance, setArixBalance] = useState(0);
-  const [loading, setLoading] = useState(false); // General loading for initial data
-  const [actionLoading, setActionLoading] = useState(false); // For stake/unstake actions
+  const [totalAccruedUsdtRewards, setTotalAccruedUsdtRewards] = useState(0); // For displaying total claimable USDT
+
+  const [loading, setLoading] = useState(true); // Start with loading true
+  const [actionLoading, setActionLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeStakes, setActiveStakes] = useState([]);
 
-  const wallet = useTonWallet(); // Raw wallet object, if needed
-  const userFriendlyAddress = useTonAddress(); // User-friendly address
-  const rawAddress = useTonAddress(false); // Raw address
-  const [tonConnectUI] = useTonConnectUI();
+  const userFriendlyAddress = useTonAddress();
+  const rawAddress = useTonAddress(false);
+  const [tonConnectUI, setTonConnectUI] = useTonConnectUI(); // Ensure setTonConnectUI is available if needed for manual control
 
-  // --- Data Fetching Functions ---
-
-   const fetchStakingConfig = useCallback(async () => {
-      console.log("Fetching staking config...");
-      try {
-        const response = await getStakingConfig();
-        setStakingConfigData(response.data);
-        console.log("Staking config:", response.data);
-
-        // Update staking contract address from backend config if provided
-        if (response.data?.stakingContractAddress && response.data.stakingContractAddress !== "PLACEHOLDER_STAKING_CONTRACT_ADDRESS") {
-          STAKING_CONTRACT_ADDRESS = response.data.stakingContractAddress;
-           console.log("Updated STAKING_CONTRACT_ADDRESS from backend config:", STAKING_CONTRACT_ADDRESS);
-        } else {
-           console.warn("Staking contract address from backend is placeholder or missing. Using VITE_STAKING_CONTRACT_ADDRESS:", STAKING_CONTRACT_ADDRESS);
-        }
-
-        // Use price from backend config first, fallback to direct fetch if needed
-        if (response.data?.currentArxUsdtPrice) {
-          setCurrentArxPrice(response.data.currentArxUsdtPrice);
-           console.log("ARIX Price from backend config:", response.data.currentArxUsdtPrice);
-        } else {
-          console.warn("ARIX price not in config, fetching directly from backend price endpoint...");
-          const price = await getArxUsdtPriceFromBackend(); // Fallback
-          setCurrentArxPrice(price);
-           console.log("ARIX Price fetched directly:", price);
-        }
-
-      } catch (error) {
-        message.error("Failed to fetch staking configuration from backend.", 5);
-        console.error("Fetch staking config error:", error);
+  const fetchStakingConfig = useCallback(async () => {
+    try {
+      const response = await getStakingConfig();
+      setStakingConfigData(response.data);
+      if (response.data?.stakingContractAddress && response.data.stakingContractAddress !== "PLACEHOLDER_STAKING_CONTRACT_ADDRESS") {
+        STAKING_CONTRACT_ADDRESS = response.data.stakingContractAddress;
       }
-    }, []);
-
+      if (response.data?.stakingContractJettonWalletAddress && response.data.stakingContractJettonWalletAddress !== "PLACEHOLDER_SC_JETTON_WALLET") {
+        STAKING_CONTRACT_JETTON_WALLET_ADDRESS = response.data.stakingContractJettonWalletAddress;
+      }
+      if (response.data?.currentArxUsdtPrice) {
+        setCurrentArxPrice(response.data.currentArxUsdtPrice);
+      } else {
+        console.warn("ARIX price not in config, fetching directly...");
+        const price = await getArxUsdtPriceFromBackend();
+        setCurrentArxPrice(price);
+      }
+    } catch (error) {
+      message.error("Failed to fetch staking configuration.", 5);
+      console.error("Fetch staking config error:", error);
+    }
+  }, []);
 
   const fetchArixBalance = useCallback(async () => {
     if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) {
-      setArixBalance(0);
-      return;
+      setArixBalance(0); return;
     }
-    console.log("Fetching ARIX balance for", rawAddress);
     try {
       const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
       if (userArixJettonWallet) {
         const balanceSmallestUnits = await getJettonBalance(userArixJettonWallet);
         setArixBalance(fromArixSmallestUnits(balanceSmallestUnits));
-        console.log("ARIX balance fetched:", fromArixSmallestUnits(balanceSmallestUnits));
       } else {
         setArixBalance(0);
-        console.info("User ARIX jetton wallet not found. Balance set to 0.");
       }
     } catch (error) {
       console.error("Failed to fetch ARIX balance:", error);
       setArixBalance(0);
-      // message.error("Failed to fetch ARIX balance."); // Too frequent?
     }
   }, [rawAddress]);
 
-  const fetchUserActiveStakesData = useCallback(async () => {
+  const fetchUserStakesData = useCallback(async () => {
     if (!rawAddress) {
-      setActiveStakes([]);
+      setActiveStakes([]); 
+      setTotalAccruedUsdtRewards(0);
       return;
     }
-    console.log("Fetching active stakes for", rawAddress);
     try {
-      const response = await getUserStakes(rawAddress);
-      setActiveStakes(response.data || []);
-      console.log("Active stakes fetched:", response.data);
+      const response = await getUserStakes(rawAddress); // This API call should fetch all stakes for the user
+      const stakes = response.data || [];
+      setActiveStakes(stakes);
+      // Calculate total claimable USDT rewards from stakes that are eligible
+      let totalUsdt = 0;
+      stakes.forEach(stake => {
+        // Define your condition for "claimable" USDT. Example:
+        if (stake.accruedUsdtReward && stake.status !== 'pending_withdrawal') { // Or based on a specific flag
+             totalUsdt += parseFloat(stake.accruedUsdtReward);
+        }
+      });
+      setTotalAccruedUsdtRewards(totalUsdt);
+
     } catch (error) {
-      message.error('Failed to fetch your active stakes from backend.', 5);
-      console.error("Fetch active stakes error:", error);
+      message.error('Failed to fetch your stakes & USDT earnings.', 5);
+      console.error("Fetch user stakes error:", error);
       setActiveStakes([]);
+      setTotalAccruedUsdtRewards(0);
     }
   }, [rawAddress]);
 
    const refreshAllData = useCallback(async () => {
-      if (!rawAddress) return;
+      if (!userFriendlyAddress) return; // Don't refresh if wallet not connected
       setLoading(true);
-      console.log("Refreshing all data for", rawAddress);
-      // Fetch config first as it might contain price and contract address
-      await fetchStakingConfig();
-      // Balance and stakes depend on rawAddress and potentially price/contract address from config,
-      // so they will be triggered by the useEffects below once dependencies update.
-      // Manually trigger them here as well for immediate refresh UX
-      await fetchArixBalance();
-      await fetchUserActiveStakesData();
-      setLoading(false);
-      message.success("Data refreshed.", 2);
-   }, [rawAddress, fetchStakingConfig, fetchArixBalance, fetchUserActiveStakesData]);
+      try {
+        await Promise.all([
+            fetchStakingConfig(), // Fetches config including price
+            fetchArixBalance(),
+            fetchUserStakesData()
+        ]);
+        message.success("Data refreshed successfully!", 2);
+      } catch (error) {
+        message.error("Failed to refresh all data.", 3);
+        console.error("Error refreshing all data:", error);
+      } finally {
+        setLoading(false);
+      }
+   }, [userFriendlyAddress, fetchStakingConfig, fetchArixBalance, fetchUserStakesData]);
 
+  useEffect(() => { // Initial data load
+    setLoading(true);
+    fetchStakingConfig().finally(() => {
+        if (userFriendlyAddress) { // Only fetch user data if wallet is connected
+            Promise.all([fetchArixBalance(), fetchUserStakesData()]).finally(() => setLoading(false));
+        } else {
+            setLoading(false);
+        }
+    });
+  }, [fetchStakingConfig, userFriendlyAddress, fetchArixBalance, fetchUserStakesData]); // Dependencies for initial load logic
 
-  // --- Effects ---
-
-  // Initial fetch of config
-  useEffect(() => {
-    if (!ARIX_JETTON_MASTER_ADDRESS) {
-        message.error("ARIX Token Master Address is not configured in the frontend. Staking features may be affected.", 5);
-        console.error("VITE_ARIX_TOKEN_MASTER_ADDRESS is missing.");
-    }
-     fetchStakingConfig();
-  }, [fetchStakingConfig]);
-
-  // Fetch balance and stakes when wallet is connected AND price/config is available
-  useEffect(() => {
-    // Check for rawAddress and ensure config data (including price) is loaded before fetching balance/stakes
-    if (rawAddress && stakingConfigData !== null) {
-      fetchArixBalance();
-      fetchUserActiveStakesData();
+ useEffect(() => { // Subsequent refreshes when rawAddress changes (wallet connection)
+    if (rawAddress && stakingConfigData) { // Ensure config is loaded before fetching user-specific data
+        setLoading(true);
+        Promise.all([fetchArixBalance(), fetchUserStakesData()]).finally(() => setLoading(false));
     } else if (!rawAddress) {
-      setArixBalance(0);
-      setActiveStakes([]);
+        setArixBalance(0);
+        setActiveStakes([]);
+        setTotalAccruedUsdtRewards(0);
     }
-  }, [rawAddress, stakingConfigData, fetchArixBalance, fetchUserActiveStakesData]); // Depend on stakingConfigData
+  }, [rawAddress, stakingConfigData, fetchArixBalance, fetchUserStakesData]);
 
-  // Calculate ARIX amount when USDT input or price changes
+
   useEffect(() => {
     if (inputUsdtAmount && currentArxPrice && currentArxPrice > 0) {
-      // Calculate ARIX amount based on USDT value and price
       const calculated = parseFloat((inputUsdtAmount / currentArxPrice).toFixed(ARIX_DECIMALS));
       setCalculatedArixAmount(calculated);
     } else {
@@ -165,278 +177,293 @@ const EarnPage = () => {
     }
   }, [inputUsdtAmount, currentArxPrice]);
 
-
-  // --- Handlers ---
-
   const handlePlanSelect = (plan) => {
     if (!currentArxPrice || currentArxPrice <= 0 || !stakingConfigData) {
         message.error("ARIX price or staking configuration not available. Please try refreshing.", 3);
-        refreshAllData(); // Attempt to re-fetch everything
+        refreshAllData(); 
         return;
     }
-    // Find the full plan details from the fetched config
-    const fullPlanDetails = stakingConfigData?.stakingPlans?.find(p => (p.key === plan.key) || (p.id === plan.id));
+    const fullPlanDetails = stakingConfigData?.stakingPlans?.find(p => (p.key === plan.key) || (p.id === plan.id.toString()));
     if (!fullPlanDetails) {
       message.error("Could not find details for the selected plan. Try refreshing.", 3);
       refreshAllData();
       return;
     }
     setSelectedPlan(fullPlanDetails);
-    setInputUsdtAmount(null); // Reset input when new plan is selected
+    setInputUsdtAmount(null); 
     setCalculatedArixAmount(0);
     setIsModalVisible(true);
   };
 
   const handleUsdtAmountChange = (value) => {
-     // Ensure value is a number or null
      const numericValue = value === null ? null : parseFloat(value);
     setInputUsdtAmount(numericValue);
   };
 
   const handleConfirmStake = async () => {
     if (!rawAddress || !selectedPlan || !calculatedArixAmount || calculatedArixAmount <= 0) {
-      message.error('Please connect wallet, select a plan, and enter a valid ARIX amount.', 3);
-      return;
+      message.error('Please connect wallet, select a plan, and enter a valid ARIX amount.', 3); return;
+    }
+    if (!STAKING_CONTRACT_JETTON_WALLET_ADDRESS || STAKING_CONTRACT_JETTON_WALLET_ADDRESS.includes("PLACEHOLDER")) {
+        message.error("Staking contract jetton wallet address is not configured. Staking ARIX is currently unavailable.", 5); return;
     }
     const minStakeArix = parseFloat(selectedPlan.minStakeArix || 0);
     if (calculatedArixAmount < minStakeArix) {
-      message.error(`Minimum stake for this plan is ${minStakeArix.toFixed(ARIX_DECIMALS)} ARIX.`, 3);
-      return;
+      message.error(`Minimum stake for this plan is ${minStakeArix.toFixed(ARIX_DECIMALS)} ARIX.`, 3); return;
     }
     if (calculatedArixAmount > arixBalance) {
-      message.error(`Insufficient ARIX balance. You have ${arixBalance.toFixed(ARIX_DECIMALS)} ARIX.`, 3);
-      return;
+      message.error(`Insufficient ARIX balance. You have ${arixBalance.toFixed(ARIX_DECIMALS)} ARIX.`, 3); return;
     }
-     if (!STAKING_CONTRACT_ADDRESS || STAKING_CONTRACT_ADDRESS === "PLACEHOLDER_STAKING_CONTRACT_ADDRESS" || STAKING_CONTRACT_ADDRESS === "NOT_YET_DEPLOYED_STAKING_CONTRACT_ADDRESS") {
-        message.error("Staking contract address is not configured. Staking is currently unavailable. Please contact support.", 5);
-        return;
-     }
 
-
-    setActionLoading(true);
-    message.loading('Preparing stake transaction...', 0); // Indefinite loading
+    setActionLoading(true); 
+    const hideLoadingMsg = message.loading('Preparing ARIX stake transaction...', 0);
 
     try {
-      // Step 1: Get the user's specific ARIX Jetton Wallet Address
-      const userArixJettonWalletAddress = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
-      if (!userArixJettonWalletAddress) {
-        message.destroy();
-        message.error("Your ARIX wallet address could not be found. Ensure you hold ARIX tokens and have performed at least one inbound transfer.", 5);
-        setActionLoading(false);
-        return;
+      const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
+      if (!userArixJettonWallet) {
+        message.error("Your ARIX wallet address could not be found. Ensure you hold ARIX tokens.", 5);
+        setActionLoading(false); hideLoadingMsg(); return;
       }
 
-      // Step 2: Create the Jetton Transfer message
       const amountInSmallestUnits = toArixSmallestUnits(calculatedArixAmount);
-      const forwardTonAmount = toArixSmallestUnits(0.05); 
-      let forwardPayload = null; // Replace with actual smart contract payload logic if needed
+      
+      // Parameters for the ARIX locking smart contract
+      // The APR/Penalty here are for the ARIX lock itself, if the SC manages such terms.
+      // If USDT rewards are purely backend, these SC params might be minimal or zero.
+      const scPayloadParams = {
+          queryId: BigInt(Date.now()), 
+          durationSeconds: parseInt(selectedPlan.duration, 10) * 24 * 60 * 60,
+          // These depend on your SC design. If SC only locks ARIX and backend handles USDT rewards,
+          // these might be 0 or related to ARIX-specific lock conditions.
+          aprBps: 0, // Placeholder: e.g., Math.round((selectedPlan.arixLockApr || 0) * 100)
+          penaltyBps: 0, // Placeholder: e.g., Math.round((selectedPlan.arixLockPenalty || 0) * 100)
+      };
+      const forwardPayloadCell = createStakeForwardPayload(scPayloadParams);
 
       const jettonTransferBody = createJettonTransferMessage(
         amountInSmallestUnits,
-        STAKING_CONTRACT_ADDRESS, 
+        STAKING_CONTRACT_JETTON_WALLET_ADDRESS, // User sends ARIX to SC's Jetton Wallet
         rawAddress,    
-        forwardTonAmount,  
-        forwardPayload      
+        toArixSmallestUnits("0.1"), // Min forward TON for Jetton Wallet to notify main SC
+        forwardPayloadCell      
       );
 
-      // Step 3: Prepare the transaction object for TonConnect UI
       const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 360, // 6 minutes validity
         messages: [{
-          address: userArixJettonWalletAddress, 
-          amount: toArixSmallestUnits(0.1).toString(), 
+          address: userArixJettonWallet, 
+          amount: toArixSmallestUnits("0.15").toString(), // Gas for user's jetton wallet + forward_ton_amount
           payload: jettonTransferBody.toBoc().toString("base64") 
         }],
       };
 
-      message.destroy(); 
-      message.loading('Please confirm transaction in your wallet...', 0);
+      hideLoadingMsg(); 
+      const hideWalletMsg = message.loading('Please confirm transaction in your wallet...', 0);
 
-      // Step 4: Send the transaction via TonConnect UI
       const result = await tonConnectUI.sendTransaction(transaction);
-
-      message.destroy(); 
-      message.loading("Transaction sent. Recording stake with backend...", 0);
       
-      // Using recordUserStake which should be correctly imported
+      hideWalletMsg(); 
+      const hideBackendMsg = message.loading("Transaction sent. Recording ARIX stake with backend...", 0);
+      
+      const referrerAddress = getReferrerAddress(); // Get referrer if any
+
       await recordUserStake({
         planKey: selectedPlan.key || selectedPlan.id.toString(), 
         arixAmount: calculatedArixAmount,
         userWalletAddress: rawAddress,
-        transactionBoc: result.boc, 
-        referenceUsdtValue: inputUsdtAmount 
+        transactionBoc: result.boc, // This BOC is sent to backend for verification
+        referenceUsdtValue: inputUsdtAmount,
+        referrerWalletAddress: referrerAddress 
       });
 
-      message.destroy();
-      message.success(`Stake for ${calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX recorded! It will reflect after on-chain confirmation.`, 5);
+      hideBackendMsg();
+      message.success(`ARIX Stake for ${calculatedArixAmount.toFixed(ARIX_DECIMALS)} recorded! Awaiting on-chain confirmation.`, 5);
 
-      // Step 6: Close modal and reset state
-      setIsModalVisible(false);
-      setSelectedPlan(null);
-      setInputUsdtAmount(null);
-      setCalculatedArixAmount(0);
-
-      // Step 7: Refresh data after a delay
-      setTimeout(() => { refreshAllData(); }, 15000); 
+      setIsModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null); setCalculatedArixAmount(0);
+      setTimeout(() => { refreshAllData(); }, 20000); // Longer delay for potential block confirmation
 
     } catch (error) {
-      message.destroy();
-      const errorMsg = error.response?.data?.message || error.message || 'Staking failed. Please try again.';
-      if (errorMsg.toLowerCase().includes('user declined transaction')) {
+      hideLoadingMsg(); // Ensure all loading messages are cleared
+      const errorMsg = error?.response?.data?.message || error?.message || 'ARIX Staking failed.';
+      if (errorMsg.toLowerCase().includes('user declined') || errorMsg.toLowerCase().includes('rejected by user')) {
         message.warn('Transaction was declined in wallet.', 3);
       } else {
-        message.error(`Staking failed: ${errorMsg}`, 5);
+        message.error(`ARIX Staking failed: ${errorMsg}`, 5);
       }
-      console.error('Staking error:', error);
+      console.error('ARIX Staking error:', error);
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleUnstake = async (stake) => {
-    if (!rawAddress) {
-      message.error("Please connect your wallet.", 3);
-      return;
+  const handleUnstake = async (stake) => { // For unstaking ARIX principal from the SC
+    if (!rawAddress || !STAKING_CONTRACT_ADDRESS || STAKING_CONTRACT_ADDRESS.includes("PLACEHOLDER")) {
+      message.error("Wallet not connected or Staking Contract not configured.", 3); return;
     }
-     if (!STAKING_CONTRACT_ADDRESS || STAKING_CONTRACT_ADDRESS === "PLACEHOLDER_STAKING_CONTRACT_ADDRESS" || STAKING_CONTRACT_ADDRESS === "NOT_YET_DEPLOYED_STAKING_CONTRACT_ADDRESS") {
-        message.error("Staking contract address is not configured. Unstaking is currently unavailable. Please contact support.", 5);
-        return;
-     }
-
-
     setActionLoading(true);
-    message.loading(`Preparing unstake for stake ID: ${stake.id.substring(0,6)}...`, 0);
+    const hideLoadingMsg = message.loading(`Preparing to unstake ARIX for stake ID: ${stake.id.substring(0,6)}...`, 0);
 
     try {
-      // Step 1: Initiate unstake request to backend
       const prepResponse = await initiateUnstake({ userWalletAddress: rawAddress, stakeId: stake.id });
-      message.destroy();
-
-      // Step 2: Show confirmation modal
+      hideLoadingMsg();
+      
       Modal.confirm({
-        title: <Text style={{color: '#00adee', fontWeight: 'bold'}}>Confirm Unstake</Text>,
+        title: <Text style={{color: '#00adee', fontWeight: 'bold'}}>Confirm ARIX Unstake</Text>,
         className: "glass-pane", 
         content: (
           <div>
-            <Paragraph>{prepResponse.data.message}</Paragraph>
-            <Paragraph><Text strong style={{color: '#aaa'}}>Principal ARIX: </Text><Text style={{color: 'white'}}>{parseFloat(prepResponse.data.principalArix).toFixed(ARIX_DECIMALS)} ARIX</Text></Paragraph>
-            {prepResponse.data.isEarly && <Paragraph style={{color: '#ff7875'}}><Text strong style={{color: '#aaa'}}>Penalty: </Text>{prepResponse.data.penaltyPercent}% of principal</Paragraph>}
-            <Paragraph><Text strong style={{color: '#aaa'}}>Estimated Reward (if full term): </Text><Text style={{color: 'white'}}>{parseFloat(prepResponse.data.estimatedRewardArix).toFixed(ARIX_DECIMALS)} ARIX</Text></Paragraph>
+            <Paragraph>{prepResponse.data.message}</Paragraph> {/* Message from backend about ARIX penalty */}
+            <Paragraph><Text strong style={{color: '#aaa'}}>ARIX Principal: </Text><Text style={{color: 'white'}}>{prepResponse.data.principalArix} ARIX</Text></Paragraph>
+            {prepResponse.data.isEarly && <Paragraph style={{color: '#ff7875'}}><Text strong style={{color: '#aaa'}}>ARIX Penalty: </Text>{prepResponse.data.arixPenaltyPercentApplied}% of principal</Paragraph>}
             <Divider style={{borderColor: 'rgba(255,255,255,0.1)'}}/>
-            <Paragraph style={{color: '#ccc'}}>To complete unstaking, you must send a transaction to the staking contract.</Paragraph>
-            <Alert message="This next step involves an on-chain transaction in your wallet." type="info" showIcon style={{marginBottom: 10}} className="glass-pane"/>
+            <Paragraph style={{color: '#ccc'}}>To complete ARIX unstaking, you must send a transaction to the ARIX Staking Contract.</Paragraph>
+            <Alert message="This next step involves an on-chain transaction in your wallet to call the ARIX Staking Contract." type="info" showIcon style={{marginBottom: 10}} className="glass-pane"/>
           </div>
         ),
-        okText: 'Proceed to Wallet',
-        cancelText: 'Cancel',
+        okText: 'Proceed to Wallet', cancelText: 'Cancel',
         onOk: async () => {
-          message.loading('Preparing unstake transaction... Please confirm in your wallet.', 0);
-
-          // Placeholder for smart contract unstake payload. REPLACE WITH YOUR ACTUAL PAYLOAD.
-          const unstakePayload = new Cell();
-          unstakePayload.bits.writeUint(0xAAAAAAAA, 32); // Example: YOUR_UNSTAKE_OP_CODE
-          unstakePayload.bits.writeUint(0, 64); // query_id
-
-          const transaction = {
-            validUntil: Math.floor(Date.now() / 1000) + 360, 
-            messages: [{
-              address: STAKING_CONTRACT_ADDRESS, 
-              amount: toArixSmallestUnits(0.05).toString(), 
-              payload: unstakePayload.toBoc().toString("base64") 
-            }],
-          };
-
+          const hideWalletMsg = message.loading('Preparing ARIX unstake transaction... Please confirm in wallet.', 0);
           try {
-            // Step 3: Send the unstake transaction
+            // This payload needs to match the `UserUnstakeMessage` struct in your Tact contract
+            // It typically includes the specific stake ID internal to the smart contract.
+            // Assuming `stake.id` from DB is the same as `stake_id_to_withdraw` in SC.
+            const unstakePayloadBuilder = new Builder();
+            unstakePayloadBuilder.storeUint(BigInt(Date.now()), 64); // query_id for the message to SC
+            unstakePayloadBuilder.storeUint(BigInt(stake.id), 64); // stake_id_to_withdraw (ensure this ID matches what SC expects)
+            const unstakePayloadCell = unstakePayloadBuilder.asCell();
+
+            const transaction = {
+              validUntil: Math.floor(Date.now() / 1000) + 360, 
+              messages: [{
+                address: STAKING_CONTRACT_ADDRESS, // Main ARIX Staking Contract address
+                amount: toArixSmallestUnits("0.05").toString(), 
+                payload: unstakePayloadCell.toBoc().toString("base64") 
+              }],
+            };
             const result = await tonConnectUI.sendTransaction(transaction);
+            hideWalletMsg();
+            const hideBackendMsg = message.loading("ARIX unstake transaction sent. Confirming with backend...", 0);
 
-            message.destroy();
-            message.loading("Unstake transaction sent. Confirming with backend...", 0);
-
-            // Step 4: Confirm unstake with backend
-            await confirmUnstake({
+            await confirmUnstake({ // Backend confirms/records this attempt
               userWalletAddress: rawAddress,
               stakeId: stake.id,
               unstakeTransactionBoc: result.boc,
             });
-
-            message.destroy();
-            message.success("Unstake request processed! Your stake status and balance will update after on-chain settlement.", 5);
-
-            // Step 5: Refresh data
-            setTimeout(() => { refreshAllData(); }, 15000);
-
+            hideBackendMsg();
+            message.success("ARIX unstake request processed by backend! ARIX balance will update after on-chain settlement and verification.", 6);
+            setTimeout(() => { refreshAllData(); }, 20000);
           } catch (txError) {
-            message.destroy();
-            const errorMsg = txError.response?.data?.message || txError.message || 'Unstake transaction failed.';
-            if (errorMsg.toLowerCase().includes('user declined')) {
-                   message.warn('Unstake transaction was declined in wallet.', 3);
-            } else {
-                message.error(`Unstake failed: ${errorMsg}`, 5);
-            }
-            console.error("On-chain Unstake Tx Error:", txError);
-          } finally {
-            setActionLoading(false);
-          }
+            hideWalletMsg();
+            const errorMsg = txError?.response?.data?.message || txError?.message || 'ARIX unstake transaction failed.';
+            if (errorMsg.toLowerCase().includes('user declined')) { message.warn('ARIX unstake transaction declined in wallet.', 3); } 
+            else { message.error(`ARIX unstake failed: ${errorMsg}`, 5); }
+            console.error("On-chain ARIX Unstake Tx Error:", txError);
+          } finally { setActionLoading(false); }
         },
-        onCancel: () => {
-          setActionLoading(false); 
-          message.destroy(); 
-        },
+        onCancel: () => { setActionLoading(false); hideLoadingMsg(); },
       });
     } catch (error) {
-      message.destroy();
-      const errorMsg = error.response?.data?.message || error.message || 'Unstake initiation error.';
-      message.error(errorMsg, 5);
-      console.error("Initiate Unstake Error:", error);
+      hideLoadingMsg();
+      message.error(error?.response?.data?.message || 'ARIX unstake initiation error.', 5);
+      console.error("Initiate ARIX Unstake Error:", error);
       setActionLoading(false);
     }
   };
 
+  const handleWithdrawUsdtRewards = async () => {
+    // This function would allow users to withdraw their accrued and "claimable" USDT rewards.
+    // It needs a backend endpoint to handle the request, check balance, and initiate USDT transfer.
+    setActionLoading(true);
+    const hideLoadingMsg = message.loading("Preparing USDT reward withdrawal...", 0);
+    try {
+        // const amountToWithdraw = totalAccruedUsdtRewards; // Or allow partial withdrawal via an input
+        // if (amountToWithdraw < 3) { // Example: min withdrawal check from client image
+        //     message.warn("Minimum USDT withdrawal is $3.", 3);
+        //     hideLoadingMsg(); setActionLoading(false); return;
+        // }
+        // const response = await requestUsdtWithdrawal({ userWalletAddress: rawAddress, amount: amountToWithdraw });
+        // message.success(response.data.message || "USDT withdrawal request submitted!", 5);
+        // refreshAllData(); // To update displayed balances
+        message.info("USDT Withdrawal functionality is under development.", 3); // Placeholder
+        hideLoadingMsg();
+    } catch (error) {
+        hideLoadingMsg();
+        message.error(error?.response?.data?.message || "USDT withdrawal failed.", 5);
+        console.error("USDT Withdrawal Error:", error);
+    } finally {
+        setActionLoading(false);
+    }
+  };
 
-  // --- Render ---
 
   if (!userFriendlyAddress) {
     return (
       <div style={{ textAlign: 'center', marginTop: '50px', padding: 20 }} className="glass-pane">
         <Title level={3} style={{color: 'white'}}>Connect Your TON Wallet</Title>
-        <Paragraph style={{color: '#ccc', marginBottom: 20}}>To access staking features, please connect your TON wallet using the button in the header.</Paragraph>
+        <Paragraph style={{color: '#ccc', marginBottom: 20}}>To access staking features and manage your ARIX & USDT earnings, please connect your TON wallet.</Paragraph>
         <Button type="primary" size="large" onClick={() => tonConnectUI?.openModal()}>Connect Wallet</Button>
       </div>
     );
   }
 
-  if (loading && activeStakes.length === 0 && !stakingConfigData) {
+  if (loading && !stakingConfigData) { // Initial loading state
        return (
             <div style={{ textAlign: 'center', marginTop: '50px', padding: 20 }}>
-                 <Spin spinning={true} tip="Loading ARIX Data..." size="large" />
-                 <Paragraph style={{color: '#ccc', marginTop: 20}}>Fetching staking plans, balance, and active stakes...</Paragraph>
+                 <Spin spinning={true} tip="Loading ARIX Staking Hub..." size="large" />
+                 <Paragraph style={{color: '#ccc', marginTop: 20}}>Fetching staking plans, your balances, and active stakes...</Paragraph>
             </div>
        );
   }
 
-
   return (
-    <Spin spinning={loading && activeStakes.length > 0} tip="Refreshing data..." size="large"> 
+    <Spin spinning={loading && stakingConfigData != null} tip="Refreshing data..." size="large"> 
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-        <Row gutter={[16, 24]} justify="center" style={{ marginBottom: 30 }}>
-          <Col span={24}> 
-            <div style={{padding: '20px'}} className="glass-pane"> 
-              <Title level={2} style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Stake ARIX, Earn ARIX</Title>
-              <Text style={{ color: '#aaa', fontSize: '1.1em' }}>
-              Your Wallet: <Text copyable={{ text: userFriendlyAddress }} style={{color: '#00adee'}}>{userFriendlyAddress.slice(0,6)}...{userFriendlyAddress.slice(-4)}</Text> 
-              </Text>
-              <br/>
-              <Text style={{ color: '#aaa', fontSize: '1.1em' }}>
-              ARIX Balance: <span style={{color: '#00adee', fontWeight: 'bold'}}>{arixBalance.toFixed(ARIX_DECIMALS)} ARIX</span>
-              </Text>
+        <Row justify="center" style={{ marginBottom: 20 }} gutter={[16,16]}>
+          <Col xs={24} md={14}>
+            <div style={{padding: '15px 20px', height: '100%'}} className="glass-pane"> 
+              <Title level={3} style={{ color: 'white', fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>Stake ARIX, Earn USDT</Title>
+              <Paragraph style={{textAlign: 'center', marginBottom: 4}}>
+                <Text style={{ color: '#aaa' }}>Wallet: </Text>
+                <Text copyable={{ text: userFriendlyAddress }} style={{color: '#00adee'}}>{`${userFriendlyAddress?.slice(0,6)}...${userFriendlyAddress?.slice(-4)}`}</Text> 
+              </Paragraph>
+              <Paragraph style={{textAlign: 'center', marginBottom: 4}}>
+                <Text style={{ color: '#aaa' }}>ARIX Balance: </Text>
+                <Text strong style={{color: '#00adee'}}>{arixBalance.toFixed(ARIX_DECIMALS)} ARIX</Text>
+              </Paragraph>
               {currentArxPrice && (
-              <Text style={{ color: '#aaa', display: 'block', fontSize: '0.9em' }}>
-                Current ARIX Price: ~$${currentArxPrice.toFixed(5)} / ARIX
-              </Text>
+              <Paragraph style={{textAlign: 'center', fontSize: '0.9em', marginBottom: 15}}>
+                <Text style={{ color: '#aaa' }}>ARIX Price: ~${currentArxPrice.toFixed(5)} / ARIX</Text>
+              </Paragraph>
               )}
-              <Button onClick={refreshAllData} style={{marginTop: 15}} size="small">Refresh Data</Button> 
+              <div style={{textAlign: 'center'}}>
+                <Button icon={<RedoOutlined/>} onClick={refreshAllData} loading={loading} size="small">Refresh Data</Button> 
+              </div>
             </div>
+          </Col>
+          <Col xs={24} md={10}>
+             <div style={{padding: '15px 20px', height: '100%'}} className="glass-pane">
+                <Title level={4} style={{ color: 'white', fontWeight: 'bold', marginBottom: 8, textAlign: 'center' }}>Your USDT Rewards</Title>
+                <AntdStatistic 
+                    title={<Text style={{color: '#aaa'}}>Total Claimable USDT (Est.)</Text>} 
+                    value={totalAccruedUsdtRewards.toFixed(2)} // Assuming 2 decimals for USDT display
+                    valueStyle={{color: '#52c41a', fontWeight: 'bold', fontSize: '1.8em', textAlign: 'center'}} 
+                    suffix="USDT" 
+                />
+                <Paragraph style={{color: '#888', fontSize: '0.8em', textAlign: 'center', marginTop: 5}}>
+                    Rewards are calculated by the backend based on your active ARIX stakes.
+                </Paragraph>
+                <div style={{textAlign: 'center', marginTop: 15}}>
+                    <Button 
+                        type="primary" 
+                        icon={<DollarCircleOutlined />} 
+                        onClick={handleWithdrawUsdtRewards} 
+                        disabled={totalAccruedUsdtRewards < 3 || actionLoading} // Min $3 withdrawal
+                        loading={actionLoading}
+                    >
+                        Withdraw USDT Rewards
+                    </Button>
+                </div>
+             </div>
           </Col>
         </Row>
 
@@ -447,71 +474,45 @@ const EarnPage = () => {
         />
 
         {activeStakes.length > 0 && (
-          <div style={{ marginTop: '50px' }}>
-            <Title level={3} style={{ color: 'white', textAlign: 'center', marginBottom: '30px', fontWeight: 'bold'}}>
-              Your Active Stakes
+          <div style={{ marginTop: '40px' }}>
+            <Title level={3} style={{ color: 'white', textAlign: 'center', marginBottom: '20px', fontWeight: 'bold'}}>
+              Your Stakes & Earnings Overview
             </Title>
-            <Row gutter={[24, 24]} justify="center"> 
+            <Row gutter={[16, 16]} justify="center"> 
               {activeStakes.map(stake => (
-                <Col xs={24} sm={18} md={12} lg={8} key={stake.id}> 
+                <Col xs={24} sm={12} md={8} key={stake.id}> 
                   <Card
                     className="neumorphic-glass-card"
-                    title={<Text style={{color: '#00adee', fontWeight: 'bold'}}>{stake.planTitle}</Text>}
+                    title={<Text style={{color: '#00adee', fontWeight: 'bold'}}>{stake.planTitle} (ARIX Stake)</Text>}
+                    style={{height: '100%'}} 
                   >
-                     <Statistic title={<Text style={{color: '#aaa'}}>ARIX Staked</Text>} value={parseFloat(stake.arixAmountStaked).toFixed(ARIX_DECIMALS)} suffix=" ARIX" valueStyle={{color: 'white'}} />
-                     <Statistic title={<Text style={{color: '#aaa'}}>Ref. Value (Stake Time)</Text>} value={`$${parseFloat(stake.referenceUsdtValueAtStakeTime || 0).toFixed(2)}`} valueStyle={{color: '#ccc', fontSize: '0.9em'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Current Value (Est.)</Text>} value={stake.currentUsdtValueRef !== 'N/A' ? `$${stake.currentUsdtValueRef}` : 'N/A'} valueStyle={{color: '#ccc', fontSize: '0.9em'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Fixed APR</Text>} value={`${stake.apr}% ARIX`} valueStyle={{color: '#52c41a'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Accrued Reward</Text>} value={`${parseFloat(stake.accruedArixReward || 0).toFixed(ARIX_DECIMALS)} ARIX`} valueStyle={{color: 'white'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Early Penalty</Text>} value={`${stake.earlyUnstakePenaltyPercent}%`} valueStyle={{color: '#ff7875'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Days Remaining</Text>} value={stake.remainingDays} valueStyle={{color: 'white'}}/>
-                     <Statistic title={<Text style={{color: '#aaa'}}>Status</Text>} value={stake.status} valueStyle={{color: stake.status === 'active' ? '#52c41a' : (stake.status === 'pending_verification' ? '#faad14' : (stake.status === 'completed' ? '#ccc' : '#ff4d4f'))}}/> 
-
-
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Staked</Text>} value={stake.arixAmountStaked} suffix="ARIX" valueStyle={{color: 'white'}} />
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>Value at Stake Time</Text>} value={`$${stake.referenceUsdtValueAtStakeTime || '0.00'}`} valueStyle={{color: '#ccc', fontSize: '0.9em'}}/>
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>USDT Reward APR</Text>} value={`${stake.usdtApr || '0.00'}%`} valueStyle={{color: '#52c41a'}}/>
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>Accrued USDT (Est.)</Text>} value={`${stake.accruedUsdtReward || '0.00'}`} suffix="USDT" valueStyle={{color: 'white', fontWeight: 'bold'}}/>
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Early Penalty</Text>} value={`${stake.arixEarlyUnstakePenaltyPercent || '0'}%`} valueStyle={{color: '#ff7875'}}/>
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>Days Left (ARIX Lock)</Text>} value={stake.remainingDays} valueStyle={{color: 'white'}}/>
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Lock Status</Text>} value={stake.status} valueStyle={{color: stake.status === 'active' ? '#52c41a' : (stake.status && stake.status.includes('pending') ? '#faad14' : '#ccc')}}/> 
                     <div style={{marginTop: '20px', display: 'flex', justifyContent: 'center'}}>
-                        {stake.status === 'active' && (
-                           <Button
-                               type="primary"
-                               onClick={() => handleUnstake(stake)}
-                               disabled={actionLoading}
-                               danger={stake.remainingDays <= 0} 
-                               loading={actionLoading && selectedPlan?.id === stake.id} 
-                           >
-                               {stake.remainingDays > 0 ? `Unstake Early` : `Unstake ARIX`}
+                        {(stake.status === 'active') && ( // Only allow unstake for 'active' ARIX stakes
+                           <Button type="primary" onClick={() => handleUnstake(stake)} loading={actionLoading && selectedPlan?.id === stake.id} danger={new Date() < new Date(stake.unlockTimestamp)}>
+                               {new Date() < new Date(stake.unlockTimestamp) ? `Unstake ARIX Early` : `Unstake ARIX`}
                            </Button>
                         )}
-                        {stake.status === 'pending_verification' && (
-                             <Button type="default" disabled>Pending Verification</Button>
-                        )}
-                         {stake.status === 'pending_unstake' && (
-                             <Button type="default" disabled>Unstaking...</Button> 
-                        )}
-                         {stake.status === 'completed' && (
-                             <Button type="default" disabled>Completed</Button>
-                        )}
-                         {stake.status === 'early_unstaked' && (
-                             <Button type="default" disabled>Early Unstaked</Button>
-                        )}
-                         {stake.status === 'failed' && (
-                             <Button type="default" danger disabled>Failed</Button>
-                        )}
+                         {(stake.status !== 'active') && <Button type="default" disabled>{stake.status.replace('_', ' ').toUpperCase()}</Button>}
                     </div>
                      <Text style={{fontSize: '12px', color: '#888', display: 'block', marginTop: '10px', textAlign: 'center'}}>
-                        {stake.status === 'active' && stake.remainingDays > 0 ? `Unstaking early incurs a ${stake.earlyUnstakePenaltyPercent}% penalty on principal and forfeits accrued rewards.` : (stake.status === 'active' ? `Ready to unstake.` : `Status: ${stake.status}`)}
+                        {stake.status === 'active' && new Date() < new Date(stake.unlockTimestamp) ? `Unstaking ARIX early incurs a ${stake.arixEarlyUnstakePenaltyPercent}% penalty on ARIX principal.` : `ARIX lock status: ${stake.status}. USDT rewards are handled separately.`}
                     </Text>
                   </Card>
                 </Col>
               ))}
             </Row>
-             {activeStakes.length > 0 && activeStakes.every(s => s.status !== 'active' && s.status !== 'pending_verification') && (
-                 <div style={{ textAlign: 'center', color: '#aaa', marginTop: 30}}>All your stakes are completed or were unstaked.</div>
-             )}
           </div>
         )}
          {activeStakes.length === 0 && !loading && stakingConfigData && (
-             <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">You have no active stakes yet. Choose a plan above to start earning!</div>
+             <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">You have no active ARIX stakes yet. Choose a plan above to start earning USDT rewards!</div>
          )}
-
 
         <Modal
           title={<Text style={{color: '#00adee', fontWeight: 'bold'}}>{`Stake ARIX in "${selectedPlan?.title || ''}"`}</Text>}
@@ -535,44 +536,38 @@ const EarnPage = () => {
         >
           {selectedPlan && (
             <>
-              <Paragraph><Text strong style={{color: '#aaa'}}>Plan Duration: </Text><Text style={{color: 'white'}}>{selectedPlan.duration || selectedPlan.duration_days} days</Text></Paragraph>
-              <Paragraph><Text strong style={{color: '#aaa'}}>Fixed Reward APR: </Text><span style={{color: '#52c41a', fontWeight: 'bold'}}>{selectedPlan.apr}% ARIX</span></Paragraph>
-              <Paragraph><Text strong style={{color: '#aaa'}}>Early Unstake Penalty: </Text><span style={{color: '#ff7875', fontWeight: 'bold'}}>{selectedPlan.earlyUnstakePenaltyPercent}% of staked ARIX</span></Paragraph>
-              <Paragraph><Text strong style={{color: '#aaa'}}>Minimum Stake: </Text><Text style={{color: 'white'}}>{parseFloat(selectedPlan.minStakeArix).toFixed(ARIX_DECIMALS)} ARIX</Text></Paragraph>
+              <Paragraph><Text strong style={{color: '#aaa'}}>ARIX Lock Duration: </Text><Text style={{color: 'white'}}>{selectedPlan.duration} days</Text></Paragraph>
+              <Paragraph><Text strong style={{color: '#aaa'}}>USDT Reward APR: </Text><span style={{color: '#52c41a', fontWeight: 'bold'}}>{selectedPlan.apr}% USDT</span></Paragraph>
+              <Paragraph><Text strong style={{color: '#aaa'}}>ARIX Early Unstake Penalty: </Text><span style={{color: '#ff7875', fontWeight: 'bold'}}>{selectedPlan.earlyUnstakePenaltyPercent}% of staked ARIX</span></Paragraph>
+              <Paragraph><Text strong style={{color: '#aaa'}}>Minimum ARIX Stake: </Text><Text style={{color: 'white'}}>{parseFloat(selectedPlan.minStakeArix).toFixed(ARIX_DECIMALS)} ARIX</Text></Paragraph>
               <Divider style={{borderColor: 'rgba(255,255,255,0.1)'}}/>
               <Paragraph><Text strong style={{color: '#aaa'}}>Your ARIX Balance: </Text><Text style={{color: '#00adee', fontWeight: 'bold'}}>{arixBalance.toFixed(ARIX_DECIMALS)} ARIX</Text></Paragraph> 
               <div style={{ margin: '20px 0' }}>
-                <Text strong style={{color: '#aaa', display: 'block', marginBottom: 8}}>Amount to Stake (Approx. USDT Value):</Text>
+                <Text strong style={{color: '#aaa', display: 'block', marginBottom: 8}}>Amount to Stake (Approx. USDT Value you want to correspond to ARIX):</Text>
                 <InputNumber
-                  min={0.01} 
                   style={{ width: '100%'}} 
                   addonBefore={<Text style={{color: '#aaa'}}>$</Text>}
                   value={inputUsdtAmount}
                   onChange={handleUsdtAmountChange}
-                  placeholder="e.g., 10 for $10 USDT"
+                  placeholder="e.g., 10 for $10 USDT worth of ARIX"
                   formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   parser={value => value ? value.toString().replace(/\$\s?|(,*)/g, '') : ''}
-                  step={1} 
-                  precision={2} 
+                  min={0.01} precision={2} step={1} 
                 />
               </div>
-              {currentArxPrice && inputUsdtAmount !== null && inputUsdtAmount > 0 && ( 
+              {currentArxPrice && inputUsdtAmount != null && inputUsdtAmount > 0 && ( 
                 <Paragraph style={{
                     color: (calculatedArixAmount > arixBalance || calculatedArixAmount < (parseFloat(selectedPlan.minStakeArix) || 0)) ? '#ff7875' : '#52c41a',
-                    fontWeight: 'bold',
-                    marginTop: 10,
-                    padding: '8px',
-                    background: 'rgba(0,0,0,0.1)',
-                    borderRadius: '8px'
+                    fontWeight: 'bold', marginTop: 10, padding: '8px', background: 'rgba(0,0,0,0.1)', borderRadius: '8px'
                   }}
                 >
                   This equals approx. {calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX.
-                  {calculatedArixAmount > arixBalance && " (Insufficient Balance)"}
-                  {calculatedArixAmount < (parseFloat(selectedPlan.minStakeArix) || 0) && calculatedArixAmount > 0 && ` (Min stake: ${parseFloat(selectedPlan.minStakeArix).toFixed(ARIX_DECIMALS)} ARIX)`}
+                  {calculatedArixAmount > arixBalance && " (Insufficient ARIX Balance)"}
+                  {calculatedArixAmount < (parseFloat(selectedPlan.minStakeArix) || 0) && calculatedArixAmount > 0 && ` (Min ARIX stake: ${parseFloat(selectedPlan.minStakeArix).toFixed(ARIX_DECIMALS)})`}
                 </Paragraph>
               )}
-               {inputUsdtAmount !== null && inputUsdtAmount <= 0 && (
-                   <Paragraph style={{color: '#ff7875', marginTop: 10}}>Amount must be greater than 0.</Paragraph>
+               {(inputUsdtAmount !== null && inputUsdtAmount <= 0 && selectedPlan) && ( // Only show if plan is selected
+                   <Paragraph style={{color: '#ff7875', marginTop: 10}}>Stake amount must be greater than 0.</Paragraph>
                )}
             </>
           )}
