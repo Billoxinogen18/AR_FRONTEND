@@ -2,7 +2,6 @@
 import { TonClient, Address, Cell, toNano, fromNano, Builder } from "@ton/core";
 import { getHttpEndpoint } from "@orbs-network/ton-access";
 
-// Keep existing getTonClient function
 async function getTonClient() {
   const network = import.meta.env.VITE_TON_NETWORK || "mainnet"; 
   const endpoint = await getHttpEndpoint({ network: network });
@@ -15,7 +14,7 @@ export async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) 
     return null;
   }
   try {
-    const client = await getTonClient(); // Use the local getTonClient
+    const client = await getTonClient();
     const masterAddr = Address.parse(jettonMasterAddress);
     const ownerAddr = Address.parse(ownerAddress);
 
@@ -38,7 +37,7 @@ export async function getJettonBalance(jettonWalletAddressString) {
     return BigInt(0);
   }
   try {
-    const client = await getTonClient(); // Use the local getTonClient
+    const client = await getTonClient();
     const jettonWalletAddress = Address.parse(jettonWalletAddressString);
 
     const contractState = await client.getContractState(jettonWalletAddress);
@@ -78,10 +77,13 @@ export function createJettonTransferMessage(
   return bodyBuilder.asCell();
 }
 
-export function createStakeForwardPayload({ queryId = 0n, durationSeconds, aprBps, penaltyBps }) {
+export function createStakeForwardPayload({ queryId = 0n, stakeIdentifier, durationSeconds, aprBps, penaltyBps }) {
   const body = new Builder();
-  body.storeUint(BigInt(queryId), 64); body.storeUint(durationSeconds, 32); 
-  body.storeUint(aprBps, 16); body.storeUint(penaltyBps, 16); 
+  body.storeUint(BigInt(queryId), 64); 
+  body.storeUint(BigInt(stakeIdentifier), 64); 
+  body.storeUint(durationSeconds, 32); 
+  body.storeUint(aprBps, 16); 
+  body.storeUint(penaltyBps, 16); 
   return body.asCell();
 }
 
@@ -105,7 +107,7 @@ export function fromArixSmallestUnits(amount) {
     try { return Number(fromNano(amount)); } 
     catch(e) { console.error("fromNano failed for bigint:", amount, e); return 0; }
   }
-  if (typeof amount === 'string' || typeof amount === 'number') { // Handle string or number input for amount
+  if (typeof amount === 'string' || typeof amount === 'number') { 
      try { return Number(fromNano(BigInt(amount))); } 
      catch(e) { console.error("fromNano failed for string/number:", amount, e); return 0; }
   }
@@ -113,14 +115,6 @@ export function fromArixSmallestUnits(amount) {
   return 0;
 }
 
-/**
- * Waits for a transaction to be confirmed on the blockchain by polling.
- * @param {string} sourceWalletAddressString - The address string of the wallet that sent the transaction.
- * @param {Cell} externalMessageCell - The external message cell that was sent.
- * @param {number} [pollingIntervalMs=5000] - Interval between polling attempts.
- * @param {number} [maxRetries=24] - Maximum number of polling attempts (24 * 5s = 2 minutes).
- * @returns {Promise<string|null>} The transaction hash in hex format if found, otherwise null.
- */
 export async function waitForTransactionConfirmation(
     sourceWalletAddressString, 
     externalMessageCell,
@@ -137,12 +131,9 @@ export async function waitForTransactionConfirmation(
         await new Promise(resolve => setTimeout(resolve, pollingIntervalMs));
         console.log(`[waitForTx] Polling attempt ${i + 1}/${maxRetries}...`);
         try {
-            const transactions = await client.getTransactions(sourceAddress, { limit: 10 }); // Fetch recent transactions
+            const transactions = await client.getTransactions(sourceAddress, { limit: 10 }); 
             for (const tx of transactions) {
                 if (tx.inMessage && tx.inMessage.info.type === 'external-in') {
-                    // The BOC from tonConnectUI is the external message.
-                    // We need to ensure the tx.inMessage.body is what we compare.
-                    // Cell.hash() is a reliable way to compare.
                     if (tx.inMessage.body.hash().equals(messageHash)) {
                         console.log(`[waitForTx] Transaction found! Hash: ${tx.hash().toString('hex')}`);
                         return tx.hash().toString('hex');
@@ -151,7 +142,6 @@ export async function waitForTransactionConfirmation(
             }
         } catch (error) {
             console.error(`[waitForTx] Error during polling attempt ${i + 1}:`, error);
-            // Don't stop polling on transient errors, but log them.
         }
     }
     console.warn(`[waitForTx] Transaction not confirmed after ${maxRetries} retries for message hash ${messageHash.toString('hex')}`);

@@ -1,9 +1,10 @@
-// File: AR_FRONTEND/src/pages/EarnPage.jsx
+// File: AR_Proj/AR_FRONTEND/src/pages/EarnPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic } from 'antd';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import { CheckCircleOutlined, RedoOutlined, InfoCircleOutlined, DollarCircleOutlined } from '@ant-design/icons';
-import { Cell } from '@ton/core'; // Import Cell for message processing
+import { Cell, Builder } from '@ton/core';
+import { v4 as uuidv4 } from 'uuid'; 
 
 import StakingPlans from '../components/earn/StakingPlans';
 import { 
@@ -11,18 +12,18 @@ import {
     recordUserStake, 
     getUserStakesAndRewards,
     initiateArixUnstake,
-    confirmArixUnstake, // This is the frontend API function that calls backend's finalizeArixUnstake
+    confirmArixUnstake,
     requestUsdtWithdrawal      
 } from '../services/api'; 
 import {
   getJettonWalletAddress,
   getJettonBalance,
   createJettonTransferMessage,
-  createStakeForwardPayload,
+  createStakeForwardPayload, 
   toArixSmallestUnits,
   fromArixSmallestUnits,
   ARIX_DECIMALS,
-  waitForTransactionConfirmation // Import the new utility
+  waitForTransactionConfirmation
 } from '../utils/tonUtils';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 
@@ -34,10 +35,13 @@ let STAKING_CONTRACT_JETTON_WALLET_ADDRESS = import.meta.env.VITE_STAKING_CONTRA
 const MIN_USDT_WITHDRAWAL = 3; 
 
 const getReferrerAddress = () => {
-    // TODO: Implement actual referrer fetching logic if needed (e.g., from URL query params, local storage)
-    // For now, returning null as per previous state.
-    // Example: const urlParams = new URLSearchParams(window.location.search); return urlParams.get('ref');
     return null; 
+};
+
+const uuidToScStakeId = (uuidStr) => {
+    if (!uuidStr) return BigInt(0);
+    const hexPart = uuidStr.replace(/-/g, '').substring(0, 16); 
+    return BigInt('0x' + hexPart);
 };
 
 const EarnPage = () => {
@@ -51,18 +55,17 @@ const EarnPage = () => {
   const [totalClaimableUsdt, setTotalClaimableUsdt] = useState(0);
 
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false); // General action loading
-  const [stakeSubmitLoading, setStakeSubmitLoading] = useState(false); // Specific for stake submission
-  const [unstakeSubmitLoading, setUnstakeSubmitLoading] = useState(false); // Specific for unstake submission
+  const [actionLoading, setActionLoading] = useState(false); 
+  const [stakeSubmitLoading, setStakeSubmitLoading] = useState(false); 
+  const [unstakeSubmitLoading, setUnstakeSubmitLoading] = useState(false); 
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeStakes, setActiveStakes] = useState([]);
 
   const userFriendlyAddress = useTonAddress();
-  const rawAddress = useTonAddress(false); // Non-bounceable for internal/backend use
+  const rawAddress = useTonAddress(false); 
   const [tonConnectUI] = useTonConnectUI();
 
-  // Fetch Staking Configuration and Initial Price
   const fetchStakingConfigAndPrice = useCallback(async () => {
     try {
       const response = await getStakingConfig();
@@ -84,7 +87,6 @@ const EarnPage = () => {
     }
   }, []);
 
-  // Fetch ARIX Balance
   const fetchArixBalance = useCallback(async () => {
     if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) { setArixBalance(0); return; }
     try {
@@ -96,7 +98,6 @@ const EarnPage = () => {
     } catch (error) { console.error("[EarnPage] Failed to fetch ARIX balance:", error); setArixBalance(0); }
   }, [rawAddress]);
 
-  // Fetch User Stakes and USDT Rewards Data
   const fetchUserStakesAndRewardsData = useCallback(async () => {
     if (!rawAddress) { setActiveStakes([]); setTotalClaimableUsdt(0); return; }
     try {
@@ -110,7 +111,6 @@ const EarnPage = () => {
     }
   }, [rawAddress]);
 
-  // Combined data refresh function
    const refreshAllData = useCallback(async (showSuccessMessage = true) => {
       if (!userFriendlyAddress) return;
       setLoading(true);
@@ -123,7 +123,6 @@ const EarnPage = () => {
       } finally { setLoading(false); }
    }, [userFriendlyAddress, fetchStakingConfigAndPrice, fetchArixBalance, fetchUserStakesAndRewardsData]);
 
-  // Initial data load
   useEffect(() => {
     setLoading(true);
     fetchStakingConfigAndPrice().finally(() => {
@@ -133,9 +132,8 @@ const EarnPage = () => {
         setLoading(false); setArixBalance(0); setActiveStakes([]); setTotalClaimableUsdt(0);
       }
     });
-  }, [fetchStakingConfigAndPrice, userFriendlyAddress, fetchArixBalance, fetchUserStakesAndRewardsData]); // Added dependencies for completeness
+  }, [fetchStakingConfigAndPrice, userFriendlyAddress, fetchArixBalance, fetchUserStakesAndRewardsData]);
 
-  // Recalculate ARIX amount when USDT input or price changes
   useEffect(() => {
     if (inputUsdtAmount && currentArxPrice && currentArxPrice > 0) {
       setCalculatedArixAmount(parseFloat((inputUsdtAmount / currentArxPrice).toFixed(ARIX_DECIMALS)));
@@ -172,20 +170,23 @@ const EarnPage = () => {
     }
 
     setStakeSubmitLoading(true);
-    const hideMsg1 = message.loading({ content: 'Preparing ARIX stake transaction...', duration: 0 });
+    const loadingMessageKey = 'stakeAction';
+    message.loading({ content: 'Preparing ARIX stake transaction...', key: loadingMessageKey, duration: 0 });
     
+    const dbStakeUUID = uuidv4(); 
+    const scStakeIdentifier = uuidToScStakeId(dbStakeUUID); 
+
     try {
       const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
-      if (!userArixJettonWallet) {
-        throw new Error("Your ARIX Jetton Wallet not found.");
-      }
+      if (!userArixJettonWallet) throw new Error("Your ARIX Jetton Wallet not found.");
+      
       const amountInSmallestUnits = toArixSmallestUnits(calculatedArixAmount);
       const scPayloadParams = {
           queryId: BigInt(Date.now()), 
+          stakeIdentifier: scStakeIdentifier,
           durationSeconds: parseInt(selectedPlan.duration || selectedPlan.duration_days, 10) * 24 * 60 * 60,
-          // These apr/penalty are for ARIX lock, if SC uses them. Backend handles USDT APR.
           arix_lock_apr_bps: parseInt(selectedPlan.arixLockAprBps || 0), 
-          arix_lock_penalty_bps: parseInt(selectedPlan.arixEarlyUnstakePenaltyPercent * 100 || 0), // Convert percent to BPS for SC
+          arix_lock_penalty_bps: parseInt(selectedPlan.arixEarlyUnstakePenaltyPercent * 100 || 0),
       };
       const forwardPayloadCell = createStakeForwardPayload(scPayloadParams);
       const jettonTransferBody = createJettonTransferMessage(
@@ -197,38 +198,35 @@ const EarnPage = () => {
         messages: [{ address: userArixJettonWallet, amount: toArixSmallestUnits("0.15").toString(), payload: jettonTransferBody.toBoc().toString("base64") }],
       };
       
-      hideMsg1();
-      message.loading({ content: 'Please confirm transaction in your wallet...', key: 'stakeConfirm', duration: 0 });
+      message.loading({ content: 'Please confirm transaction in your wallet...', key: loadingMessageKey, duration: 0 });
       const result = await tonConnectUI.sendTransaction(transaction);
-      message.destroy('stakeConfirm');
       
-      message.loading({ content: 'Transaction sent, awaiting blockchain confirmation...', key: 'stakeWait', duration: 0 });
+      message.loading({ content: 'Transaction sent, awaiting blockchain confirmation...', key: loadingMessageKey, duration: 0 });
       const externalMessageCell = Cell.fromBase64(result.boc);
       const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell);
-      message.destroy('stakeWait');
 
       if (!txHash) {
         throw new Error('Failed to confirm stake transaction on blockchain. Please check your wallet and try again or contact support if ARIX was deducted.');
       }
       
-      message.loading({ content: 'Transaction confirmed! Recording ARIX stake with backend...', key: 'stakeRecord', duration: 0 });
+      message.loading({ content: 'Transaction confirmed! Recording ARIX stake with backend...', key: loadingMessageKey, duration: 0 });
       await recordUserStake({
-        planKey: selectedPlan.key || selectedPlan.id.toString(), arixAmount: calculatedArixAmount,
-        userWalletAddress: rawAddress, transactionBoc: result.boc, // Keep sending BOC for archival
-        transactionHash: txHash, // Send the confirmed TX hash
-        referenceUsdtValue: inputUsdtAmount, referrerWalletAddress: getReferrerAddress() 
+        planKey: selectedPlan.key || selectedPlan.id.toString(), 
+        arixAmount: calculatedArixAmount,
+        userWalletAddress: rawAddress, 
+        transactionBoc: result.boc, 
+        transactionHash: txHash, 
+        stakeUUID: dbStakeUUID, 
+        referenceUsdtValue: inputUsdtAmount, 
+        referrerWalletAddress: getReferrerAddress() 
       });
-      message.success({ content: `ARIX Stake for ${calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX submitted & recorded! Backend will verify.`, key: 'stakeRecord', duration: 6 });
+      message.success({ content: `ARIX Stake for ${calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX submitted & recorded! Backend will verify.`, key: loadingMessageKey, duration: 6 });
       
       setIsModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);
-      setTimeout(() => { refreshAllData(false); }, 5000); // Refresh after a short delay for backend to process
-      setTimeout(() => { refreshAllData(false); }, 30000); // And another one later
+      setTimeout(() => { refreshAllData(false); }, 7000); 
+      setTimeout(() => { refreshAllData(false); }, 35000);
     } catch (error) {
-      message.destroy('stakeConfirm'); message.destroy('stakeWait'); message.destroy('stakeRecord');
-      const errorMsg = error?.response?.data?.message || error?.message || 'ARIX Staking failed.';
-      if (errorMsg.toLowerCase().includes('user declined') || errorMsg.toLowerCase().includes('rejected by user')) {
-        message.warn('Transaction declined in wallet.', 4);
-      } else { message.error(`${errorMsg}`, 6); }
+      message.error({ content: error?.response?.data?.message || error?.message || 'ARIX Staking failed.', key: loadingMessageKey, duration: 6 });
       console.error('[EarnPage] ARIX Staking tx/record error:', error);
     } finally {
       setStakeSubmitLoading(false);
@@ -240,17 +238,18 @@ const EarnPage = () => {
       message.error("Wallet not connected or Staking Contract Address not configured.", 3); return;
     }
     
-    setActionLoading(true); // General action loading for modal prep
-    const hidePrepMsg = message.loading({ content: `Preparing ARIX unstake for stake ID ${stakeToUnstake.id?.substring(0,6)}...`, duration: 0 });
+    setActionLoading(true);
+    const loadingMessageKey = 'unstakeAction';
+    message.loading({ content: `Preparing ARIX unstake for stake ID ${stakeToUnstake.id?.substring(0,6)}...`, key: loadingMessageKey, duration: 0 });
     
     try {
       const prepResponse = await initiateArixUnstake({ userWalletAddress: rawAddress, stakeId: stakeToUnstake.id });
-      hidePrepMsg();
       setActionLoading(false);
+      message.destroy(loadingMessageKey);
 
       Modal.confirm({
         title: <Text style={{color: '#00adee', fontWeight: 'bold'}}>Confirm ARIX Principal Unstake</Text>, className: "glass-pane", 
-        content: (
+        content: ( 
            <div>
             <Paragraph>{prepResponse.data.message}</Paragraph>
             <Paragraph><Text strong style={{color: '#aaa'}}>ARIX Principal: </Text><Text style={{color: 'white'}}>{prepResponse.data.principalArix} ARIX</Text></Paragraph>
@@ -260,74 +259,58 @@ const EarnPage = () => {
           </div>
         ),
         okText: 'Proceed with ARIX Unstake', cancelText: 'Cancel',
-        confirmLoading: unstakeSubmitLoading,
+        confirmLoading: unstakeSubmitLoading, 
         onOk: async () => {
           setUnstakeSubmitLoading(true);
-          const hideWalletMsg = message.loading({ content: 'Please confirm ARIX unstake in your wallet...', key: 'unstakeConfirm', duration: 0 });
+          message.loading({ content: 'Please confirm ARIX unstake in your wallet...', key: loadingMessageKey, duration: 0 });
           try {
-            // UserUnstakeArixMessage { query_id: Int as uint64; stake_id_to_withdraw: Int as uint64; }
+            const scStakeIdentifierToWithdraw = uuidToScStakeId(stakeToUnstake.id); 
+
             const unstakePayloadBuilder = new Builder();
             unstakePayloadBuilder.storeUint(BigInt(Date.now()), 64); 
-            unstakePayloadBuilder.storeUint(BigInt(stakeToUnstake.id.replace(/-/g, ''), 16), 64); // Assuming stake.id is UUID, SC might expect numeric. Adjust if SC uses different ID format.
-                                                                                                // If stake.id from DB is already the SC's numeric ID, use that directly.
-                                                                                                // For this example, assuming SC expects numeric, this conversion is illustrative and likely incorrect for UUID.
-                                                                                                // The SC provided uses `Int as uint64` for stake_id. The DB uses UUID. This needs alignment.
-                                                                                                // **Let's assume for now SC uses a simple numeric ID that the backend can provide or map.**
-                                                                                                // **For robust solution: The SC should use a user-specific stake counter or a hash as ID.**
-                                                                                                // **If stake.numeric_sc_id is available: unstakePayloadBuilder.storeUint(BigInt(stakeToUnstake.numeric_sc_id), 64);**
-                                                                                                // For now, using a placeholder for SC stake ID, this will fail if not aligned.
-            const placeholderScStakeId = BigInt(parseInt(stakeToUnstake.id.substring(0,5), 16) || Date.now()); // Highly illustrative
-            console.warn("Using placeholder SC stake ID for unstake message:", placeholderScStakeId, ". Align with actual SC ID format.");
-            unstakePayloadBuilder.storeUint(placeholderScStakeId, 64);
-
-
+            unstakePayloadBuilder.storeUint(scStakeIdentifierToWithdraw, 64); 
+            
             const unstakePayloadCell = unstakePayloadBuilder.asCell();
             const transaction = {
               validUntil: Math.floor(Date.now() / 1000) + 360, 
               messages: [{ address: STAKING_CONTRACT_ADDRESS, amount: toArixSmallestUnits("0.05").toString(), payload: unstakePayloadCell.toBoc().toString("base64") }],
             };
             const result = await tonConnectUI.sendTransaction(transaction);
-            message.destroy('unstakeConfirm');
             
-            message.loading({ content: 'Unstake transaction sent, awaiting blockchain confirmation...', key: 'unstakeWait', duration: 0 });
+            message.loading({ content: 'Unstake transaction sent, awaiting blockchain confirmation...', key: loadingMessageKey, duration: 0 });
             const externalMessageCell = Cell.fromBase64(result.boc);
             const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell);
-            message.destroy('unstakeWait');
 
             if (!txHash) {
               throw new Error('Failed to confirm unstake transaction on blockchain. Please check your wallet.');
             }
             
-            message.loading({ content: 'Transaction confirmed! Finalizing ARIX unstake with backend...', key: 'unstakeFinalize', duration: 0 });
+            message.loading({ content: 'Transaction confirmed! Finalizing ARIX unstake with backend...', key: loadingMessageKey, duration: 0 });
             await confirmArixUnstake({ 
                 userWalletAddress: rawAddress, 
                 stakeId: stakeToUnstake.id, 
-                unstakeTransactionBoc: result.boc, // BOC of message to SC
-                unstakeTransactionHash: txHash     // Hash of the TX containing that message
+                unstakeTransactionBoc: result.boc,
+                unstakeTransactionHash: txHash 
             });
-            message.success({ content: "ARIX unstake request submitted! Backend will verify.", key: 'unstakeFinalize', duration: 7 });
+            message.success({ content: "ARIX unstake request submitted! Backend will verify.", key: loadingMessageKey, duration: 7 });
             
-            setTimeout(() => { refreshAllData(false); }, 5000);
-            setTimeout(() => { refreshAllData(false); }, 30000);
+            setTimeout(() => { refreshAllData(false); }, 7000);
+            setTimeout(() => { refreshAllData(false); }, 35000);
             setUnstakeSubmitLoading(false);
-            return Promise.resolve(); // For Modal.confirm to close
+            return Promise.resolve();
           } catch (txError) {
-            message.destroy('unstakeConfirm'); message.destroy('unstakeWait'); message.destroy('unstakeFinalize');
-            const errorMsg = txError?.response?.data?.message || txError?.message || 'ARIX unstake failed.';
-            if (errorMsg.toLowerCase().includes('user declined')) { message.warn('ARIX unstake transaction declined.', 4); } 
-            else { message.error(`ARIX unstake failed: ${errorMsg}`, 6); }
+            message.error({ content: txError?.response?.data?.message || txError?.message || 'ARIX unstake failed.', key: loadingMessageKey, duration: 6 });
             console.error("[EarnPage] On-chain ARIX Unstake Tx Error:", txError);
             setUnstakeSubmitLoading(false);
-            return Promise.reject(); // For Modal.confirm to not close on error
+            return Promise.reject();
           }
         },
-        onCancel: () => { setActionLoading(false); setUnstakeSubmitLoading(false); },
+        onCancel: () => { setUnstakeSubmitLoading(false); },
       });
     } catch (error) {
-      hidePrepMsg();
-      setActionLoading(false);
-      message.error(error?.response?.data?.message || 'ARIX unstake initiation failed.', 5);
+      message.error({ content: error?.response?.data?.message || 'ARIX unstake initiation failed.', key: loadingMessageKey, duration: 5 });
       console.error("[EarnPage] Initiate ARIX Unstake Error:", error);
+      setActionLoading(false);
     }
   };
   
@@ -346,9 +329,6 @@ const EarnPage = () => {
         console.error("[EarnPage] USDT Withdrawal Error:", error);
     } finally { hideMsg(); setActionLoading(false); }
   };
-
-  // Render logic remains largely the same as your provided EarnPage.jsx
-  // Ensure to use `stakeSubmitLoading` for the modal's confirm button.
 
   if (!userFriendlyAddress && !loading) {
     return ( 
@@ -439,10 +419,15 @@ const EarnPage = () => {
                      <AntdStatistic title={<Text style={{color: '#aaa'}}>Total Accrued USDT</Text>} value={`${stake.accruedUsdtRewardTotal || '0.00'}`} suffix=" USDT" valueStyle={{color: 'white', fontWeight: 'bold'}}/>
                      <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Early Penalty</Text>} value={`${stake.arixEarlyUnstakePenaltyPercent || '0'}%`} valueStyle={{color: '#ff7875'}}/>
                      <AntdStatistic title={<Text style={{color: '#aaa'}}>Days Left (ARIX Lock)</Text>} value={stake.remainingDays} valueStyle={{color: 'white'}}/>
-                     <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Lock Status</Text>} value={stake.status?.replace(/_/g, ' ').toUpperCase()} valueStyle={{color: /* getStakeStatusColor(stake.status) - define this helper if needed */ 'white'}}/> 
+                     <AntdStatistic title={<Text style={{color: '#aaa'}}>ARIX Lock Status</Text>} value={stake.status?.replace(/_/g, ' ').toUpperCase()} valueStyle={{color: 'white'}}/> 
                     <div style={{marginTop: '20px', display: 'flex', justifyContent: 'center'}}>
                         {(stake.status === 'active') && (
-                           <Button type="primary" onClick={() => handleUnstake(stake)} loading={actionLoading && selectedPlan?.id === stake.id} danger={new Date() < new Date(stake.unlockTimestamp)}>
+                           <Button 
+                             type="primary" 
+                             onClick={() => handleUnstake(stake)} 
+                             loading={actionLoading && selectedPlan?.id === stake.id} 
+                             danger={new Date() < new Date(stake.unlockTimestamp)}
+                           >
                                {new Date() < new Date(stake.unlockTimestamp) ? `Unstake ARIX Early` : `Unstake ARIX`}
                            </Button>
                         )}
