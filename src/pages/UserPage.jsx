@@ -4,7 +4,8 @@ import { Typography, Tabs, message, Spin, Button } from 'antd';
 import { useTonAddress } from '@tonconnect/ui-react';
 import UserProfileCard from '../components/user/UserProfileCard';
 import TransactionList, { renderStakeHistoryItem, renderCoinflipHistoryItem } from '../components/user/TransactionList';
-import { getAllUserStakes, getCoinflipHistoryForUser } from '../services/api';
+// Corrected import: changed getAllUserStakes to getUserStakes
+import { getUserStakes, getCoinflipHistoryForUser } from '../services/api';
 
 const { Title, Text } = Typography;
 
@@ -17,11 +18,13 @@ const UserPage = () => {
   const [loadingCoinflips, setLoadingCoinflips] = useState(false);
   const [activeTab, setActiveTab] = useState('stakes');
 
-  const fetchAllStakeHistory = useCallback(async () => {
+  // Renamed function for clarity, and using getUserStakes
+  const fetchUserStakeHistory = useCallback(async () => {
     if (!rawAddress) return;
     setLoadingStakes(true);
     try {
-      const response = await getAllUserStakes(rawAddress);
+      // Corrected function call: changed getAllUserStakes to getUserStakes
+      const response = await getUserStakes(rawAddress);
       setStakeHistory(response.data || []);
     } catch (error) {
       message.error('Failed to fetch staking history.');
@@ -48,7 +51,7 @@ const UserPage = () => {
   useEffect(() => {
     if (rawAddress) {
       if (activeTab === 'stakes') {
-        fetchAllStakeHistory();
+        fetchUserStakeHistory(); // Using the renamed function
       } else if (activeTab === 'games') {
         fetchCoinflipHistory();
       }
@@ -56,11 +59,11 @@ const UserPage = () => {
         setStakeHistory([]);
         setCoinflipHistory([]);
     }
-  }, [rawAddress, activeTab, fetchAllStakeHistory, fetchCoinflipHistory]);
+  }, [rawAddress, activeTab, fetchUserStakeHistory, fetchCoinflipHistory]); // Updated dependency
   
   const handleRefreshAll = () => {
     if (rawAddress) {
-      if (activeTab === 'stakes') fetchAllStakeHistory();
+      if (activeTab === 'stakes') fetchUserStakeHistory(); // Using the renamed function
       if (activeTab === 'games') fetchCoinflipHistory();
       // UserProfileCard has its own internal refresh for balance
       message.success("Data refresh initiated!");
