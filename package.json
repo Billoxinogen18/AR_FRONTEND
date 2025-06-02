@@ -1,36 +1,35 @@
 {
-  "name": "tma_frontend",
+  "name": "arix_tma_frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview --host"
   },
   "dependencies": {
     "@orbs-network/ton-access": "^2.3.3",
-    "@ton/core": "latest",
-    "@ton/crypto": "^3.2.0",
-    "@ton/ton": "latest",
+    "@ton/core": "^0.60.1",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^15.2.1",
     "@tonconnect/ui-react": "^2.1.0",
     "antd": "^5.17.0",
     "axios": "^1.7.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
-    "ton": "^6.13.1"
+    "vite-plugin-node-polyfills": "^0.22.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.2.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.7",
-    "globals": "^15.2.0",
-    "vite": "^6.3.5"
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "vite": "^5.2.0"
   }
 }

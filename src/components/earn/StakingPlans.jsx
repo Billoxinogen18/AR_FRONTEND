@@ -1,81 +1,71 @@
-// File: ar_terminal/tma_frontend/src/components/earn/StakingPlans.jsx
+// File: AR_Proj/AR_FRONTEND/src/components/earn/StakingPlans.jsx
 import React from 'react';
-import { Card, Row, Col, Button, Statistic, Tooltip } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Button, Statistic, Tooltip, Typography } from 'antd';
+import { InfoCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { ARIX_DECIMALS } from '../../utils/tonUtils.js'; // <-- Added this import
 
-// Updated plan data with a single 'apr' field representing the total fixed ARIX APR
-const stakingPlansData = [
-  {
-    key: 'PLAN_30D',
-    title: '30 Day Stake',
-    duration: 30,
-    apr: 1, // Total Fixed ARIX APR for this plan
-    earlyUnstakePenaltyPercent: 7,
-    description: 'Short-term stake.',
-  },
-  {
-    key: 'PLAN_60D',
-    title: '60 Day Stake',
-    duration: 60,
-    apr: 2, // Total Fixed ARIX APR for this plan
-    earlyUnstakePenaltyPercent: 8,
-    description: 'Medium-term stake.',
-  },
-  {
-    key: 'PLAN_120D',
-    title: '120 Day Stake',
-    duration: 120,
-    apr: 3, // Total Fixed ARIX APR for this plan
-    earlyUnstakePenaltyPercent: 9,
-    description: 'Longer stake for better rewards.',
-  },
-  {
-    key: 'PLAN_240D',
-    title: '240 Day Stake',
-    duration: 240,
-    apr: 4, // Total Fixed ARIX APR for this plan
-    earlyUnstakePenaltyPercent: 10,
-    description: 'Maximize ARIX returns with the longest commitment.',
-  },
-];
+const { Title: AntTitle, Text } = Typography;
 
-const StakingPlans = ({ onSelectPlan }) => {
+const StakingPlans = ({ plans, onSelectPlan, currentArxPrice }) => {
+  if (!plans || plans.length === 0) {
+    return <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">No staking plans available at the moment. Please check back later.</div>;
+  }
   return (
     <div>
-      <h2 style={{ textAlign: 'center', marginBottom: '24px', color: 'white' }}>Choose Your Staking Plan</h2>
-      <Row gutter={[16, 16]}>
-        {stakingPlansData.map((plan) => (
-          <Col xs={24} sm={12} md={12} lg={6} key={plan.key}>
-            <Card
-              title={plan.title}
-              hoverable
-              style={{ background: '#1f1f1f', color: 'white', borderColor: '#303030', borderRadius: '8px', height: '100%' }}
-              headStyle={{ color: 'white', borderColor: '#303030', borderTopLeftRadius: '8px', borderTopRightRadius: '8px' }}
-              bodyStyle={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'calc(100% - 57px)' }}
-              actions={[
-                <Button type="primary" key={`select-${plan.key}`} onClick={() => onSelectPlan(plan)} style={{ borderRadius: '6px' }}>
-                  Select Plan
-                </Button>,
-              ]}
-            >
-              <div>
-                <Statistic title={<span style={{color: '#aaa'}}>Duration</span>} value={`${plan.duration} Days`} valueStyle={{ color: '#00adee', fontWeight: 'bold' }} />
-                <Statistic 
-                  title={<span style={{color: '#aaa'}}>Fixed Reward APR (ARIX)</span>} 
-                  value={`${plan.apr}%`} 
-                  valueStyle={{ color: '#52c41a', fontWeight: 'bold' }} 
+      <AntTitle level={2} style={{ textAlign: 'center', marginBottom: '30px', color: 'white', fontWeight: 'bold' }}>
+        Choose Your Staking Plan
+      </AntTitle>
+      <Row gutter={[24, 24]} justify="center"> {/* Increased gutter and added justify */}
+        {plans.map((plan) => {
+          const minStakeArixNum = parseFloat(plan.minStakeArix || 0);
+          const minStakeUsdtApprox = currentArxPrice && minStakeArixNum > 0 ? (minStakeArixNum * currentArxPrice).toFixed(2) : null;
+
+          return (
+            <Col xs={24} sm={18} md={12} lg={8} key={plan.key || plan.id}> {/* Adjusted col sizes for better responsiveness */}
+              <Card
+                className="neumorphic-glass-card" // Apply base neumorphic/glass style
+                hoverable
+                actions={[
+                  <Button
+                    type="primary"
+                    key={`select-${plan.key || plan.id}`}
+                    onClick={() => onSelectPlan(plan)}
+                    style={{ margin: '0 auto', display: 'block', width: 'calc(100% - 48px)'}} // Style applied via App.css actions li span button
+                    icon={<CheckCircleOutlined />}
+                  >
+                    Select Plan
+                  </Button>,
+                ]}
+              >
+                <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                    <Text style={{ color: '#00adee', fontWeight: 'bold', fontSize: '1.4em' }}>{plan.title}</Text>
+                </div>
+                <Statistic
+                  title={<Text style={{color: '#aaa'}}>Duration</Text>}
+                  value={`${plan.duration || plan.duration_days} Days`}
+                  valueStyle={{ color: '#00adee', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
-                <Statistic 
-                  title={<span style={{color: '#aaa'}}>Early Unstake Penalty <Tooltip title={`If unstaked before ${plan.duration} days.`}><InfoCircleOutlined style={{marginLeft: '4px'}}/></Tooltip></span>} 
-                  value={`${plan.earlyUnstakePenaltyPercent}%`} 
-                  valueStyle={{ color: 'red', fontWeight: 'bold' }} 
-                  suffix="of staked ARIX"
+                <Statistic
+                  title={<Text style={{color: '#aaa'}}>Fixed Reward APR</Text>}
+                  value={`${plan.apr}%`}
+                  suffix={<Text style={{color: '#52c41a', fontSize: '0.8em', marginLeft: 4}}> ARIX</Text>}
+                  valueStyle={{ color: '#52c41a', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
-                <p style={{ marginTop: '16px', color: '#ccc', fontSize: '14px', flexGrow: 1 }}>{plan.description}</p>
-              </div>
-            </Card>
-          </Col>
-        ))}
+                <Statistic
+                  title={<Text style={{color: '#aaa'}}>Min. Stake</Text>}
+                  value={`${minStakeArixNum.toFixed(ARIX_DECIMALS)} ARIX`}
+                  valueStyle={{ color: '#e0e0e0', fontWeight: 'normal', fontSize: '1.1em' }}
+                  suffix={minStakeUsdtApprox ? <Text style={{color: '#888', fontSize: '0.8em', marginLeft: 4}}>(~${minStakeUsdtApprox} USDT)</Text> : ""}
+                />
+                <Statistic
+                  title={<Text style={{color: '#aaa'}}>Early Unstake Penalty <Tooltip title={`Penalty applies to staked ARIX if unstaked before ${plan.duration || plan.duration_days} days. Rewards are forfeited.`}><InfoCircleOutlined style={{marginLeft: '4px', color: '#aaa'}}/></Tooltip></Text>}
+                  value={`${plan.earlyUnstakePenaltyPercent}%`}
+                  valueStyle={{ color: '#ff7875', fontWeight: '500', fontSize: '1.1em' }}
+                />
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
     </div>
   );

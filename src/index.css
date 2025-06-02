@@ -1,68 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  color-scheme: dark;
+  color: #e0e0e5; /* Default light text for dark mode */
+  background-color: #101018; /* Deep dark blue/grey base */
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  background-color: #101018; /* Ensure body has the base background color */
+  color: #e0e0e5;
   min-height: 100vh;
+  /* Hide scrollbar for body, handle scrolling within specific content areas */
+  /* overflow: hidden; */
+  overscroll-behavior: none; /* Prevent pull-to-refresh issues in TMAs */
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#root {
+  min-height: 100vh;
+  /* The background color is on the body, #root can be transparent */
+  background: transparent;
+  /* Consider adding a very subtle noise texture or gradient to the background if desired for glassmorphism */
+  /* background-image: linear-gradient(to bottom right, #101018, #181820); */
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+a {
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+  color: #00adee; /* ARIX primary color */
+  text-decoration: none; /* Cleaner look */
+  transition: color 0.25s ease;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+a:hover {
+  color: #3cf4ff; /* Lighter shade on hover */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+h1, h2, h3, h4, h5, h6 {
+  color: #f0f0f5;
+  font-weight: 600; /* Slightly bolder headings */
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 173, 238, 0.3); /* ARIX color, semi-transparent */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 173, 238, 0.6);
+}
+
+/* Utility class for glass effect - can be applied to modals, sidebars etc. */
+.glass-pane {
+  background: rgba(30, 32, 45, 0.6); /* Adjust alpha for desired transparency */
+  backdrop-filter: blur(12px) saturate(150%); /* Add saturate for more pop */
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px; /* Consistent rounded corners */
+  padding: 20px; /* Default padding */
+}
+
+/* General typography consistency */
+.ant-typography {
+  color: inherit; /* Inherit from body or parent */
+}
+.ant-typography strong {
+  color: #f5f5f5; /* Brighter strong text */
+}
+
+/* Remove default focus outline if custom styling is preferred, ensure accessibility */
+/* Use a custom outline for accessibility */
+*:focus-visible {
+  outline: 2px solid #00adee; /* ARIX primary focus outline */
+  outline-offset: 2px;
+  border-radius: inherit; /* Try to match element border radius */
+}
+
+/* Ensure input focus looks good */
+.ant-input-number-focused,
+.ant-input-focused {
+    outline: none !important; /* Remove default AntD outline */
 }
