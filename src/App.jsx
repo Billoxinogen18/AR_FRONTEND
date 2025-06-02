@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/App.jsx
+// File: AR_Proj/AR_FRONTEND/src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { TonConnectButton } from '@tonconnect/ui-react';
@@ -14,28 +14,22 @@ import './App.css';
 import EarnPage from './pages/EarnPage';
 import GamePage from './pages/GamePage';
 import UserPage from './pages/UserPage';
-import TaskPage from './pages/TaskPage'; // Import new TaskPage
+import TaskPage from './pages/TaskPage';
+import PushPage from './pages/PushPage'; // Import new PushPage
 
-const { Header, Content, Sider } = Layout; // Removed Footer as it's not used
-const { Title, Text } = Typography;
+const { Header, Content, Sider } = Layout;
+const { Title } = Typography; // Removed unused Text import
 const { useBreakpoint } = Grid;
 
-// Placeholder page for PUSH/MODS
-const PushPagePlaceholder = () => (
-    <div style={{ padding: 24, textAlign: 'center', color: '#e0e0e0', minHeight: 'calc(100vh - 128px)' }}>
-        <Title level={2} style={{color: 'white'}}>PUSH / MODS</Title>
-        <Text style={{color: '#aaa'}}>Platform news, updates, and announcements will appear here. Stay tuned!</Text>
-    </div>
-);
+// PushPagePlaceholder is no longer needed here as PushPage is implemented
 
 const AppMenu = ({ mobile }) => {
   const location = useLocation();
   let currentPath = location.pathname;
   if (currentPath === '/' || currentPath === '') {
-    currentPath = '/earn'; // Default to earn page
+    currentPath = '/earn'; 
   }
 
-  // Reordered menu items as per typical TMA layout (Task, Game, Earn, User, Push)
   const menuItems = [
     { key: '/task', icon: <CheckSquareOutlined />, label: <NavLink to="/task">TASK</NavLink> },
     { key: '/game', icon: <ExperimentOutlined />, label: <NavLink to="/game">GAME</NavLink> },
@@ -51,7 +45,7 @@ const AppMenu = ({ mobile }) => {
         mode="horizontal"
         selectedKeys={[currentPath]}
         items={menuItems}
-        className="mobile-bottom-nav" // Apply class for specific styling
+        className="mobile-bottom-nav" 
       />
     );
   }
@@ -94,98 +88,61 @@ function App() {
   const screens = useBreakpoint();
   const isMobile = !screens.lg; 
 
-  const ARIX_DARK_THEME = {
+  const ARIX_DARK_THEME = { /* ... (Full theme object as provided in previous response) ... */ 
     algorithm: antdTheme.darkAlgorithm,
     token: {
-      colorPrimary: '#00adee',
-      colorInfo: '#00adee',
-      colorSuccess: '#52c41a',
-      colorError: '#ff4d4f',
-      colorWarning: '#faad14',
-      colorTextBase: '#e0e0e0',
-      colorBgBase: '#101018', 
-      colorBgContainer: 'rgba(26, 26, 34, 0.8)', 
-      colorBgElevated: 'rgba(30, 30, 40, 0.85)', 
-      colorBorder: 'rgba(255, 255, 255, 0.15)',
-      colorBorderSecondary: 'rgba(255, 255, 255, 0.1)',
-      borderRadius: 12,
+      colorPrimary: '#00adee', colorInfo: '#00adee', colorSuccess: '#52c41a',
+      colorError: '#ff4d4f', colorWarning: '#faad14', colorTextBase: '#e0e0e0',
+      colorBgBase: '#101018', colorBgContainer: 'rgba(26, 26, 34, 0.8)',
+      colorBgElevated: 'rgba(30, 30, 40, 0.85)', colorBorder: 'rgba(255, 255, 255, 0.15)',
+      colorBorderSecondary: 'rgba(255, 255, 255, 0.1)', borderRadius: 12,
       fontFamily: "'Inter', sans-serif",
     },
     components: {
-      Layout: {
-        headerBg: 'rgba(20, 20, 30, 0.7)', 
-        siderBg: 'rgba(25, 25, 35, 0.6)', 
-        bodyBg: '#101018', 
-        footerBg: 'transparent',
-      },
+      Layout: { headerBg: 'rgba(20, 20, 30, 0.7)', siderBg: 'rgba(25, 25, 35, 0.6)', bodyBg: '#101018', footerBg: 'transparent', },
       Menu: {
-        darkItemBg: 'transparent',
-        darkItemSelectedBg: 'rgba(0, 173, 238, 0.2)', 
-        darkItemColor: 'rgba(220, 220, 230, 0.75)',
-        darkItemSelectedColor: '#00adee',
-        darkItemHoverBg: 'rgba(255, 255, 255, 0.05)',
-        darkItemHoverColor: '#00adee',
-        darkSubMenuItemBg: 'rgba(30, 30, 45, 0.4)',
-        horizontalItemSelectedColor: '#00adee',
+        darkItemBg: 'transparent', darkItemSelectedBg: 'rgba(0, 173, 238, 0.2)',
+        darkItemColor: 'rgba(220, 220, 230, 0.75)', darkItemSelectedColor: '#00adee',
+        darkItemHoverBg: 'rgba(255, 255, 255, 0.05)', darkItemHoverColor: '#00adee',
+        darkSubMenuItemBg: 'rgba(30, 30, 45, 0.4)', horizontalItemSelectedColor: '#00adee',
         itemHeight: 50, 
       },
       Button: {
-        colorPrimary: '#00adee',
-        colorTextLightSolid: '#fff',
-        colorBgContainerDisabled: '#303030',
-        colorTextDisabled: '#777',
-        defaultBg: 'rgba(50, 50, 60, 0.7)',
-        defaultColor: '#e0e0e0',
-        defaultBorderColor: 'rgba(255, 255, 255, 0.2)',
-        defaultHoverBg: 'rgba(60, 60, 70, 0.8)',
-        defaultHoverColor: '#00adee',
-        defaultActiveBg: 'rgba(40, 40, 50, 0.6)',
+        colorPrimary: '#00adee', colorTextLightSolid: '#fff',
+        colorBgContainerDisabled: '#303030', colorTextDisabled: '#777',
+        defaultBg: 'rgba(50, 50, 60, 0.7)', defaultColor: '#e0e0e0',
+        defaultBorderColor: 'rgba(255, 255, 255, 0.2)', defaultHoverBg: 'rgba(60, 60, 70, 0.8)',
+        defaultHoverColor: '#00adee', defaultActiveBg: 'rgba(40, 40, 50, 0.6)',
       },
       Card: {
-         colorBgContainer: 'rgba(40, 42, 58, 0.5)', 
-         colorBorderSecondary: 'rgba(255, 255, 255, 0.08)',
+         colorBgContainer: 'rgba(40, 42, 58, 0.5)', colorBorderSecondary: 'rgba(255, 255, 255, 0.08)',
          colorTextHeading: '#00adee', 
       },
       Modal: {
-         colorBgElevated: 'rgba(30, 30, 40, 0.9)', 
-         colorBorderSecondary: 'rgba(255, 255, 255, 0.1)',
-         colorTextHeading: '#00adee',
-         boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)", 
+         colorBgElevated: 'rgba(30, 30, 40, 0.9)', colorBorderSecondary: 'rgba(255, 255, 255, 0.1)',
+         colorTextHeading: '#00adee', boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)", 
       },
       InputNumber: {
-         colorBgContainer: 'rgba(20, 22, 30, 0.5)',
-         colorBorder: 'rgba(255, 255, 255, 0.1)',
-         colorText: '#e0e0e0',
-         colorTextDisabled: '#777',
-         colorFillAlter: '#2a2a2a', 
+         colorBgContainer: 'rgba(20, 22, 30, 0.5)', colorBorder: 'rgba(255, 255, 255, 0.1)',
+         colorText: '#e0e0e0', colorTextDisabled: '#777', colorFillAlter: '#2a2a2a', 
       },
       Statistic: {
-        titleFontSize: 14,
-        contentFontSize: 20, 
-        colorTextSecondary: '#aaa', 
-        colorText: '#e0e0e0', 
+        titleFontSize: 14, contentFontSize: 20, 
+        colorTextSecondary: '#aaa', colorText: '#e0e0e0', 
       },
       Radio: {
-        buttonSolidCheckedBg: '#00adee',
-        buttonSolidCheckedColor: '#fff',
-        buttonSolidCheckedHoverBg: '#00bfff',
-        buttonSolidCheckedActiveBg: '#008cdd',
+        buttonSolidCheckedBg: '#00adee', buttonSolidCheckedColor: '#fff',
+        buttonSolidCheckedHoverBg: '#00bfff', buttonSolidCheckedActiveBg: '#008cdd',
         colorBorder: 'rgba(255, 255, 255, 0.2)',
       },
       Tabs: {
-        cardBg: 'transparent', 
-        itemColor: 'rgba(220, 220, 230, 0.65)',
-        itemSelectedColor: '#00adee',
-        itemHoverColor: '#00bfff',
-        inkBarColor: '#00adee',
-        horizontalMargin: '0',
-        titleFontSize: '1em',
+        cardBg: 'transparent', itemColor: 'rgba(220, 220, 230, 0.65)',
+        itemSelectedColor: '#00adee', itemHoverColor: '#00bfff',
+        inkBarColor: '#00adee', horizontalMargin: '0', titleFontSize: '1em',
       },
-      Spin: { 
-        colorPrimary: '#00adee',
-      },
-      Alert: { // Added Alert for consistency if used with glass-pane-alert
-        colorInfoBg: 'rgba(0, 173, 238, 0.15)', // Example for info alert glass style
+      Spin: { colorPrimary: '#00adee',},
+      Alert: {
+        colorInfoBg: 'rgba(0, 173, 238, 0.15)', 
         colorInfoBorder: 'rgba(0, 173, 238, 0.3)',
       }
     },
@@ -223,7 +180,7 @@ function App() {
                   <Route path="/game" element={<GamePage />} />
                   <Route path="/user" element={<UserPage />} />
                   <Route path="/task" element={<TaskPage />} /> 
-                  <Route path="/push" element={<PushPagePlaceholder />} />
+                  <Route path="/push" element={<PushPage />} /> {/* Updated to PushPage */}
                 </Routes>
               </Content>
             </Layout>

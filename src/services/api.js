@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/services/api.js
+// File: AR_Proj/AR_FRONTEND/src/services/api.js
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -23,14 +23,11 @@ export const confirmArixUnstake = (data) => apiClient.post('/earn/confirm-arix-u
 export const getUserStakesAndRewards = (walletAddress) => apiClient.get(`/earn/stakes/${walletAddress}`);
 export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usdt-withdrawal', data);
 
-
 // --- Game API Endpoints ---
 export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
 export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
 
-
 // --- Task API Endpoints ---
-// Pass userWalletAddress as a query parameter if available
 export const getActiveTasks = (userWalletAddress) => {
     const params = userWalletAddress ? { userWalletAddress } : {};
     return apiClient.get('/task/active', { params });
@@ -38,8 +35,7 @@ export const getActiveTasks = (userWalletAddress) => {
 export const submitTaskCompletion = (taskId, data) => apiClient.post(`/task/${taskId}/submit`, data);
 export const getUserTaskHistory = (walletAddress) => apiClient.get(`/task/user/${walletAddress}`);
 
-
-// --- User API Endpoints ---
-// export const getUserProfile = (walletAddress) => apiClient.get(`/user/profile/${walletAddress}`); 
+// --- Push/Announcements API Endpoints ---
+export const getAnnouncements = () => apiClient.get('/push/announcements');
 
 export default apiClient;
