@@ -1,8 +1,8 @@
 // File: AR_FRONTEND/src/utils/tonUtils.js
-import { TonClient } from "@ton/ton";
-import { Address, Cell, toNano, fromNano, Builder } from "@ton/core";
+import { TonClient, Address, Cell, toNano, fromNano, Builder } from "@ton/core";
 import { getHttpEndpoint } from "@orbs-network/ton-access";
 
+// Keep existing getTonClient function
 async function getTonClient() {
   const network = import.meta.env.VITE_TON_NETWORK || "mainnet"; 
   const endpoint = await getHttpEndpoint({ network: network });
@@ -15,7 +15,7 @@ export async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) 
     return null;
   }
   try {
-    const client = await getTonClient();
+    const client = await getTonClient(); // Use the local getTonClient
     const masterAddr = Address.parse(jettonMasterAddress);
     const ownerAddr = Address.parse(ownerAddress);
 
@@ -38,14 +38,12 @@ export async function getJettonBalance(jettonWalletAddressString) {
     return BigInt(0);
   }
   try {
-    const client = await getTonClient();
+    const client = await getTonClient(); // Use the local getTonClient
     const jettonWalletAddress = Address.parse(jettonWalletAddressString);
 
-    // Check if the contract is active, helpful for diagnosing -13 errors
     const contractState = await client.getContractState(jettonWalletAddress);
     if (contractState.state !== 'active') {
         console.warn(`[tonUtils.js] Jetton wallet ${jettonWalletAddressString} is not active. State: ${contractState.state}. Balance will likely be 0 or error.`);
-        // Depending on the case, you might still try get_wallet_data or return 0
     }
 
     const result = await client.runMethod(
@@ -56,7 +54,7 @@ export async function getJettonBalance(jettonWalletAddressString) {
   } catch (error) {
     console.error(`[tonUtils.js] Error getting Jetton balance from ${jettonWalletAddressString}:`, error);
     if (error.message && error.message.includes("exit_code: -13")) {
-        console.error(`[tonUtils.js] Exit code -13 for ${jettonWalletAddressString} often means the jetton wallet contract is uninitialized for this user or not found on the current network (${import.meta.env.VITE_TON_NETWORK}).`);
+        console.error(`[tonUtils.js] Exit code -13 for ${jettonWalletAddressString} often means the jetton wallet contract is uninitialized or not found.`);
     }
     return BigInt(0);
   }
@@ -107,10 +105,55 @@ export function fromArixSmallestUnits(amount) {
     try { return Number(fromNano(amount)); } 
     catch(e) { console.error("fromNano failed for bigint:", amount, e); return 0; }
   }
-  if (typeof amount === 'string') {
+  if (typeof amount === 'string' || typeof amount === 'number') { // Handle string or number input for amount
      try { return Number(fromNano(BigInt(amount))); } 
-     catch(e) { console.error("fromNano failed for string:", amount, e); return 0; }
+     catch(e) { console.error("fromNano failed for string/number:", amount, e); return 0; }
   }
-  console.warn("fromArixSmallestUnits: Invalid amount type, returning 0. Amount:", amount);
+  console.warn("fromArixSmallestUnits: Invalid amount type, returning 0. Amount:", amount, typeof amount);
   return 0;
+}
+
+/**
+ * Waits for a transaction to be confirmed on the blockchain by polling.
+ * @param {string} sourceWalletAddressString - The address string of the wallet that sent the transaction.
+ * @param {Cell} externalMessageCell - The external message cell that was sent.
+ * @param {number} [pollingIntervalMs=5000] - Interval between polling attempts.
+ * @param {number} [maxRetries=24] - Maximum number of polling attempts (24 * 5s = 2 minutes).
+ * @returns {Promise<string|null>} The transaction hash in hex format if found, otherwise null.
+ */
+export async function waitForTransactionConfirmation(
+    sourceWalletAddressString, 
+    externalMessageCell,
+    pollingIntervalMs = 5000, 
+    maxRetries = 24 
+) {
+    const client = await getTonClient();
+    const sourceAddress = Address.parse(sourceWalletAddressString);
+    const messageHash = externalMessageCell.hash();
+
+    console.log(`[waitForTx] Started polling for tx from ${sourceWalletAddressString} with message hash ${messageHash.toString('hex')}`);
+
+    for (let i = 0; i < maxRetries; i++) {
+        await new Promise(resolve => setTimeout(resolve, pollingIntervalMs));
+        console.log(`[waitForTx] Polling attempt ${i + 1}/${maxRetries}...`);
+        try {
+            const transactions = await client.getTransactions(sourceAddress, { limit: 10 }); // Fetch recent transactions
+            for (const tx of transactions) {
+                if (tx.inMessage && tx.inMessage.info.type === 'external-in') {
+                    // The BOC from tonConnectUI is the external message.
+                    // We need to ensure the tx.inMessage.body is what we compare.
+                    // Cell.hash() is a reliable way to compare.
+                    if (tx.inMessage.body.hash().equals(messageHash)) {
+                        console.log(`[waitForTx] Transaction found! Hash: ${tx.hash().toString('hex')}`);
+                        return tx.hash().toString('hex');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`[waitForTx] Error during polling attempt ${i + 1}:`, error);
+            // Don't stop polling on transient errors, but log them.
+        }
+    }
+    console.warn(`[waitForTx] Transaction not confirmed after ${maxRetries} retries for message hash ${messageHash.toString('hex')}`);
+    return null;
 }
