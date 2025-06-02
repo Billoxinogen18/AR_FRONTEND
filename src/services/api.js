@@ -12,20 +12,14 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Increased timeout for potentially longer operations like waiting for backend verification
+  timeout: 30000, 
 });
 
 // --- Earn API Endpoints ---
 export const getStakingConfig = () => apiClient.get('/earn/config');
-
-// `data` for recordUserStake should now include `transactionHash`
 export const recordUserStake = (data) => apiClient.post('/earn/stake', data);
-
 export const initiateArixUnstake = (data) => apiClient.post('/earn/initiate-arix-unstake', data);
-
-// `data` for confirmArixUnstake should now include `unstakeTransactionHash`
 export const confirmArixUnstake = (data) => apiClient.post('/earn/confirm-arix-unstake', data);
-
 export const getUserStakesAndRewards = (walletAddress) => apiClient.get(`/earn/stakes/${walletAddress}`);
 export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usdt-withdrawal', data);
 
@@ -33,7 +27,16 @@ export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usd
 // --- Game API Endpoints ---
 export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
 export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
-// export const getCoinflipGameData = () => apiClient.get('/game/coinflip/data'); // Example
+
+
+// --- Task API Endpoints ---
+// Pass userWalletAddress as a query parameter if available
+export const getActiveTasks = (userWalletAddress) => {
+    const params = userWalletAddress ? { userWalletAddress } : {};
+    return apiClient.get('/task/active', { params });
+};
+export const submitTaskCompletion = (taskId, data) => apiClient.post(`/task/${taskId}/submit`, data);
+export const getUserTaskHistory = (walletAddress) => apiClient.get(`/task/user/${walletAddress}`);
 
 
 // --- User API Endpoints ---

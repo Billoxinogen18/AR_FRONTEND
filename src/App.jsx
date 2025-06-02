@@ -7,25 +7,20 @@ import {
     DollarCircleOutlined, 
     ExperimentOutlined, 
     UserOutlined, 
-    BellOutlined, // For PUSH
-    CheckSquareOutlined // For TASK
+    BellOutlined, 
+    CheckSquareOutlined 
 } from '@ant-design/icons';
 import './App.css'; 
 import EarnPage from './pages/EarnPage';
 import GamePage from './pages/GamePage';
 import UserPage from './pages/UserPage';
+import TaskPage from './pages/TaskPage'; // Import new TaskPage
 
-const { Header, Content, Sider, Footer } = Layout;
+const { Header, Content, Sider } = Layout; // Removed Footer as it's not used
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
-// Placeholder pages for TASK and PUSH
-const TaskPagePlaceholder = () => (
-    <div style={{ padding: 24, textAlign: 'center', color: '#e0e0e0', minHeight: 'calc(100vh - 128px)' }}>
-        <Title level={2} style={{color: 'white'}}>TASK Page</Title>
-        <Text style={{color: '#aaa'}}>Complete tasks to earn ARIX! This section is coming soon.</Text>
-    </div>
-);
+// Placeholder page for PUSH/MODS
 const PushPagePlaceholder = () => (
     <div style={{ padding: 24, textAlign: 'center', color: '#e0e0e0', minHeight: 'calc(100vh - 128px)' }}>
         <Title level={2} style={{color: 'white'}}>PUSH / MODS</Title>
@@ -40,12 +35,13 @@ const AppMenu = ({ mobile }) => {
     currentPath = '/earn'; // Default to earn page
   }
 
+  // Reordered menu items as per typical TMA layout (Task, Game, Earn, User, Push)
   const menuItems = [
     { key: '/task', icon: <CheckSquareOutlined />, label: <NavLink to="/task">TASK</NavLink> },
     { key: '/game', icon: <ExperimentOutlined />, label: <NavLink to="/game">GAME</NavLink> },
-    { key: '/push', icon: <BellOutlined />, label: <NavLink to="/push">PUSH</NavLink> },
     { key: '/earn', icon: <DollarCircleOutlined />, label: <NavLink to="/earn">EARN</NavLink> },
     { key: '/user', icon: <UserOutlined />, label: <NavLink to="/user">USER</NavLink> },
+    { key: '/push', icon: <BellOutlined />, label: <NavLink to="/push">PUSH</NavLink> },
   ];
 
   if (mobile) {
@@ -55,21 +51,7 @@ const AppMenu = ({ mobile }) => {
         mode="horizontal"
         selectedKeys={[currentPath]}
         items={menuItems}
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'space-around',
-          background: 'rgba(20, 20, 30, 0.85)', // Darker, slightly more opaque for bottom bar
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-        // For mobile bottom nav, icons are often more prominent or labels are smaller
-        // This requires custom styling for Menu.Item if antd default is not sufficient
+        className="mobile-bottom-nav" // Apply class for specific styling
       />
     );
   }
@@ -77,18 +59,18 @@ const AppMenu = ({ mobile }) => {
   return (
     <Sider
       width={200}
-      breakpoint="lg" // AntD's Sider will collapse based on this
-      collapsedWidth="0" // Will disappear entirely on small screens if triggered
-      trigger={null} // No default trigger, controlled by breakpoint
+      breakpoint="lg" 
+      collapsedWidth="0" 
+      trigger={null} 
       style={{
-        background: 'rgba(25, 25, 35, 0.6)', // From your theme
+        background: 'rgba(25, 25, 35, 0.6)', 
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-        height: 'calc(100vh - 64px)', // Full height minus header
+        height: 'calc(100vh - 64px)', 
         position: 'sticky',
-        top: '64px', // Sticky below the header
-        zIndex: 9,
+        top: '64px', 
+        zIndex: 999, 
         overflow: 'auto',
       }}
     >
@@ -110,9 +92,8 @@ const AppMenu = ({ mobile }) => {
 
 function App() {
   const screens = useBreakpoint();
-  const isMobile = !screens.lg; // Consider lg breakpoint for Sider collapse
+  const isMobile = !screens.lg; 
 
-  // Full ARIX_DARK_THEME object from your provided App.jsx
   const ARIX_DARK_THEME = {
     algorithm: antdTheme.darkAlgorithm,
     token: {
@@ -122,9 +103,9 @@ function App() {
       colorError: '#ff4d4f',
       colorWarning: '#faad14',
       colorTextBase: '#e0e0e0',
-      colorBgBase: '#101018', // Main background
-      colorBgContainer: 'rgba(26, 26, 34, 0.8)', // Default for Cards, Modals if not overridden
-      colorBgElevated: 'rgba(30, 30, 40, 0.85)', // For popovers, dropdowns, modals that need to stand out
+      colorBgBase: '#101018', 
+      colorBgContainer: 'rgba(26, 26, 34, 0.8)', 
+      colorBgElevated: 'rgba(30, 30, 40, 0.85)', 
       colorBorder: 'rgba(255, 255, 255, 0.15)',
       colorBorderSecondary: 'rgba(255, 255, 255, 0.1)',
       borderRadius: 12,
@@ -132,29 +113,27 @@ function App() {
     },
     components: {
       Layout: {
-        headerBg: 'rgba(20, 20, 30, 0.7)', // Glassmorphic header
-        siderBg: 'rgba(25, 25, 35, 0.6)', // Glassmorphic sider
-        bodyBg: '#101018', // Ensure body matches base
+        headerBg: 'rgba(20, 20, 30, 0.7)', 
+        siderBg: 'rgba(25, 25, 35, 0.6)', 
+        bodyBg: '#101018', 
         footerBg: 'transparent',
       },
       Menu: {
         darkItemBg: 'transparent',
-        darkItemSelectedBg: 'rgba(0, 173, 238, 0.2)', // ARIX blue selection
+        darkItemSelectedBg: 'rgba(0, 173, 238, 0.2)', 
         darkItemColor: 'rgba(220, 220, 230, 0.75)',
         darkItemSelectedColor: '#00adee',
         darkItemHoverBg: 'rgba(255, 255, 255, 0.05)',
         darkItemHoverColor: '#00adee',
         darkSubMenuItemBg: 'rgba(30, 30, 45, 0.4)',
-        // For horizontal mobile menu
         horizontalItemSelectedColor: '#00adee',
-        itemHeight: 50, // For bottom nav items
+        itemHeight: 50, 
       },
       Button: {
         colorPrimary: '#00adee',
         colorTextLightSolid: '#fff',
         colorBgContainerDisabled: '#303030',
         colorTextDisabled: '#777',
-        // Default button styling if needed
         defaultBg: 'rgba(50, 50, 60, 0.7)',
         defaultColor: '#e0e0e0',
         defaultBorderColor: 'rgba(255, 255, 255, 0.2)',
@@ -163,28 +142,28 @@ function App() {
         defaultActiveBg: 'rgba(40, 40, 50, 0.6)',
       },
       Card: {
-         colorBgContainer: 'rgba(40, 42, 58, 0.5)', // Neumorphic/Glass Card base
+         colorBgContainer: 'rgba(40, 42, 58, 0.5)', 
          colorBorderSecondary: 'rgba(255, 255, 255, 0.08)',
-         colorTextHeading: '#00adee', // Card titles
+         colorTextHeading: '#00adee', 
       },
       Modal: {
-         colorBgElevated: 'rgba(30, 30, 40, 0.9)', // Modals should be more opaque
+         colorBgElevated: 'rgba(30, 30, 40, 0.9)', 
          colorBorderSecondary: 'rgba(255, 255, 255, 0.1)',
          colorTextHeading: '#00adee',
-         boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)", // Stronger shadow for modals
+         boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)", 
       },
       InputNumber: {
          colorBgContainer: 'rgba(20, 22, 30, 0.5)',
          colorBorder: 'rgba(255, 255, 255, 0.1)',
          colorText: '#e0e0e0',
          colorTextDisabled: '#777',
-         colorFillAlter: '#2a2a2a', // Addon background
+         colorFillAlter: '#2a2a2a', 
       },
       Statistic: {
         titleFontSize: 14,
-        contentFontSize: 20, // Default, can be overridden per instance
-        colorTextSecondary: '#aaa', // Title color
-        colorText: '#e0e0e0', // Value color
+        contentFontSize: 20, 
+        colorTextSecondary: '#aaa', 
+        colorText: '#e0e0e0', 
       },
       Radio: {
         buttonSolidCheckedBg: '#00adee',
@@ -194,7 +173,7 @@ function App() {
         colorBorder: 'rgba(255, 255, 255, 0.2)',
       },
       Tabs: {
-        cardBg: 'transparent', // For tabs with card style
+        cardBg: 'transparent', 
         itemColor: 'rgba(220, 220, 230, 0.65)',
         itemSelectedColor: '#00adee',
         itemHoverColor: '#00bfff',
@@ -202,8 +181,12 @@ function App() {
         horizontalMargin: '0',
         titleFontSize: '1em',
       },
-      Spin: { // Customizing spin color
+      Spin: { 
         colorPrimary: '#00adee',
+      },
+      Alert: { // Added Alert for consistency if used with glass-pane-alert
+        colorInfoBg: 'rgba(0, 173, 238, 0.15)', // Example for info alert glass style
+        colorInfoBorder: 'rgba(0, 173, 238, 0.3)',
       }
     },
   };
@@ -212,40 +195,26 @@ function App() {
     <ConfigProvider theme={ARIX_DARK_THEME}>
       <Router>
         <Layout style={{ minHeight: '100vh', background: ARIX_DARK_THEME.token.colorBgBase }}>
-          <Header
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 16px', // Reduced padding for mobile
-              background: ARIX_DARK_THEME.components.Layout.headerBg,
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              borderBottom: `1px solid ${ARIX_DARK_THEME.token.colorBorderSecondary}`,
-              position: 'sticky',
-              top: 0,
-              zIndex: 1001, // Ensure header is above sider/content
-            }}
-          >
+          <Header className="app-header">
             <Title level={isMobile ? 4 : 3} style={{ color: ARIX_DARK_THEME.token.colorPrimary, margin: 0, fontWeight: 'bold' }}>
               ARIX Terminal
             </Title>
             <TonConnectButton />
           </Header>
-          <Layout style={{ background: 'transparent', paddingTop: '64px' /* Account for fixed header */ }}>
+          <Layout style={{ background: 'transparent', paddingTop: '64px' }}>
             {!isMobile && <AppMenu mobile={false} />}
             <Layout style={{ 
-                paddingBottom: isMobile ? '50px' : '0', // Space for bottom nav on mobile
+                paddingBottom: isMobile ? '60px' : '0', 
                 background: 'transparent' 
-            }}>
+            }} className={isMobile ? "mobile-view" : ""}>
               <Content
                 style={{
-                  padding: isMobile ? '16px' : '24px', // Less padding on mobile
+                  padding: isMobile ? '16px' : '24px',
                   margin: 0,
-                  minHeight: 'calc(100vh - 64px - (isMobile ? 50px : 0px))', // Adjust for header and bottom nav
-                  background: 'transparent', // Content area itself is transparent
+                  minHeight: `calc(100vh - 64px ${isMobile ? '- 60px' : ''})`,
+                  background: 'transparent',
                   color: ARIX_DARK_THEME.token.colorTextBase,
-                  overflowY: 'auto', // Allow content to scroll
+                  overflowY: 'auto', 
                 }}
               >
                 <Routes>
@@ -253,13 +222,13 @@ function App() {
                   <Route path="/earn" element={<EarnPage />} />
                   <Route path="/game" element={<GamePage />} />
                   <Route path="/user" element={<UserPage />} />
-                  <Route path="/task" element={<TaskPagePlaceholder />} />
+                  <Route path="/task" element={<TaskPage />} /> 
                   <Route path="/push" element={<PushPagePlaceholder />} />
                 </Routes>
               </Content>
             </Layout>
           </Layout>
-          {isMobile && <AppMenu mobile={true} />} {/* Bottom navigation for mobile */}
+          {isMobile && <AppMenu mobile={true} />}
         </Layout>
       </Router>
     </ConfigProvider>
