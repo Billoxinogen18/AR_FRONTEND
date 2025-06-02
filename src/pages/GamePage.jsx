@@ -1,7 +1,7 @@
 // File: AR_Proj/AR_FRONTEND/src/pages/GamePage.jsx
 import React from 'react';
 import { Typography } from 'antd';
-import CoinflipGame from '../components/game/CoinFlipGame.jsx';
+import CoinFlipGame from '../components/game/CoinFlipGame'; // Fixed casing to match file name
 
 const { Title } = Typography;
 
@@ -11,7 +11,7 @@ const GamePage = () => {
       <Title level={2} style={{ color: 'white', textAlign: 'center', marginBottom: '30px', fontWeight: 'bold' }}>
         ARIX Games
       </Title>
-      <CoinflipGame />
+      <CoinFlipGame />
     </div>
   );
 };
