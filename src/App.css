@@ -1,3 +1,5 @@
+/* File: AR_FRONTEND/src/App.css */
+
 /* Base body style is in index.css */
 
 /* Custom Ant Design overrides for Neumorphic/Glassmorphic */
@@ -26,8 +28,8 @@
     -6px -6px 12px rgba(55, 58, 78, 0.8), /* Dark theme outer light */
     6px 6px 12px rgba(12, 12, 18, 0.8) !important; /* Dark theme outer dark */
   transition: all 0.25s ease-in-out !important;
-  color: #e0e0e0 !important; 
-  overflow: hidden; 
+  color: #e0e0e0 !important;
+  overflow: hidden;
 }
 
 .neumorphic-glass-card:hover {
@@ -41,11 +43,11 @@
   background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   padding: 16px 20px !important; /* Adjusted padding */
-  border-top-left-radius: 16px; 
+  border-top-left-radius: 16px;
   border-top-right-radius: 16px;
 }
 .neumorphic-glass-card .ant-card-head-title {
-  color: #00adee !important; 
+  color: #00adee !important;
   font-weight: 600 !important;
   font-size: 1.15em !important; /* Slightly larger */
 }
@@ -136,7 +138,7 @@
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px; /* Default padding */
-  position: sticky !important; top: 0; z-index: 1001;
+  position: sticky !important; top: 0; z-index: 1001; /* Changed to sticky for header */
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   /* Background and border from theme */
 }
@@ -144,46 +146,77 @@
   .app-header { padding: 0 16px; }
 }
 
+/* .app-content is within the main Layout (the one next to Sider or taking full width if Sider is hidden) */
+.app-content-wrapper {
+    padding-top: 64px; /* Height of the sticky header */
+    background: transparent;
+    flex: 1; /* Allow this Layout to grow and enable scrolling if content overflows */
+    overflow-y: auto; /* Enable scrolling on this part, not the entire body or outer Layout */
+}
+.app-content-wrapper.mobile-view {
+    padding-bottom: 60px; /* Height of the fixed bottom nav */
+}
+
 .app-content {
   padding: 24px; margin: 0;
-  min-height: calc(100vh - 64px); /* Header height */
-  /* Background from theme */
-  overflow-y: auto; 
+  min-height: calc(100vh - 64px); /* Fallback/Desktop min-height if not mobile with bottom nav */
+  background: transparent; /* Ensures it uses body or theme background */
 }
 
-.mobile-view .app-content {
+.mobile-view .app-content { /* This is now nested within app-content-wrapper */
   padding: 16px;
-  padding-bottom: 70px; /* Space for bottom nav */
-  min-height: calc(100vh - 64px - 60px); /* Header & bottom nav height */
+  min-height: auto; /* min-height will be handled by parent Layout */
+  /* padding-bottom: 70px; -> this padding-bottom is now on .app-content-wrapper.mobile-view */
+  /* min-height: calc(100vh - 64px - 60px);  -> this is complex and better handled by flex layout of app-content-wrapper */
 }
 
-.mobile-bottom-nav {
-  position: fixed !important; bottom: 0; left: 0; right: 0; z-index: 1000;
-  display: flex !important; justify-content: space-around !important;
-  background: rgba(20, 20, 30, 0.95) !important; /* Darker, more opaque for nav */
-  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+
+/* MOBILE BOTTOM NAV STYLING */
+.mobile-bottom-nav.ant-menu { /* More specificity to target the Menu directly */
+  position: fixed !important;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex !important;
+  justify-content: space-around !important;
+  
+  /* Frosted Glass Effect */
+  background: rgba(25, 25, 35, 0.6) !important; /* Match Sider background transparency */
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 -2px 15px rgba(0,0,0,0.25);
+  box-shadow: 0 -2px 15px rgba(0,0,0,0.3) !important; /* Slightly enhanced shadow */
+  height: 60px !important; /* Keep fixed height */
+  padding-bottom: 0 !important; /* Ensure no extra padding affects height */
+  padding-top: 0 !important;
 }
 
 .mobile-bottom-nav .ant-menu-item {
   flex-grow: 1; text-align: center;
-  padding: 4px 0 !important; /* Reduced padding for compact look */
-  height: 60px !important; /* Fixed height for bottom nav items */
+  padding: 0 !important; /* Reset padding, use flex for centering */
+  height: 100% !important; /* Occupy full height of nav bar */
   display: flex !important; flex-direction: column !important;
   justify-content: center !important; align-items: center !important;
-  line-height: 1.3 !important; /* Adjust line height for icon + text */
+  line-height: 1.2 !important; /* Adjusted for better icon+text spacing */
   color: rgba(220, 220, 230, 0.75) !important; /* Default item color from theme */
+  border-radius: 0 !important; /* Remove individual item radius if any */
 }
 .mobile-bottom-nav .ant-menu-item .anticon {
-  font-size: 22px !important; margin-bottom: 3px !important;
+  font-size: 20px !important; /* Slightly smaller for better fit */
+  margin-bottom: 2px !important;
+  margin-right: 0 !important; /* Remove if any right margin exists from default AntD */
+  line-height: 1; /* Ensure icon is tight */
 }
 .mobile-bottom-nav .mobile-menu-label {
-  font-size: 10px !important; display: block; /* Ensure label text is block */
-  /* color: inherit; */ /* Inherit from .ant-menu-item */
+  font-size: 10px !important; display: block;
+  line-height: 1; /* Ensure label is tight */
 }
+
+/* Selected/Active Item Styles */
 .mobile-bottom-nav .ant-menu-item-selected {
-  background-color: transparent !important; /* No distinct background for selected item itself */
+  background-color: rgba(0, 173, 238, 0.15) !important; /* Subtle background tint */
 }
 .mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
 .mobile-bottom-nav .ant-menu-item-selected .anticon {
@@ -199,12 +232,12 @@
 @media (min-width: 768px) { .coinflip-card .ant-card-body { padding: 24px !important; } }
 
 .coin-display-container {
-  width: 120px; height: 120px; border-radius: 50%; background: #2a2d3a; 
+  width: 120px; height: 120px; border-radius: 50%; background: #2a2d3a;
   margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.25); border: 2px solid #333749;
   overflow: hidden;
 }
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
   .coin-display-container { width: 160px; height: 160px; margin-bottom: 20px; }
 }
 .coin-image { width: 85%; height: 85%; object-fit: contain; }
@@ -220,7 +253,7 @@
 
 .coinflip-controls .input-label { color: #aaa; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9em; }
 .coinflip-radio-group { width: 100%; display: flex; }
-.coinflip-radio-button { 
+.coinflip-radio-button {
     flex: 1; text-align: center; height: 44px !important; line-height: 42px !important; font-size: 1em;
 }
 .flip-button { height: 48px !important; font-size: 1.05em !important; font-weight: 500; }
@@ -234,7 +267,7 @@
 .balances-col .balance-item { margin-bottom: 12px; }
 .balances-col .ant-statistic-title { font-size: 0.9em !important; color: #aaa !important; }
 .balances-col .ant-statistic-content { font-size: 1.2em !important; line-height: 1.2; font-weight: 500; }
-@media (min-width: 768px) { 
+@media (min-width: 768px) {
     .balances-col .ant-statistic-content { font-size: 1.4em !important; }
 }
 
