@@ -1,13 +1,12 @@
-// File: AR_FRONTEND/src/components/game/CoinflipGame.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Card, InputNumber, Button, Typography, Radio, Spin, message, Grid, Alert } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { placeCoinflipBet } from '../../services/api'; 
+import { placeCoinflipBet } from '../../services/api';
 import { ARIX_DECIMALS, getJettonWalletAddress, getJettonBalance, fromArixSmallestUnits } from '../../utils/tonUtils';
 
 const { Title, Text, Paragraph } = Typography;
-const { useBreakpoint } = Grid; // For responsive layout adjustments
+const { useBreakpoint } = Grid;
 
 const ARIX_JETTON_MASTER_ADDRESS_FOR_GAME = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 
@@ -15,8 +14,8 @@ const CoinflipGame = () => {
   const [betAmount, setBetAmount] = useState(10);
   const [choice, setChoice] = useState('heads');
   const [flipping, setFlipping] = useState(false);
-  const [gameResult, setGameResult] = useState(null); 
-  
+  const [gameResult, setGameResult] = useState(null);
+
   const userFriendlyAddress = useTonAddress();
   const rawAddress = useTonAddress(false);
   const [tonConnectUI] = useTonConnectUI();
@@ -27,13 +26,12 @@ const CoinflipGame = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  // Placeholder images - replace these in your /public folder or use SVGs
   const coinImages = {
-    heads: '/img/coin_heads.png', 
-    tails: '/img/coin_tails.png', 
-    spinning: '/img/coin_spinning.gif' 
+    heads: '/img/coin_heads.png',
+    tails: '/img/coin_tails.png',
+    spinning: '/img/coin_spinning.gif'
   };
-  const fallbackCoinImage = 'https://placehold.co/150x150/2a2d3a/e0e0e0?text=Coin&font=montserrat';
+  const fallbackCoinImage = 'https://placehold.co/150x150/252525/E0E0E5?text=Coin&font=inter';
 
   const fetchArixGameBalance = useCallback(async (showMsg = false) => {
       if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS_FOR_GAME) {
@@ -61,14 +59,14 @@ const CoinflipGame = () => {
 
   useEffect(() => {
     if (userFriendlyAddress) {
-        fetchArixGameBalance(false); // Initial fetch without message
+        fetchArixGameBalance(false);
     } else {
-        setArixGameBalance(0); 
+        setArixGameBalance(0);
     }
   }, [userFriendlyAddress, fetchArixGameBalance]);
 
 
-  useEffect(() => { 
+  useEffect(() => {
     Object.values(coinImages).forEach(src => {
       if (src.startsWith('/')) {
         const img = new Image();
@@ -94,10 +92,10 @@ const CoinflipGame = () => {
     message.loading({ content: 'Flipping the coin...', key: loadingMessageKey, duration: 0 });
 
     try {
-      const response = await placeCoinflipBet({ 
-        userWalletAddress: rawAddress, betAmountArix: betAmount, choice 
+      const response = await placeCoinflipBet({
+        userWalletAddress: rawAddress, betAmountArix: betAmount, choice
       });
-      
+
       setGameResult({
         outcome: response.data.outcome, serverCoinSide: response.data.server_coin_side,
         amountDelta: parseFloat(response.data.amount_delta_arix), yourChoice: choice,
@@ -109,14 +107,13 @@ const CoinflipGame = () => {
       } else {
         message.error({ content: `You lost ${Math.abs(parseFloat(response.data.amount_delta_arix))} ARIX.`, key: loadingMessageKey, duration: 3 });
       }
-      fetchArixGameBalance(false); // Refresh balance after game
+      fetchArixGameBalance(false);
     } catch (error) {
       console.error("Coinflip bet error:", error);
       message.error({ content: error?.response?.data?.message || "Failed to place bet. Please try again.", key: loadingMessageKey, duration: 3 });
       setGameResult({ error: true, message: error?.response?.data?.message || "An error occurred." });
-    } finally { 
-      // message.destroy(loadingMessageKey) is handled by setting duration on success/error
-      setFlipping(false); 
+    } finally {
+      setFlipping(false);
     }
   };
 
@@ -129,28 +126,28 @@ const CoinflipGame = () => {
   };
 
   return (
-    <Card className="neumorphic-glass-card coinflip-card" bordered={false}>
-      <Title level={isMobile ? 3 : 2} style={{ textAlign: 'center', color: '#00adee', marginBottom: isMobile ? 20 : 30 }}>
+    <Card className="dark-card coinflip-card" bordered={false}>
+      <Title level={isMobile ? 3 : 2} style={{ textAlign: 'center', color: '#00BFFF', marginBottom: isMobile ? 15 : 20 }}>
         ARIX Coinflip
       </Title>
-      
+
       {userFriendlyAddress ? (
-        <Paragraph style={{ textAlign: 'center', color: '#aaa', marginBottom: isMobile ? 15 : 20, fontSize: '0.9em' }}>
-            Your ARIX Balance: <Text strong style={{color: '#00adee'}}>{arixGameBalance.toFixed(ARIX_DECIMALS)} ARIX </Text>
-            <Button icon={<ReloadOutlined />} onClick={() => fetchArixGameBalance(true)} loading={balanceLoading} type="text" size="small" style={{marginLeft: 8}} />
+        <Paragraph style={{ textAlign: 'center', color: '#8A8A8A', marginBottom: isMobile ? 10 : 15, fontSize: '0.9em' }}>
+            Your ARIX Balance: <Text strong style={{color: '#00BFFF'}}>{arixGameBalance.toFixed(ARIX_DECIMALS)} ARIX </Text>
+            <Button icon={<ReloadOutlined />} onClick={() => fetchArixGameBalance(true)} loading={balanceLoading} type="text" size="small" style={{marginLeft: 8, color: '#8A8A8A'}} />
         </Paragraph>
       ) : (
-          <Alert 
-            message="Wallet Not Connected" type="warning" showIcon style={{ marginBottom: 20 }} className="glass-pane-alert"
-            description="Connect your TON wallet to play Coinflip with ARIX and record your game history."
+          <Alert
+            message="Wallet Not Connected" type="info" showIcon style={{ marginBottom: 15 }} className="dark-alert"
+            description="Connect your TON wallet to play Coinflip with ARIX."
             action={ <Button size="small" type="primary" onClick={() => tonConnectUI.openModal()}> Connect Wallet </Button> }
           />
       )}
 
-      <Row gutter={[isMobile ? 16 : 32, isMobile ? 20 : 32]} justify="center" align="middle">
-        <Col xs={24} md={10} style={{ textAlign: 'center', marginBottom: isMobile ? 20 : 0 }}>
+      <Row gutter={[isMobile ? 16 : 24, isMobile ? 16 : 24]} justify="center" align="middle">
+        <Col xs={24} md={10} style={{ textAlign: 'center', marginBottom: isMobile ? 15 : 0 }}>
           <div className="coin-display-container">
-            <img src={getCoinImageSrc()} alt={flipping ? "Coin Spinning" : (gameResult?.serverCoinSide ? `Coin: ${gameResult.serverCoinSide}`: "Coin")} 
+            <img src={getCoinImageSrc()} alt={flipping ? "Coin Spinning" : (gameResult?.serverCoinSide ? `Coin: ${gameResult.serverCoinSide}`: "Coin")}
                  className="coin-image" onError={(e) => { e.currentTarget.src = fallbackCoinImage; }} />
           </div>
           {gameResult && !flipping && !gameResult.error && (
@@ -165,19 +162,19 @@ const CoinflipGame = () => {
               {gameResult.gameId && <Text className="game-id-text">Game ID: {gameResult.gameId.substring(0,8)}...</Text>}
             </div>
           )}
-           {gameResult?.error && (<Alert message="Game Error" description={gameResult.message} type="error" showIcon style={{marginTop: 15}}/>)}
+           {gameResult?.error && (<Alert message="Game Error" description={gameResult.message} type="error" showIcon style={{marginTop: 10}} className="dark-alert"/>)}
         </Col>
 
         <Col xs={24} md={14} className="coinflip-controls">
-          <div style={{ marginBottom: isMobile ? 15 : 20 }}>
+          <div style={{ marginBottom: isMobile ? 12 : 16 }}>
             <Text className="input-label">Bet Amount (ARIX):</Text>
-            <InputNumber style={{ width: '100%' }} className="neumorphic-input-number" value={betAmount}
-              onChange={(value) => setBetAmount(value === null ? 0 : parseFloat(value))} min={1} max={10000} 
+            <InputNumber style={{ width: '100%' }} value={betAmount}
+              onChange={(value) => setBetAmount(value === null ? 0 : parseFloat(value))} min={1} max={10000}
               precision={ARIX_DECIMALS} disabled={flipping || !userFriendlyAddress} size="large"
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               parser={(value) => value ? value.toString().replace(/\$\s?|(,*)/g, '') : "0"} />
           </div>
-          <div style={{ marginBottom: isMobile ? 20 : 30, textAlign: 'center' }}>
+          <div style={{ marginBottom: isMobile ? 16 : 20, textAlign: 'center' }}>
             <Text className="input-label">Choose your side:</Text>
             <Radio.Group onChange={(e) => setChoice(e.target.value)} value={choice} buttonStyle="solid"
               disabled={flipping || !userFriendlyAddress} size="large" className="coinflip-radio-group">
