@@ -1,4 +1,4 @@
-// File: AR_Proj/AR_FRONTEND/src/services/api.js
+// File: AR_FRONTEND/src/services/api.js
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -21,7 +21,8 @@ export const recordUserStake = (data) => apiClient.post('/earn/stake', data);
 export const initiateArixUnstake = (data) => apiClient.post('/earn/initiate-arix-unstake', data);
 export const confirmArixUnstake = (data) => apiClient.post('/earn/confirm-arix-unstake', data);
 export const getUserStakesAndRewards = (walletAddress) => apiClient.get(`/earn/stakes/${walletAddress}`);
-export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usdt-withdrawal', data);
+// Corrected: Renamed export from requestUsdtWithdrawal to requestArixRewardWithdrawal
+export const requestArixRewardWithdrawal = (data) => apiClient.post('/earn/request-arix-withdrawal', data);
 
 // --- Game API Endpoints ---
 export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
