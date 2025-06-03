@@ -181,7 +181,7 @@ const UserProfileCard = ({ totalClaimableArix, onWithdrawArix, onRefreshBalances
               </div>
                <div className="balance-item" style={{marginTop: 10}}>
                   <AntdStatistic 
-                    title={<Text className="profile-text-label">Claimable ARIX Rewards</Text>} {/* Updated title */}
+                    title={<Text className="profile-text-label">Claimable ARIX Rewards</Text>} 
                     value={parseFloat(totalClaimableArix || 0)} // Using totalClaimableArix
                     precision={ARIX_DECIMALS} // Display ARIX precision
                     suffix="ARIX" // Changed suffix
