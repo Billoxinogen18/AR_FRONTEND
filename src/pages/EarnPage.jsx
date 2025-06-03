@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Empty } from 'antd';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
-import { CheckCircleOutlined, RedoOutlined, InfoCircleOutlined, DollarCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, RedoOutlined, DollarCircleOutlined } from '@ant-design/icons';
 import { Cell, Builder } from '@ton/core';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -68,6 +68,7 @@ const EarnPage = () => {
   const farmingOver = true;
 
   const fetchStakingConfigAndPrice = useCallback(async () => {
+    if (farmingOver) return;
     try {
       const response = await getStakingConfig();
       const config = response.data;
@@ -86,10 +87,10 @@ const EarnPage = () => {
       message.error("Failed to fetch staking configuration.", 5);
       console.error("[EarnPage] Fetch staking config error:", error);
     }
-  }, []);
+  }, [farmingOver]);
 
   const fetchArixBalance = useCallback(async () => {
-    if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) { setArixBalance(0); return; }
+    if (farmingOver || !rawAddress || !ARIX_JETTON_MASTER_ADDRESS) { setArixBalance(0); return; }
     try {
       const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
       if (userArixJettonWallet) {
@@ -97,10 +98,10 @@ const EarnPage = () => {
         setArixBalance(fromArixSmallestUnits(balanceSmallestUnits));
       } else { setArixBalance(0); }
     } catch (error) { console.error("[EarnPage] Failed to fetch ARIX balance:", error); setArixBalance(0); }
-  }, [rawAddress]);
+  }, [farmingOver, rawAddress]);
 
   const fetchUserStakesAndRewardsData = useCallback(async () => {
-    if (!rawAddress) { setActiveStakes([]); setTotalClaimableArix(0); return; }
+    if (farmingOver || !rawAddress) { setActiveStakes([]); setTotalClaimableArix(0); return; }
     try {
       const response = await getUserStakesAndRewards(rawAddress);
       setActiveStakes(response.data?.stakes || []);
@@ -110,10 +111,10 @@ const EarnPage = () => {
       console.error("[EarnPage] Fetch user stakes/rewards error:", error);
       setActiveStakes([]); setTotalClaimableArix(0);
     }
-  }, [rawAddress]);
+  }, [farmingOver, rawAddress]);
 
    const refreshAllData = useCallback(async (showSuccessMessage = true) => {
-      if (!userFriendlyAddress) return;
+      if (farmingOver || !userFriendlyAddress) return;
       setLoading(true);
       try {
         await Promise.all([ fetchStakingConfigAndPrice(), fetchArixBalance(), fetchUserStakesAndRewardsData() ]);
@@ -122,10 +123,14 @@ const EarnPage = () => {
         message.error("Failed to refresh all data.", 3);
         console.error("[EarnPage] Error refreshing all data:", error);
       } finally { setLoading(false); }
-   }, [userFriendlyAddress, fetchStakingConfigAndPrice, fetchArixBalance, fetchUserStakesAndRewardsData]);
+   }, [farmingOver, userFriendlyAddress, fetchStakingConfigAndPrice, fetchArixBalance, fetchUserStakesAndRewardsData]);
 
   useEffect(() => {
     setLoading(true);
+    if (farmingOver) {
+        setLoading(false);
+        return;
+    }
     fetchStakingConfigAndPrice().finally(() => {
       if (userFriendlyAddress) {
         Promise.all([fetchArixBalance(), fetchUserStakesAndRewardsData()]).finally(() => setLoading(false));
@@ -133,7 +138,7 @@ const EarnPage = () => {
         setLoading(false); setArixBalance(0); setActiveStakes([]); setTotalClaimableArix(0);
       }
     });
-  }, [fetchStakingConfigAndPrice, userFriendlyAddress, fetchArixBalance, fetchUserStakesAndRewardsData]);
+  }, [farmingOver, fetchStakingConfigAndPrice, userFriendlyAddress, fetchArixBalance, fetchUserStakesAndRewardsData]);
 
   useEffect(() => {
     if (inputUsdtAmount && currentArxPrice && currentArxPrice > 0) {
@@ -141,7 +146,7 @@ const EarnPage = () => {
     } else { setCalculatedArixAmount(0); }
   }, [inputUsdtAmount, currentArxPrice]);
 
-  const handlePlanSelect = (plan) => {
+ const handlePlanSelect = (plan) => {
     if (!currentArxPrice || currentArxPrice <= 0 || !stakingConfigData?.stakingPlans) {
       message.error("Price or staking plans not available. Please refresh.", 3); refreshAllData(false); return;
     }
@@ -254,13 +259,14 @@ const EarnPage = () => {
       message.destroy(loadingMessageKey);
 
       Modal.confirm({
-        title: <Text style={{color: '#00BFFF', fontWeight: 'bold'}}>Confirm ARIX Principal Unstake</Text>, className: "glass-pane",
+        title: <Text style={{color: '#00BFFF', fontWeight: 'bold'}}>Confirm ARIX Principal Unstake</Text>,
+        className: "dark-modal",
         content: (
            <div>
             <Paragraph>{prepResponse.data.message}</Paragraph>
             <Paragraph><Text strong style={{color: '#999'}}>ARIX Principal: </Text><Text style={{color: 'white'}}>{prepResponse.data.principalArix} ARIX</Text></Paragraph>
             {prepResponse.data.isEarly && <Paragraph><Text strong style={{color: '#999'}}>ARIX Early Penalty: </Text><Text style={{color: '#F44336'}}>{prepResponse.data.arixPenaltyPercentApplied}% of principal</Text></Paragraph>}
-            <Divider style={{borderColor: 'rgba(255,255,255,0.1)'}}/>
+            <Divider style={{borderColor: 'rgba(255,255,255,0.08)'}}/>
             <Paragraph style={{color: '#ccc', fontSize: '0.9em'}}>This action will call the ARIX Staking Smart Contract to withdraw your ARIX principal. ARIX rewards calculated based on USD value are separate and managed by the backend.</Paragraph>
           </div>
         ),
@@ -345,15 +351,54 @@ const EarnPage = () => {
 
   if (farmingOver) {
     return (
-        <div style={{ textAlign: 'center', padding: '30px 15px', minHeight: 'calc(100vh - 128px - 60px)'}} className="dark-card">
-             <img src="/your-arix-icon.png" alt="ARIX Terminal Character" className="earn-page-illustration" style={{filter: 'grayscale(30%) opacity(0.8)'}}/>
-            <Title level={2} style={{ color: '#00BFFF', marginTop: 20 }}>Farming is over.</Title>
-            <Paragraph style={{color: '#A0A0A0', fontSize: '1.1em', marginBottom: 30}}>
-                New phase <Text strong style={{color: '#00BFFF'}}>SOON!</Text>
-            </Paragraph>
-            <Paragraph style={{color: '#777', fontSize: '0.9em'}}>
-                Stay tuned for updates and new opportunities to earn with ARIX.
-            </Paragraph>
+        <div style={{
+            padding: '20px 15px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            minHeight: 'calc(100vh - 56px - 60px - 130px)',
+            textAlign: 'center'
+        }}>
+            <Card className="dark-card" style={{width: '100%', maxWidth: '500px', padding: '30px 15px', marginTop: '20px'}}>
+                 <img
+                    src="/your-arix-icon.png"
+                    alt="ARIX Terminal Character"
+                    style={{
+                        width: '60px',
+                        height: '60px',
+                        objectFit: 'contain',
+                        margin: '0 auto 15px auto',
+                        display: 'block',
+                        filter: 'opacity(0.7)'
+                    }}
+                    onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const altTextNode = e.currentTarget.nextSibling;
+                        if (altTextNode && altTextNode.nodeName === 'DIV') {
+                           altTextNode.style.display = 'block';
+                        }
+                    }}
+                />
+                <div style={{
+                    display: 'none',
+                    color: '#555',
+                    fontSize: '0.8em',
+                    textAlign: 'center',
+                    marginBottom: '15px'
+                }}>ARIX Terminal Character</div>
+
+
+                <Title level={2} style={{ color: '#00BFFF', marginBottom: '10px', fontSize: '2em' }}>
+                    Farming is over.
+                </Title>
+                <Paragraph style={{color: '#E0E0E5', fontSize: '1.2em', marginBottom: '25px'}}>
+                    New phase <Text strong style={{color: '#00BFFF'}}>SOON!</Text>
+                </Paragraph>
+                <Paragraph style={{color: '#8A8A8A', fontSize: '0.9em'}}>
+                    Stay tuned for updates and new opportunities to earn with ARIX.
+                </Paragraph>
+            </Card>
         </div>
     );
   }
@@ -415,7 +460,7 @@ const EarnPage = () => {
                         Min withdrawal approx. ${MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE.toFixed(2)} USD. Calculated by backend.
                     </Paragraph>
                     <Button type="primary" icon={<DollarCircleOutlined />} onClick={handleWithdrawArixRewards}
-                            disabled={totalClaimableArix < (MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice) || actionLoading || !userFriendlyAddress} loading={actionLoading} block>
+                            disabled={totalClaimableArix < (currentArxPrice > 0 ? (MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice) : Infinity) || actionLoading || !userFriendlyAddress} loading={actionLoading} block>
                         Withdraw Claimable ARIX
                     </Button>
                 </> : <Paragraph style={{textAlign: 'center', color: '#999'}}>Connect wallet to view/withdraw ARIX rewards.</Paragraph>}
@@ -481,7 +526,7 @@ const EarnPage = () => {
           title={<Text style={{color: '#00BFFF', fontWeight: 'bold'}}>{`Stake ARIX in "${selectedPlan?.title || ''}"`}</Text>}
           open={isModalVisible}
           onCancel={() => {setIsModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}}
-          className="glass-pane" destroyOnClose
+          className="dark-modal" destroyOnClose
           footer={[
             <Button key="back" onClick={() => {setIsModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}}>Cancel</Button>,
             <Button key="submit" type="primary" loading={stakeSubmitLoading} onClick={handleConfirmStake}

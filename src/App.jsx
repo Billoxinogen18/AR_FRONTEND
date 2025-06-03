@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, Link, useNavigate } from 'react-router-dom';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid, Button, Row, Col, Space, Affix } from 'antd';
 import {
@@ -12,10 +12,6 @@ import {
     RiseOutlined,
     FallOutlined,
     ThunderboltOutlined,
-    SettingOutlined,
-    CustomerServiceOutlined,
-    ReadOutlined,
-    PlaySquareOutlined,
     RedditOutlined,
 } from '@ant-design/icons';
 import './App.css';
@@ -24,13 +20,22 @@ import GamePage from './pages/GamePage';
 import UserPage from './pages/UserPage';
 import TaskPage from './pages/TaskPage';
 import PushPage from './pages/PushPage';
+import CoinflipGame from './components/game/CoinFlipGame'; // Ensure this is imported
+
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
 const AppHeader = () => {
-  const isMobile = !useBreakpoint().lg;
+  const handleCloseTMA = () => {
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.close();
+    } else {
+      console.log("Telegram WebApp context not found. Cannot close.");
+    }
+  };
+
   return (
     <Affix offsetTop={0}>
       <Header
@@ -40,7 +45,7 @@ const AppHeader = () => {
           borderBottom: '1px solid #2C2C2C',
         }}
       >
-        <Button type="text" icon={<CloseOutlined style={{ color: '#8A8A8A' }} />} onClick={() => console.log("Close TMA")} />
+        <Button type="text" icon={<CloseOutlined style={{ color: '#8A8A8A' }} />} onClick={handleCloseTMA} />
         <Title level={4} style={{ color: '#E0E0E5', margin: 0, display: 'flex', alignItems: 'center' }}>
           <RedditOutlined style={{ color: '#00BFFF', marginRight: 8 }} /> TERMINAL
         </Title>
@@ -68,7 +73,7 @@ const BalanceHeader = () => {
                 </Col>
             </Row>
             <div className="coinflip-banner">
-                <Text>X2 or maybe x256? <Link to="/game" style={{ fontWeight: 'bold' }}>Play Coinflip and try your luck! →</Link></Text>
+                <Text>X2 or maybe x256? <Link to="/game/coinflip" style={{ fontWeight: 'bold' }}>Play Coinflip and try your luck! →</Link></Text>
             </div>
         </div>
     );
@@ -77,12 +82,19 @@ const BalanceHeader = () => {
 
 const AppMenu = ({ mobile }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   let currentPath = location.pathname;
-  if (currentPath === '/' || currentPath === '') {
-    currentPath = '/earn';
-  }
 
-  const menuItems = [
+  const normalizePath = (path) => {
+    if (path === '/' || path === '') return '/earn';
+    if (path.startsWith('/game/') && path !== '/game/coinflip') return '/game';
+    return path;
+  };
+
+  currentPath = normalizePath(currentPath);
+
+
+  const menuItemsData = [
     { key: '/task', icon: <CheckSquareOutlined />, labelText: 'TASK' },
     { key: '/game', icon: <ExperimentOutlined />, labelText: 'GAME' },
     { key: '/push', icon: <ThunderboltOutlined />, labelText: 'PUSH', className: 'push-nav-item' },
@@ -90,11 +102,15 @@ const AppMenu = ({ mobile }) => {
     { key: '/user', icon: <UserOutlined />, labelText: 'USER' },
   ];
 
-  const processedMenuItems = menuItems.map(item => ({
+  const handleMenuClick = (e) => {
+    navigate(e.key);
+  };
+
+  const processedMenuItems = menuItemsData.map(item => ({
     key: item.key,
     icon: item.icon,
     className: item.className || '',
-    label: mobile ? <span className="mobile-menu-label">{item.labelText}</span> : <NavLink to={item.key} key={`${item.key}-nav`}>{item.labelText}</NavLink>,
+    label: <span className="mobile-menu-label">{item.labelText}</span>,
   }));
 
 
@@ -106,6 +122,7 @@ const AppMenu = ({ mobile }) => {
         selectedKeys={[currentPath]}
         items={processedMenuItems}
         className="mobile-bottom-nav"
+        onClick={handleMenuClick}
       />
     );
   }
@@ -154,10 +171,12 @@ function App() {
       Card: {
          colorBgContainer: '#1A1A1A', colorBorderSecondary: '#2C2C2C',
          colorTextHeading: '#00BFFF',
+         className: "dark-card", // Apply .dark-card class by default
       },
       Modal: {
          colorBgElevated: '#1F1F1F', colorBorderSecondary: '#2C2C2C',
          colorTextHeading: '#00BFFF', boxShadow: "0 6px 24px 0 rgba(0, 0, 0, 0.2)",
+         className: "dark-modal", // Apply .dark-modal class by default
       },
       InputNumber: {
          colorBgContainer: '#252525', colorBorder: '#333',
@@ -185,12 +204,14 @@ function App() {
         itemSelectedColor: '#00BFFF', itemHoverColor: '#00AADD',
         inkBarColor: '#00BFFF', horizontalMargin: '0', titleFontSize: '1em',
         colorBorderSecondary: '#2C2C2C',
+        className: "dark-tabs", // Apply .dark-tabs class by default
       },
       Spin: { colorPrimary: '#00BFFF',},
       Alert: {
         colorInfoBg: 'rgba(0, 191, 255, 0.1)',
         colorInfoBorder: 'rgba(0, 191, 255, 0.3)',
         colorInfoIcon: '#00BFFF',
+        className: 'dark-alert', // Apply .dark-alert class by default
       },
       List: {
         itemPadding: '12px 0',
@@ -217,6 +238,7 @@ function App() {
                   <Route path="/" element={<EarnPage />} />
                   <Route path="/earn" element={<EarnPage />} />
                   <Route path="/game" element={<GamePage />} />
+                  <Route path="/game/coinflip" element={<CoinflipGame />} />
                   <Route path="/user" element={<UserPage />} />
                   <Route path="/task" element={<TaskPage />} />
                   <Route path="/push" element={<PushPage />} />

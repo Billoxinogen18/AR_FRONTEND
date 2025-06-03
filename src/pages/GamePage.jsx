@@ -1,8 +1,8 @@
 import React from 'react';
-import { Typography, Grid } from 'antd';
+import { Typography, Grid, Button } from 'antd';
 import { Link } from 'react-router-dom';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
 
 const GamePage = () => {
@@ -17,27 +17,41 @@ const GamePage = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 'calc(100vh - 56px - 60px - 130px)',
+        minHeight: 'calc(100vh - 56px - 60px - 130px)', // Adjust if BalanceHeader height changes
     }}>
-      <img
-        src="/img/terminal_character_coins.png"
-        alt="ARIX Terminal Character with Coins"
-        style={{
-          maxWidth: isMobile ? '280px' : '350px',
-          width: '80%',
-          marginBottom: '20px',
-          filter: 'drop-shadow(0 0 20px rgba(0, 191, 255, 0.2))'
-        }}
-        onError={(e) => { e.currentTarget.src = 'https://placehold.co/350x300/0D0D0D/1A1A1A?text=Game+Art&font=inter'; }}
-      />
-       <Title level={3} style={{ color: '#00BFFF', marginBottom: '10px' }}>
+      <div style={{
+          backgroundColor: '#FFFFFF', // White background for the square
+          padding: '20px',
+          borderRadius: '12px', // Rounded corners for the white square
+          display: 'inline-block', // To contain the circle
+          marginBottom: '25px',
+          boxShadow: '0 4px 15px rgba(0, 191, 255, 0.1)',
+      }}>
+        <img
+            src="https://cryptologos.cc/logos/solana-sol-logo.png?v=032" // Solana logo URL
+            alt="Game Platform Logo"
+            style={{
+                width: isMobile ? '100px' : '120px',
+                height: isMobile ? '100px' : '120px',
+                objectFit: 'contain',
+            }}
+        />
+      </div>
+       <Title level={2} style={{ color: '#00BFFF', marginBottom: '10px', fontSize: isMobile ? '1.5em': '1.8em' }}>
             Games Coming Soon!
         </Title>
-        <Text style={{ color: '#8A8A8A', fontSize: isMobile ? '0.9em': '1em', maxWidth: '400px', lineHeight: '1.6' }}>
+        <Paragraph style={{ color: '#8A8A8A', fontSize: isMobile ? '0.9em': '1em', maxWidth: '400px', lineHeight: '1.6', marginBottom: '25px' }}>
             Get ready for an exciting lineup of games. Coinflip is just the beginning! More challenges and fun are on the way.
-        </Text>
-         <div className="coinflip-banner" style={{backgroundColor: '#181818', border: '1px solid #2C2C2C', padding: '10px 15px', marginTop: '25px', width: '100%', maxWidth: '400px'}}>
-            <Text style={{color: '#A6FFBE'}}>Want to try your luck now? <Link to="/game/coinflip" style={{ fontWeight: 'bold', color: '#A6FFBE' }}>Play Coinflip! →</Link></Text>
+        </Paragraph>
+         <div className="coinflip-banner" style={{
+             backgroundColor: 'transparent',
+             border: '1px solid #2C2C2C',
+             padding: '10px 15px',
+             width: '100%',
+             maxWidth: '400px',
+             borderRadius: '8px'
+            }}>
+            <Text style={{color: '#E0E0E5', fontSize: '0.9em'}}>Want to try your luck now? <Link to="/game/coinflip" style={{ fontWeight: 'bold', color: '#00BFFF' }}>Play Coinflip! →</Link></Text>
         </div>
     </div>
   );
