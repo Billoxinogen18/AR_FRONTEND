@@ -39,8 +39,9 @@
   padding-top: 56px; /* Match header height */
   background: transparent; /* Show main app background */
   flex: 1; 
-  overflow-y: auto;
+  overflow-y: auto; /* This is the main scrolling area */
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 @media (min-width: 768px) {
   .app-content-wrapper {
@@ -55,25 +56,20 @@
 .app-content {
   padding: 16px;
   margin: 0 auto;
-  min-height: calc(100vh - 56px); /* Fallback for desktop */
+  /* min-height removed as app-content-wrapper handles full height scrolling */
   background: transparent;
-  max-width: 900px; /* Max width for content on larger screens */
+  max-width: 900px; 
   width: 100%;
 }
 
 @media (min-width: 768px) {
   .app-content {
     padding: 24px;
-    min-height: calc(100vh - 64px); /* Fallback for desktop */
   }
 }
 
-.mobile-view .app-content {
-  min-height: calc(100vh - 56px - 56px); /* Full viewport minus header and bottom nav */
-}
 
-
-/* Mobile Bottom Navigation - Matches screenshot style */
+/* Mobile Bottom Navigation - STABILIZED */
 .mobile-bottom-nav.ant-menu {
   position: fixed !important;
   bottom: 0;
@@ -81,42 +77,46 @@
   right: 0;
   z-index: 1000;
   display: flex !important;
-  justify-content: space-around !important;
-  align-items: stretch !important; /* Make items stretch to fill height */
+  justify-content: space-around !important; /* Distribute space evenly */
+  align-items: center !important; /* Vertically center content within items */
   background: #1c1c1e !important; 
   border-top: 1px solid #38383a !important; 
   box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
   height: 56px !important;
   padding: 0 !important;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .mobile-bottom-nav .ant-menu-item {
-  flex: 1 1 0px; /* Allow items to grow and shrink, basis 0 for equal distribution */
-  min-width: 0; /* Prevent items from overflowing if text is long (though labels are short) */
+  flex: 1 1 auto; /* Each item takes equal width */
+  /* width: 20%; Use flex instead of fixed width percentages for better adaptability */
   text-align: center;
-  padding: 0 !important; 
+  padding: 4px 0 !important; /* Small vertical padding, no horizontal (flex handles distribution) */
   margin: 0 !important;
   height: 100% !important;
   display: flex !important; 
   flex-direction: column !important;
   justify-content: center !important; 
   align-items: center !important;
-  line-height: 1 !important; 
+  line-height: 1.1 !important; /* Adjusted for better vertical spacing */
   border-radius: 0 !important;
   color: #8e8e93 !important; 
-  transition: color 0.2s ease-in-out; /* Smooth color transition */
+  transition: color 0.15s ease-in-out; /* Quicker transition */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+  cursor: pointer; /* Ensure it looks clickable */
 }
 .mobile-bottom-nav .ant-menu-item .anticon {
   font-size: 20px !important; 
-  margin-bottom: 4px !important; /* Increased space between icon and label */
-  line-height: 1; /* Ensure icon is tight */
+  margin-bottom: 3px !important; /* Consistent small space */
+  line-height: 1; 
 }
 .mobile-bottom-nav .mobile-menu-label {
   font-size: 10px !important; 
   display: block;
   font-weight: 500;
-  line-height: 1; /* Ensure label is tight */
-  white-space: nowrap; /* Prevent label wrapping */
+  line-height: 1; 
+  white-space: nowrap; 
+  margin-top: 1px; /* Slight adjustment for centering with icon */
 }
 
 .mobile-bottom-nav .ant-menu-item-selected {
@@ -126,11 +126,13 @@
 .mobile-bottom-nav .ant-menu-item-selected .anticon {
   color: #7e73ff !important; 
 }
-/* Remove AntD default :after selected indicator if it appears */
 .mobile-bottom-nav .ant-menu-item::after, 
 .mobile-bottom-nav .ant-menu-submenu-title::after { 
   display: none !important;
   border-bottom: none !important;
+}
+.mobile-bottom-nav .ant-menu-item:active { /* Subtle active state */
+    background-color: rgba(126, 115, 255, 0.08) !important;
 }
 
 
@@ -151,7 +153,7 @@
 .desktop-sider .ant-menu-item {
   color: #a0a0a5 !important;
   border-radius: 6px;
-  margin: 4px 8px !important; /* Add some margin around items */
+  margin: 4px 8px !important; 
   width: calc(100% - 16px) !important;
 }
 .desktop-sider .ant-menu-item .anticon {
@@ -165,7 +167,7 @@
 .desktop-sider .ant-menu-item-selected .anticon {
  color: #7e73ff !important;
 }
-.desktop-sider .ant-menu-item-selected::after { /* Remove vertical bar indicator for sider */
+.desktop-sider .ant-menu-item-selected::after { 
     border-right: none !important;
 }
 
@@ -215,9 +217,9 @@
   background: #2c2c2e !important;
   border-color: #38383a !important;
   color: #e0e0e5 !important;
-  height: auto !important; /* Ensure flexible height */
-  padding: 6px 15px !important; /* Adjust padding as needed */
-  line-height: inherit !important; /* Use natural line height */
+  height: auto !important; 
+  padding: 6px 15px !important; 
+  line-height: inherit !important; 
 }
 .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   background: #7e73ff !important;
@@ -264,12 +266,12 @@
 .ant-statistic-title {
     color: #8e8e93 !important;
     font-size: 0.85rem !important;
-    margin-bottom: 2px !important; /* Tighter spacing */
+    margin-bottom: 2px !important; 
 }
 .ant-statistic-content {
     color: #ffffff !important;
     font-size: 1.3rem !important;
-    line-height: 1.2 !important; /* Adjust line height */
+    line-height: 1.2 !important; 
 }
 .ant-statistic-content-suffix {
     color: #8e8e93 !important;
@@ -300,9 +302,6 @@
 .ant-alert-description {
   color: #a0a0a5 !important;
 }
-/* .ton-connect-button custom styling if default isn't enough, 
-   otherwise its internal styles or theme should work */
-
 
 /* Custom card style based on screenshot games/earn page */
 .game-info-card {
@@ -312,11 +311,11 @@
   margin-bottom: 16px;
   border: 1px solid #38383a;
   text-align: left; 
-  display: flex; /* For flex grow */
-  flex-direction: column; /* For flex grow */
-  height: 100%; /* For consistent height in grid */
+  display: flex; 
+  flex-direction: column; 
+  height: 100%; 
 }
-.game-info-card .card-content-grow { /* Wrapper for title and description */
+.game-info-card .card-content-grow { 
     flex-grow: 1;
 }
 
@@ -338,7 +337,7 @@
 }
 
 .game-info-card .ant-btn { 
-    margin-top: 16px; /* Pushes button to bottom if card content grows */
+    margin-top: 16px; 
 }
 
 
@@ -353,7 +352,7 @@
     padding: 8px 10px !important; 
     height: auto !important; 
     line-height: 1.2 !important;
-    font-size: 0.85rem; /* Slightly smaller for compact segments */
+    font-size: 0.85rem; 
 }
 
 
@@ -401,16 +400,16 @@
 .task-list-item .ant-card, .history-list-item .ant-card {
   /* uses .dark-theme-card by className prop */
 }
-.task-description { /* For TaskPage description Paragraph */
+.task-description { 
     color: #d1d1d6;
-    min-height: 40px; /* Ensures a minimum space */
+    min-height: 40px; 
     font-size: 0.9rem;
     line-height: 1.4;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Show 2 lines, then ellipsis */
+    -webkit-line-clamp: 2; 
     -webkit-box-orient: vertical;
-    margin-bottom: 12px; /* Add some space below description */
+    margin-bottom: 12px; 
 }
 
 
@@ -450,10 +449,10 @@
 .user-settings-section {
   margin-bottom: 24px;
 }
-.user-settings-section .section-title { /* Shared classname now defined in UserPage JSX */
+.user-settings-section .section-title { 
   color: #aaa;
   text-align: left;
-  font-size: 0.85rem; /* Made a bit smaller */
+  font-size: 0.85rem; 
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;

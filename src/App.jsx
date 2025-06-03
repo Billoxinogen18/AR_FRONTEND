@@ -37,21 +37,28 @@ const AppMenu = ({ mobile }) => {
     currentPath = '/earn'; 
   }
 
-  const commonItemStyle = mobile ? {} : { padding: '0 16px', fontSize: '0.9rem' };
+  const commonItemStyle = mobile ? {
+    // Specific styles for mobile items directly in JSX if needed, or rely purely on CSS
+    // flex: '1', // This can sometimes cause jitters if not perfectly managed
+    // width: '20%', // Explicit width can stabilize layout
+  } : { 
+    padding: '0 16px', 
+    fontSize: '0.9rem' 
+  };
 
   const menuItems = menuConfig.map(item => ({
     key: item.key,
     icon: React.cloneElement(item.icon, { style: { fontSize: mobile ? '20px' : '16px' } }),
     label: mobile ? <span className="mobile-menu-label">{item.labelText}</span> : item.labelText,
-    style: commonItemStyle,
-    onClick: mobile ? () => navigate(item.key) : undefined, // For mobile, handle click directly
+    style: commonItemStyle, // Apply common style (can be empty for mobile if CSS handles all)
+    onClick: mobile ? () => navigate(item.key) : undefined,
   }));
 
-  const desktopMenuItems = menuConfig.map(item => ({ // Separate for desktop NavLink
+  const desktopMenuItems = menuConfig.map(item => ({
     key: item.key,
     icon: React.cloneElement(item.icon, { style: { fontSize: '16px' } }),
     label: <NavLink to={item.key}>{item.labelText}</NavLink>,
-    style: commonItemStyle,
+    style: { padding: '0 16px', fontSize: '0.9rem' }, // Ensure consistent styling for desktop links
   }));
 
   if (mobile) {
@@ -60,8 +67,11 @@ const AppMenu = ({ mobile }) => {
         theme="dark"
         mode="horizontal"
         selectedKeys={[currentPath]}
-        items={menuItems} // Uses items with onClick for navigation
+        items={menuItems}
         className="mobile-bottom-nav"
+        // subMenuCloseDelay={0} // May not be relevant for horizontal, non-submenu menu
+        // subMenuOpenDelay={0}  // "
+        // disabledOverflow // Potentially useful if AntD is trying to be smart about overflow
       />
     );
   }
@@ -79,7 +89,7 @@ const AppMenu = ({ mobile }) => {
         theme="dark"
         mode="inline"
         selectedKeys={[currentPath]}
-        items={desktopMenuItems} // Uses items with NavLink for desktop
+        items={desktopMenuItems}
         style={{ height: '100%', borderRight: 0, background: 'transparent', padding: '10px 0' }}
       />
     </Sider>
@@ -124,10 +134,8 @@ function App() {
         darkItemSelectedColor: '#7e73ff',    
         darkItemHoverBg: '#252527',
         darkItemHoverColor: '#9a91ff',
-        itemHeight: isMobile ? 56 : 40, // Adjust for mobile menu item full height
-        // itemMarginInline: 0, // Important for mobile flex distribution
-        // Horizontal Menu (Mobile specific overrides are in App.css)
-        horizontalItemSelectedColor: '#7e73ff', // Ensure selected color works
+        itemHeight: isMobile ? 56 : 40, 
+        horizontalItemSelectedColor: '#7e73ff', 
       },
       Button: {
         colorPrimary: '#7e73ff',
