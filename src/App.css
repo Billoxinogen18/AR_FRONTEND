@@ -69,7 +69,7 @@
 }
 
 
-/* Mobile Bottom Navigation - STABILIZED */
+/* Mobile Bottom Navigation - COMPLETELY STABILIZED */
 .mobile-bottom-nav.ant-menu {
   position: fixed !important;
   bottom: 0;
@@ -77,64 +77,132 @@
   right: 0;
   z-index: 1000;
   display: flex !important;
-  justify-content: space-around !important; /* Distribute space evenly */
-  align-items: center !important; /* Vertically center content within items */
+  justify-content: center !important; /* Center the content */
+  align-items: stretch !important; /* Stretch items to full height */
   background: #1c1c1e !important; 
   border-top: 1px solid #38383a !important; 
   box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
   height: 56px !important;
   padding: 0 !important;
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
 }
 
 .mobile-bottom-nav .ant-menu-item {
-  flex: 1 1 auto; /* Each item takes equal width */
-  /* width: 20%; Use flex instead of fixed width percentages for better adaptability */
-  text-align: center;
-  padding: 4px 0 !important; /* Small vertical padding, no horizontal (flex handles distribution) */
+  flex: 1 1 0 !important; /* Equal flex basis of 0 prevents jitter */
+  min-width: 0 !important; /* Allow items to shrink below content size */
+  width: 20% !important; /* Explicit width as fallback */
+  text-align: center !important;
+  padding: 0 !important; /* Remove all padding to prevent layout shifts */
   margin: 0 !important;
-  height: 100% !important;
+  height: 56px !important; /* Fixed height matching container */
+  max-height: 56px !important;
+  min-height: 56px !important;
   display: flex !important; 
   flex-direction: column !important;
   justify-content: center !important; 
   align-items: center !important;
-  line-height: 1.1 !important; /* Adjusted for better vertical spacing */
+  line-height: 1 !important; /* Consistent line height */
   border-radius: 0 !important;
   color: #8e8e93 !important; 
-  transition: color 0.15s ease-in-out; /* Quicker transition */
-  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-  cursor: pointer; /* Ensure it looks clickable */
+  transition: color 0.15s ease-in-out !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
 }
+
 .mobile-bottom-nav .ant-menu-item .anticon {
   font-size: 20px !important; 
-  margin-bottom: 3px !important; /* Consistent small space */
-  line-height: 1; 
+  margin: 0 !important; /* Remove all margin */
+  padding: 0 !important;
+  line-height: 1 !important; 
+  display: block !important;
+  width: 20px !important; /* Fixed width to prevent shifting */
+  height: 20px !important; /* Fixed height to match font-size */
+  flex-shrink: 0 !important; /* Prevent icon from shrinking */
 }
+
 .mobile-bottom-nav .mobile-menu-label {
   font-size: 10px !important; 
-  display: block;
-  font-weight: 500;
-  line-height: 1; 
-  white-space: nowrap; 
-  margin-top: 1px; /* Slight adjustment for centering with icon */
+  display: block !important;
+  font-weight: 500 !important;
+  line-height: 1 !important; 
+  white-space: nowrap !important; 
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: 2px !important; /* Small consistent spacing from icon */
+  text-align: center !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex-shrink: 0 !important;
 }
 
 .mobile-bottom-nav .ant-menu-item-selected {
   background-color: transparent !important; 
 }
+
 .mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
 .mobile-bottom-nav .ant-menu-item-selected .anticon {
   color: #7e73ff !important; 
 }
+
 .mobile-bottom-nav .ant-menu-item::after, 
 .mobile-bottom-nav .ant-menu-submenu-title::after { 
   display: none !important;
   border-bottom: none !important;
 }
-.mobile-bottom-nav .ant-menu-item:active { /* Subtle active state */
+
+.mobile-bottom-nav .ant-menu-item:active {
     background-color: rgba(126, 115, 255, 0.08) !important;
 }
 
+/* Prevent any AntD menu overrides that might cause instability */
+.mobile-bottom-nav .ant-menu-item-only-child {
+  flex: 1 1 0 !important;
+  width: 20% !important;
+}
+
+.mobile-bottom-nav .ant-menu-item-group {
+  display: none !important;
+}
+
+.mobile-bottom-nav .ant-menu-submenu {
+  display: none !important;
+}
+
+/* Additional stability for smaller screens */
+@media (max-width: 320px) {
+  .mobile-bottom-nav .mobile-menu-label {
+    font-size: 9px !important;
+  }
+  .mobile-bottom-nav .ant-menu-item .anticon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+/* Additional stability for medium screens */
+@media (min-width: 375px) and (max-width: 767px) {
+  .mobile-bottom-nav .mobile-menu-label {
+    font-size: 10px !important;
+  }
+  .mobile-bottom-nav .ant-menu-item .anticon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
 
 /* Desktop Sider */
 .desktop-sider {
