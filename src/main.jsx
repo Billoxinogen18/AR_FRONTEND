@@ -8,7 +8,7 @@ import './index.css'; // Global styles, including neumorphic/glassmorphic base
 const manifestUrl = new URL('tonconnect-manifest.json', window.location.origin).toString();
 
 // Telegram Mini App return URL - replace with your actual bot username
-const telegramBotUsername = 'your_telegram_bot_username'; // <<<--- IMPORTANT: REPLACE THIS
+const telegramBotUsername = 'arix_terminal_tma_bot'; // <<<--- IMPORTANT: REPLACE THIS
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
