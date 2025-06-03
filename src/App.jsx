@@ -1,6 +1,6 @@
 // File: AR_Proj/AR_FRONTEND/src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid } from 'antd';
 import {
@@ -11,6 +11,7 @@ import {
     CheckSquareOutlined 
 } from '@ant-design/icons';
 import './App.css';
+import ResponsiveMobileNav from './components/ResponsiveMobileNav';
 import EarnPage from './pages/EarnPage';
 import GamePage from './pages/GamePage';
 import UserPage from './pages/UserPage';
@@ -29,54 +30,20 @@ const menuConfig = [
   { key: '/user', icon: <UserOutlined />, labelText: "USER" },
 ];
 
-const AppMenu = ({ mobile }) => {
+const DesktopMenu = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   let currentPath = location.pathname;
   if (currentPath === '/' || currentPath === '') { 
     currentPath = '/earn'; 
   }
 
-  const commonItemStyle = mobile ? {
-    // Specific styles for mobile items directly in JSX if needed, or rely purely on CSS
-    // flex: '1', // This can sometimes cause jitters if not perfectly managed
-    // width: '20%', // Explicit width can stabilize layout
-  } : { 
-    padding: '0 16px', 
-    fontSize: '0.9rem' 
-  };
-
-  const menuItems = menuConfig.map(item => ({
-    key: item.key,
-    icon: React.cloneElement(item.icon, { style: { fontSize: mobile ? '20px' : '16px' } }),
-    label: mobile ? <span className="mobile-menu-label">{item.labelText}</span> : item.labelText,
-    style: commonItemStyle, // Apply common style (can be empty for mobile if CSS handles all)
-    onClick: mobile ? () => navigate(item.key) : undefined,
-  }));
-
   const desktopMenuItems = menuConfig.map(item => ({
     key: item.key,
     icon: React.cloneElement(item.icon, { style: { fontSize: '16px' } }),
     label: <NavLink to={item.key}>{item.labelText}</NavLink>,
-    style: { padding: '0 16px', fontSize: '0.9rem' }, // Ensure consistent styling for desktop links
+    style: { padding: '0 16px', fontSize: '0.9rem' },
   }));
 
-  if (mobile) {
-    return (
-      <Menu
-        theme="dark"
-        mode="horizontal"
-        selectedKeys={[currentPath]}
-        items={menuItems}
-        className="mobile-bottom-nav"
-        // subMenuCloseDelay={0} // May not be relevant for horizontal, non-submenu menu
-        // subMenuOpenDelay={0}  // "
-        // disabledOverflow // Potentially useful if AntD is trying to be smart about overflow
-      />
-    );
-  }
-
-  // Desktop Sider
   return (
     <Sider
       width={180} 
@@ -134,7 +101,7 @@ function App() {
         darkItemSelectedColor: '#7e73ff',    
         darkItemHoverBg: '#252527',
         darkItemHoverColor: '#9a91ff',
-        itemHeight: isMobile ? 56 : 40, 
+        itemHeight: 40, 
         horizontalItemSelectedColor: '#7e73ff', 
       },
       Button: {
@@ -203,8 +170,14 @@ function App() {
         colorInfoBorder: 'rgba(126, 115, 255, 0.3)',
         borderRadius: 12,
       },
-       List: {
-          colorSplit: '#2a2a2a', 
+      List: {
+        colorSplit: '#2a2a2a', 
+      },
+      Dropdown: {
+        colorBgElevated: '#1c1c1e',
+        colorBorder: '#38383a',
+        borderRadius: 12,
+        boxShadowSecondary: '0 6px 20px rgba(0, 0, 0, 0.3)',
       }
     },
   };
@@ -221,7 +194,7 @@ function App() {
           </Header>
 
           <Layout className="app-main-layout-container">
-            {!isMobile && <AppMenu mobile={false} />}
+            {!isMobile && <DesktopMenu />}
 
             <Layout className={`app-content-wrapper ${isMobile ? "mobile-view" : ""}`}>
               <Content className="app-content"> 
@@ -237,7 +210,7 @@ function App() {
             </Layout>
           </Layout>
 
-          {isMobile && <AppMenu mobile={true} />}
+          {isMobile && <ResponsiveMobileNav menuConfig={menuConfig} />}
         </Layout>
       </Router>
     </ConfigProvider>
