@@ -1,37 +1,11 @@
 // File: AR_FRONTEND/src/pages/PushPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { List, Card, Typography, Spin, message, Empty, Tag, Button, Grid, Image as AntImage, Row, Col } from 'antd';
-import { BellOutlined, TagOutlined, CalendarOutlined, LinkOutlined, RedoOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { BellOutlined, TagOutlined, CalendarOutlined, LinkOutlined, RedoOutlined } from '@ant-design/icons';
 import { getAnnouncements } from '../services/api'; 
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
-
-// Based on one of the screenshots for "Push", if announcements are empty, or for a different state:
-const PushPlaceholderContent = () => (
-  <div className="page-image-container" style={{padding: '20px 0'}}>
-      <img src="/img/push-main-placeholder.png" alt="Push center graphic" style={{maxWidth: '280px', maxHeight: '280px', objectFit: 'contain'}}/>
-      <Title level={3} style={{color: 'white', marginTop: 16, marginBottom: 8}}>Mystery Zone</Title>
-      <Paragraph style={{color: '#a0a0a5', fontSize: '1rem', maxWidth: '400px', margin: '0 auto'}}>
-          What's that mysterious button? Looks like TopUp & Cashout coming soon to manage your ARIX right here. Stay tuned for updates!
-      </Paragraph>
-      {/* 
-      Example TopUp/Cashout section as in one screenshot:
-      <Card className="dark-theme-card" style={{maxWidth: '350px', margin: '24px auto 0 auto'}}>
-         <AntdStatistic title={<Text style={{color: '#8e8e93', textAlign:'center', display:'block'}}>TOTAL BALANCE</Text>} value={"0.00"} suffix="TON" valueStyle={{textAlign:'center', fontSize: '1.8em'}}/>
-         <Row gutter={16} style={{marginTop: 16}}>
-           <Col span={12}>
-             <Button block icon={<ArrowDownOutlined />}>Top up</Button>
-           </Col>
-           <Col span={12}>
-             <Button block icon={<ArrowUpOutlined />}>Cashout</Button>
-           </Col>
-         </Row>
-      </Card> 
-      */}
-  </div>
-);
-
 
 const PushPage = () => {
     const [announcements, setAnnouncements] = useState([]);
@@ -59,7 +33,7 @@ const PushPage = () => {
     const renderAnnouncementItem = (item) => (
         <List.Item className="announcement-list-item">
             <Card 
-                className="dark-theme-card" // Use the new base card style
+                className="dark-theme-card" 
                 title={
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                         {item.is_pinned && <Tag color="#7e73ff" style={{fontWeight:'bold'}}>PINNED</Tag>}
@@ -103,12 +77,12 @@ const PushPage = () => {
     );
 
     return (
-        <div style={{ padding: isMobile ? '16px' : '24px'}}>
+        <div style={{ padding: isMobile ? '0px' : '0px' }}> {/* Reduced padding */}
             <Title level={2} className="page-title">
                 <BellOutlined style={{marginRight: 10}} /> Updates & News
             </Title>
 
-            <div style={{textAlign:'right', marginBottom: 16}}>
+            <div style={{textAlign:'right', marginBottom: 16, paddingRight: isMobile? 16:0 }}>
                 <Button icon={<RedoOutlined/>} onClick={fetchAnnouncementsData} loading={loading}>Refresh</Button>
             </div>
 
@@ -116,17 +90,22 @@ const PushPage = () => {
                  <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" tip="Loading Announcements..." /></div>
             ) : announcements.length > 0 ? (
                 <List
-                    grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 2 }} // Display 2 columns on larger screens
+                    grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 2 }} 
                     dataSource={announcements}
                     renderItem={renderAnnouncementItem}
                     className="announcements-list"
+                    style={{padding: isMobile? '0 16px' : '0'}}
                 />
             ) : (
-                 // If no announcements, show the placeholder from screenshot for "Push"
-                 <PushPlaceholderContent />
-                //  <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px'}}>
-                //      <Empty description={<Text style={{color:'#a0a0a5'}}>No announcements available at the moment. Stay tuned!</Text>} />
-                //  </Card>
+                <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px', margin: isMobile ? '0 16px' : '0'}}>
+                     <Empty 
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                           <Title level={4} style={{color: '#a0a0a5'}}>So much empty, engage!</Title>
+                        }
+                    />
+                    <Paragraph style={{color: '#8e8e93'}}>No new announcements. Check back soon for updates or explore other sections!</Paragraph>
+                </Card>
             )}
         </div>
     );

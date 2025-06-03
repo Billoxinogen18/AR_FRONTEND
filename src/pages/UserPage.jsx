@@ -1,8 +1,9 @@
 // File: AR_FRONTEND/src/pages/UserPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Tabs, message, Spin, Button, Grid, Card, Row, Col, Radio, Divider, Tooltip, Alert } from 'antd';
+import { Typography, Tabs, message, Spin, Button, Grid, Card, Row, Col, Radio, Divider, Tooltip, Alert, Empty } from 'antd'; // Added Empty
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { FacebookOutlined, InstagramOutlined, SendOutlined, ReadOutlined, InfoCircleOutlined, SettingOutlined, EditOutlined, QqOutlined, BulbOutlined, CopyOutlined, QuestionCircleOutlined } from '@ant-design/icons'; // Import more icons
+// Icons for future use if re-enabled
+// import { FacebookOutlined, InstagramOutlined, SendOutlined, ReadOutlined, InfoCircleOutlined, SettingOutlined, EditOutlined, QqOutlined, BulbOutlined, CopyOutlined, QuestionCircleOutlined } from '@ant-design/icons'; 
 
 import UserProfileCard from '../components/user/UserProfileCard';
 import TransactionList, { renderStakeHistoryItem, renderCoinflipHistoryItem } from '../components/user/TransactionList';
@@ -12,7 +13,7 @@ import { ARIX_DECIMALS } from '../utils/tonUtils';
 
 
 const { Title, Text, Paragraph } = Typography;
-const { TabPane } = Tabs;
+const { TabPane } = Tabs; // Kept for AntD Tabs structure
 const { useBreakpoint } = Grid;
 
 const MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE = 3;
@@ -26,18 +27,18 @@ const UserPage = () => {
   const [profileAndStakeData, setProfileAndStakeData] = useState({ stakes: [], totalClaimableArix: '0.000000000' }); 
   const [coinflipHistory, setCoinflipHistory] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [isWithdrawalLoading, setIsWithdrawalLoading] = useState(false);
+  // const [isWithdrawalLoading, setIsWithdrawalLoading] = useState(false); // Managed within UserProfileCard now via onWithdrawArix prop
   const [activeTab, setActiveTab] = useState('stakes');
   const [currentArxPrice, setCurrentArxPrice] = useState(null);
 
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   
-  // State for UI stubs, default to 'en' and 'Terminal' as per screenshot
-  const [language, setLanguage] = useState('en');
-  const [colorTheme, setColorTheme] = useState('terminal');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [musicEnabled, setMusicEnabled] = useState(false);
+  // States for UI stubs - commented out as features are removed for now
+  // const [language, setLanguage] = useState('en');
+  // const [colorTheme, setColorTheme] = useState('terminal');
+  // const [soundEnabled, setSoundEnabled] = useState(true);
+  // const [musicEnabled, setMusicEnabled] = useState(false);
 
   const fetchCurrentArxPrice = useCallback(async () => {
     try {
@@ -45,7 +46,7 @@ const UserPage = () => {
       setCurrentArxPrice(price);
     } catch (error) {
       console.error("Failed to fetch ARIX price:", error);
-      setCurrentArxPrice(null); // Handle error state
+      setCurrentArxPrice(null); 
     }
   }, []);
 
@@ -90,7 +91,7 @@ const UserPage = () => {
     }
   }, [userFriendlyAddress, activeTab, fetchDataForTab, fetchCurrentArxPrice]); 
   
-  const handleRefreshAllData = () => {
+  const handleRefreshAllData = () => { // Simplified: Profile card's refresh will call this via prop
       if (userFriendlyAddress) {
           fetchDataForTab(activeTab, true); 
           fetchCurrentArxPrice();
@@ -99,19 +100,19 @@ const UserPage = () => {
       }
   };
 
-  const handleWithdrawArix = async () => {
+  const handleWithdrawArix = async () => { // Logic now passed to UserProfileCard and called from there if button enabled
     if (!currentArxPrice || currentArxPrice <= 0) {
         message.warn("Cannot process withdrawal: ARIX price not available. Try refreshing.");
         return;
     }
-    const minArixWithdrawalAmount = MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice;
+    const minArixForWithdrawal = (MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice);
 
-    if (parseFloat(profileAndStakeData.totalClaimableArix) < minArixWithdrawalAmount) {
-        message.warn(`Minimum ARIX withdrawal is approx. ${minArixWithdrawalAmount.toFixed(ARIX_DECIMALS)} ARIX. Your balance: ${parseFloat(profileAndStakeData.totalClaimableArix).toFixed(ARIX_DECIMALS)} ARIX.`);
+    if (parseFloat(profileAndStakeData.totalClaimableArix) < minArixForWithdrawal) {
+        message.warn(`Minimum ARIX withdrawal is approx. ${minArixForWithdrawal.toFixed(ARIX_DECIMALS)} ARIX. Your balance: ${parseFloat(profileAndStakeData.totalClaimableArix).toFixed(ARIX_DECIMALS)} ARIX.`);
         return;
     }
-    setIsWithdrawalLoading(true);
-    const key = 'arixWithdrawal';
+    // setIsWithdrawalLoading(true); // UserProfileCard can manage its own loading state for the button
+    const key = 'arixWithdrawalUserPage';
     message.loading({ content: 'Processing ARIX withdrawal request...', key, duration: 0 });
     try {
         const response = await requestArixRewardWithdrawal({ 
@@ -119,27 +120,27 @@ const UserPage = () => {
             amountArix: parseFloat(profileAndStakeData.totalClaimableArix) 
         });
         message.success({ content: response.data.message || "ARIX Withdrawal request submitted successfully!", key, duration: 4 });
-        fetchDataForTab('stakes', false); 
+        fetchDataForTab('stakes', false); // Refresh quietly after withdrawal
     } catch (error) {
         message.error({ content: error?.response?.data?.message || "ARIX Withdrawal request failed.", key, duration: 4 });
-        console.error("ARIX Withdrawal Error:", error);
+        console.error("ARIX Withdrawal Error from UserPage:", error);
     } finally {
-        setIsWithdrawalLoading(false);
+        // setIsWithdrawalLoading(false);
     }
   };
 
   const tabItems = [
     {
       key: 'stakes',
-      label: <span style={{fontSize: isMobile ? '0.9rem' : '1rem'}}>ARIX Staking</span>, 
+      label: <span style={{fontSize: isMobile ? '0.9rem' : '1rem'}}>ARIX Staking History</span>, 
       children: (
         <TransactionList 
           items={profileAndStakeData.stakes} 
           isLoading={loadingData && activeTab === 'stakes'} 
           renderItemDetails={renderStakeHistoryItem} 
           itemType="staking activity" 
-          listTitle="Your ARIX Stakes & Earnings History" 
-          listStyle={{marginTop:0}} // Remove default top margin for lists in tabs
+          listTitle={null} // Title provided by tab, or remove if redundant
+          listStyle={{marginTop:0, borderTop:'none', boxShadow:'none', background:'transparent'}} 
         />
       ),
     },
@@ -152,84 +153,21 @@ const UserPage = () => {
           isLoading={loadingData && activeTab === 'games'} 
           renderItemDetails={renderCoinflipHistoryItem} 
           itemType="Coinflip game" 
-          listTitle="Your Coinflip Game Log"
-          listStyle={{marginTop:0}}
+          listTitle={null}
+          listStyle={{marginTop:0, borderTop:'none', boxShadow:'none', background:'transparent'}}
         />
       ),
     },
   ];
-
-  const ReferralSection = () => (
-    <div className="user-settings-section">
-      <Title level={5} className="section-title">REFERRAL LINK</Title>
-       {/* Placeholder for referral boxes based on screenshot */}
-       <Row gutter={8} style={{ marginBottom: 10 }}>
-            {Array(8).fill(0).map((_, idx) => (
-                 <Col span={3} key={idx}><div style={{background:'#2c2c2e', height: '30px', borderRadius:'6px', border: '1px solid #38383a', display:'flex', alignItems:'center', justifyContent:'center', color:'#6a6a6e'}}>X</div></Col>
-            ))}
-       </Row>
-       <Button type="default" block disabled icon={<EditOutlined />}>
-          Activate an internal wallet to invite friends (Coming Soon)
-      </Button>
-    </div>
-  );
-
-  const SettingsSection = () => (
-    <div className="user-settings-section">
-      <Title level={5} className="section-title">LANGUAGE</Title>
-      <Radio.Group value={language} onChange={(e) => setLanguage(e.target.value)} buttonStyle="solid" style={{width: '100%'}} className="dark-segmented-control">
-        <Radio.Button value="en">English</Radio.Button>
-        <Radio.Button value="ru">Русский</Radio.Button>
-        <Radio.Button value="uk">Українська</Radio.Button>
-      </Radio.Group>
-
-      <Title level={5} className="section-title" style={{marginTop: 20}}>COLOR THEME</Title>
-      <Radio.Group value={colorTheme} onChange={(e) => setColorTheme(e.target.value)} buttonStyle="solid" style={{width: '100%'}} className="dark-segmented-control">
-        <Radio.Button value="terminal">Terminal</Radio.Button>
-        <Radio.Button value="telegram" disabled>Telegram (Soon)</Radio.Button>
-      </Radio.Group>
-
-      <Title level={5} className="section-title" style={{marginTop: 20}}>SOUND</Title>
-      <Radio.Group value={soundEnabled} onChange={(e) => setSoundEnabled(e.target.value)} buttonStyle="solid" style={{width: '100%'}} className="dark-segmented-control">
-        <Radio.Button value={true}>On</Radio.Button>
-        <Radio.Button value={false}>Off</Radio.Button>
-      </Radio.Group>
-
-      <Title level={5} className="section-title" style={{marginTop: 20}}>MUSIC</Title>
-      <Radio.Group value={musicEnabled} onChange={(e) => setMusicEnabled(e.target.value)} buttonStyle="solid" style={{width: '100%'}} className="dark-segmented-control">
-        <Radio.Button value={true}>On</Radio.Button>
-        <Radio.Button value={false}>Off</Radio.Button>
-      </Radio.Group>
-
-      <Row gutter={[8,8]} style={{marginTop: 24}} className="support-guide-buttons">
-            <Col xs={24} sm={8}>
-                <Button block type="default" icon={<QuestionCircleOutlined />}>Support</Button>
-            </Col>
-            <Col xs={24} sm={8}>
-                 <Button block type="default" icon={<ReadOutlined />}>Guide</Button>
-            </Col>
-            <Col xs={24} sm={8}>
-                 <Button block type="default" icon={<InfoCircleOutlined />}>Onboarding</Button>
-            </Col>
-      </Row>
-      <div className="social-links-container" style={{marginTop: 20}}>
-            <Tooltip title="Telegram (Coming Soon)">
-                <Button type="text" shape="circle" icon={<SendOutlined />} size="large" disabled />
-            </Tooltip>
-            <Tooltip title="Discord (Coming Soon)">
-                <Button type="text" shape="circle" icon={<QqOutlined />} size="large" disabled />
-            </Tooltip>
-             <Tooltip title="Instagram (Coming Soon)">
-                <Button type="text" shape="circle" icon={<InstagramOutlined />} size="large" disabled />
-            </Tooltip>
-        </div>
-    </div>
-  );
   
   const renderContent = () => {
     if (loadingData && !profileAndStakeData.stakes.length && !coinflipHistory.length && userFriendlyAddress) {
         return <div style={{textAlign: 'center', padding: '50px 0'}}><Spin size="large" tip="Loading Your Hub Data..." /></div>;
     }
+    
+    const noHistoryForStakes = activeTab === 'stakes' && !profileAndStakeData.stakes.length && !loadingData;
+    const noHistoryForGames = activeTab === 'games' && !coinflipHistory.length && !loadingData;
+
     return (
         <>
             <UserProfileCard 
@@ -237,37 +175,43 @@ const UserPage = () => {
                 onWithdrawArix={handleWithdrawArix}
                 onRefreshBalances={handleRefreshAllData} 
                 isDataLoading={loadingData} 
-                currentArxPrice={currentArxPrice} // Pass current ARIX price
+                currentArxPrice={currentArxPrice}
             />
-            {/* Removed the global refresh button here, user profile has one. Can be re-added if desired. */}
+            
+            <Divider style={{borderColor: '#2a2a2a', margin: '24px 0 16px 0'}}><Text style={{color:'#6a6a6e', fontSize:'0.8rem'}}>ACTIVITY LOGS</Text></Divider>
 
-            {/* Placeholder Sections based on screenshots - logic is UI stub only */}
-            <ReferralSection />
-            <Divider style={{borderColor: '#2a2a2a', margin: '24px 0'}} />
-            <SettingsSection />
-             <Divider style={{borderColor: '#2a2a2a', margin: '30px 0 20px 0'}} />
-
-
-            {/* History Tabs */}
             <Tabs 
                 defaultActiveKey="stakes" 
                 activeKey={activeTab}
                 items={tabItems} 
                 onChange={(key) => setActiveTab(key)} 
                 centered 
-                className="dark-theme-tabs" // Custom class for potential specific tab styling
+                className="dark-theme-tabs"
                 size={isMobile ? 'small' : 'middle'}
             />
+             {(noHistoryForStakes || noHistoryForGames) && (
+                <Card className="dark-theme-card" style={{marginTop: 0, borderTopLeftRadius:0, borderTopRightRadius:0, borderTop:'none', textAlign: 'center'}}>
+                    <Empty 
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                        <Title level={4} style={{color: '#a0a0a5'}}>So much empty, engage!</Title>
+                        }
+                    />
+                    <Paragraph style={{color: '#8e8e93'}}>
+                        Your {activeTab === 'stakes' ? 'staking' : 'gaming'} history will appear here.
+                    </Paragraph>
+                </Card>
+            )}
         </>
       );
   };
 
 
   return (
-      <div style={{ padding: isMobile ? '16px' : '24px'}}>
+      <div style={{ padding: isMobile ? '0px' : '0px' }}> {/* Reduced main padding */}
         <Title level={2} className="page-title">User Hub</Title>
         {!userFriendlyAddress ? (
-             <Card className="dark-theme-card" style={{textAlign: 'center', padding: '30px' }}>
+             <Card className="dark-theme-card" style={{textAlign: 'center', padding: '30px', margin: isMobile ? '0 16px' : '0' }}>
                 <Text style={{ color: '#a0a0a5', display:'block', marginBottom: 20, fontSize: '1rem' }}>Please connect your wallet to view your ARIX Hub and history.</Text>
                 <Button type="primary" size="large" onClick={() => tonConnectUI.openModal()}>Connect Wallet</Button>
              </Card>
