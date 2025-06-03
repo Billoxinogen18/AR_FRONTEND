@@ -1,9 +1,10 @@
 // File: AR_FRONTEND/src/components/user/TransactionList.jsx
+// File: AR_FRONTEND/src/components/user/TransactionList.jsx
 import React from 'react';
 import { List, Card, Typography, Empty, Spin, Tag, Row, Col, Grid, Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { ARIX_DECIMALS } from '../../utils/tonUtils.js'; 
-const USDT_DECIMALS = 6; // Standard for most USDT on TON
+const USD_DECIMALS = 2; // Standard for USD values
 
 const { Text, Paragraph, Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -11,18 +12,18 @@ const { useBreakpoint } = Grid;
 const getStakeStatusColor = (status) => {
   const s = status?.toLowerCase() || 'unknown';
   if (s === 'active') return 'green';
-  if (s.includes('pending_confirmation')) return 'gold'; // Covers ARIX stake and unstake pending backend/SC
+  if (s.includes('pending_confirmation')) return 'gold'; 
   if (s.includes('pending_arix_unstake_confirmation')) return 'orange';
-  if (s.includes('completed')) return 'blue'; // e.g. completed_arix_unstaked
+  if (s.includes('completed')) return 'blue'; 
   if (s.includes('early_arix_unstaked') || s.includes('early_unstaked')) return 'volcano';
-  if (s.includes('failed')) return 'red'; // e.g., stake_failed, unstake_failed
+  if (s.includes('failed')) return 'red'; 
   return 'default';
 };
 
 export const renderStakeHistoryItem = (stake, isMobile) => {
   // stake object should contain:
   // id, planTitle, arixAmountStaked, referenceUsdtValueAtStakeTime,
-  // usdtApr (for display), accruedUsdtRewardTotal, arixEarlyUnstakePenaltyPercent,
+  // usdValueRewardApr (new), accruedArixRewardTotal (new), arixEarlyUnstakePenaltyPercent,
   // remainingDays (for ARIX lock), status (of ARIX lock),
   // stakeTimestamp, unlockTimestamp, onchainStakeTxHash, onchainUnstakeTxHash, planDurationDays
 
@@ -50,16 +51,16 @@ export const renderStakeHistoryItem = (stake, isMobile) => {
       <Row gutter={isMobile ? [8, 8] : [16, 8]}>
         <Col xs={24} sm={12}>
             <Paragraph className="history-text-item">
-                <InfoCircleOutlined style={{marginRight: 4, color: '#777'}}/> ARIX Principal Staked:<br/>
-                <Text strong style={{color: 'white', fontSize: '1.1em'}}>{parseFloat(stake.arixAmountStaked).toFixed(ARIX_DECIMALS)} ARIX</Text>
-                <br/><Text style={{color: '#999', fontSize: '0.8em'}}>(Value at stake: ${parseFloat(stake.referenceUsdtValueAtStakeTime || 0).toFixed(2)} USDT)</Text>
+                <InfoCircleOutlined style={{marginRight: 4, color: '#777'}}/> Initial USD Staked:<br/> {/* Updated title */}
+                <Text strong style={{color: 'white', fontSize: '1.1em'}}>${parseFloat(stake.referenceUsdtValueAtStakeTime || 0).toFixed(USD_DECIMALS)} USD</Text> {/* Display as USD */}
+                <br/><Text style={{color: '#999', fontSize: '0.8em'}}>({parseFloat(stake.arixAmountStaked).toFixed(ARIX_DECIMALS)} ARIX principal)</Text> {/* Clarify ARIX principal */}
             </Paragraph>
         </Col>
         <Col xs={24} sm={12}>
             <Paragraph className="history-text-item">
-                <DollarCircleOutlined style={{marginRight: 4, color: '#777'}}/> USDT Reward Terms:<br/>
-                <Text strong style={{color: '#52c41a', fontSize: '1.1em'}}>{parseFloat(stake.usdtApr || 0).toFixed(2)}% APR</Text>
-                 <br/><Text style={{color: '#999', fontSize: '0.8em'}}>Accrued: {parseFloat(stake.accruedUsdtRewardTotal || 0).toFixed(USDT_DECIMALS)} USDT</Text>
+                <DollarCircleOutlined style={{marginRight: 4, color: '#777'}}/> USD Value Reward APR:<br/> {/* Updated title */}
+                <Text strong style={{color: '#52c41a', fontSize: '1.1em'}}>{parseFloat(stake.usdValueRewardApr || 0).toFixed(2)}%</Text> {/* Display usdValueRewardApr */}
+                 <br/><Text style={{color: '#999', fontSize: '0.8em'}}>Accrued: {parseFloat(stake.accruedArixRewardTotal || 0).toFixed(ARIX_DECIMALS)} ARIX</Text> {/* Display accrued in ARIX */}
             </Paragraph>
         </Col>
       </Row>
@@ -160,7 +161,7 @@ const TransactionList = ({ items, isLoading, renderItemDetails, listTitle, itemT
           </List.Item>
         )}
         pagination={{ 
-            pageSize: isMobile ? 3 : 5, // Fewer items per page on mobile
+            pageSize: isMobile ? 3 : 5, 
             align: 'center', 
             hideOnSinglePage: true, 
             showSizeChanger: false, 
@@ -179,4 +180,4 @@ TransactionList.defaultProps = {
   listStyle: {}
 };
 
-export default TransactionList; // Default export
+export default TransactionList;

@@ -47,3 +47,4 @@ lerna-debug.log*
 # Optional: Windows thumbnail cache files
 Thumbs.db
 ehthumbs.db
+.DS_Store

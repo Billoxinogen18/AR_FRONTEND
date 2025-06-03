@@ -1,4 +1,5 @@
 // File: AR_FRONTEND/src/components/earn/StakingPlans.jsx
+// File: AR_FRONTEND/src/components/earn/StakingPlans.jsx
 import React from 'react';
 import { Card, Row, Col, Button, Statistic, Tooltip, Typography } from 'antd';
 import { InfoCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
@@ -19,13 +20,14 @@ const StakingPlans = ({ plans, onSelectPlan, currentArxPrice }) => {
         {plans.map((plan) => {
           // Ensure plan properties are accessed correctly from backend mapping
           // Backend in earnController maps:
-          // fixed_usdt_apr_percent -> usdtApr
+          // apr_percent_of_initial_usd_value -> usdRewardApr
+          // min_stake_usd -> minStakeUsd
           // arix_early_unstake_penalty_percent -> arixEarlyUnstakePenaltyPercent
           // duration_days -> duration
-          // min_stake_arix -> minStakeArix
-          const minStakeArixNum = parseFloat(plan.minStakeArix || 0);
-          const minStakeUsdtApprox = currentArxPrice && minStakeArixNum > 0 ? (minStakeArixNum * currentArxPrice).toFixed(2) : null;
-          const displayUsdtApr = parseFloat(plan.usdtApr || 0).toFixed(2);
+          
+          const minStakeUsdNum = parseFloat(plan.minStakeUsd || 0); // Changed from minStakeArixNum
+          const minStakeArixApprox = currentArxPrice && minStakeUsdNum > 0 ? (minStakeUsdNum / currentArxPrice).toFixed(ARIX_DECIMALS) : null; // Changed calculation
+          const displayUsdApr = parseFloat(plan.usdRewardApr || 0).toFixed(2); // Changed from displayUsdtApr
           const displayArixPenalty = parseFloat(plan.arixEarlyUnstakePenaltyPercent || 0).toFixed(2);
 
 
@@ -55,19 +57,19 @@ const StakingPlans = ({ plans, onSelectPlan, currentArxPrice }) => {
                   valueStyle={{ color: '#00adee', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>USDT Reward APR</Text>}
-                  value={`${displayUsdtApr}%`} 
-                  suffix={<Text style={{color: '#52c41a', fontSize: '0.8em', marginLeft: 4}}> USDT</Text>}
+                  title={<Text style={{color: '#aaa'}}>USD Reward APR</Text>} {/* Updated title */}
+                  value={`${displayUsdApr}%`} // Displaying USD APR
+                  suffix={<Text style={{color: '#52c41a', fontSize: '0.8em', marginLeft: 4}}> USD (Paid in ARIX)</Text>} // Updated suffix
                   valueStyle={{ color: '#52c41a', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>Min. ARIX Stake</Text>}
-                  value={`${minStakeArixNum.toFixed(ARIX_DECIMALS)} ARIX`}
+                  title={<Text style={{color: '#aaa'}}>Min. USD Stake</Text>} {/* Updated title */}
+                  value={`$${minStakeUsdNum.toFixed(2)} USD`} // Displaying USD amount
                   valueStyle={{ color: '#e0e0e0', fontWeight: 'normal', fontSize: '1.1em' }}
-                  suffix={minStakeUsdtApprox ? <Text style={{color: '#888', fontSize: '0.8em', marginLeft: 4}}>(~${minStakeUsdtApprox} USDT)</Text> : ""}
+                  suffix={minStakeArixApprox ? <Text style={{color: '#888', fontSize: '0.8em', marginLeft: 4}}>(~${minStakeArixApprox} ARIX)</Text> : ""} // Updated suffix for ARIX equivalent
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>ARIX Early Unstake Penalty <Tooltip title={`Penalty on ARIX principal if unstaked before ${plan.duration} days. USDT rewards are separate.`}><InfoCircleOutlined style={{marginLeft: '4px', color: '#aaa'}}/></Tooltip></Text>}
+                  title={<Text style={{color: '#aaa'}}>ARIX Early Unstake Penalty <Tooltip title={`Penalty on ARIX principal if unstaked before ${plan.duration} days. ARIX rewards are separate.`}><InfoCircleOutlined style={{marginLeft: '4px', color: '#aaa'}}/></Tooltip></Text>} {/* Updated tooltip */}
                   value={`${displayArixPenalty}%`}
                   valueStyle={{ color: '#ff7875', fontWeight: '500', fontSize: '1.1em' }}
                 />

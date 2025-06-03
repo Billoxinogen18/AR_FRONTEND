@@ -1,23 +1,27 @@
 // File: AR_FRONTEND/src/components/user/UserProfileCard.jsx
+// File: AR_FRONTEND/src/components/user/UserProfileCard.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Typography, Button, Spin, message, Tooltip, Row, Col, Grid, Statistic as AntdStatistic } from 'antd';
 import { CopyOutlined, RedoOutlined, GlobalOutlined, DollarCircleOutlined } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getJettonWalletAddress, getJettonBalance, fromArixSmallestUnits, ARIX_DECIMALS } from '../../utils/tonUtils';
+import { getArxUsdtPriceFromBackend } from '../../services/priceServiceFrontend'; // Import to get current ARIX price
 
 const { Text, Paragraph, Title } = Typography;
 const { useBreakpoint } = Grid;
 
 const ARIX_JETTON_MASTER_ADDRESS = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 const TON_NETWORK = import.meta.env.VITE_TON_NETWORK || "mainnet";
-const MIN_USDT_WITHDRAWAL = 3; // Example, align with backend
+const MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE = 3; // Minimum withdrawal equivalent to $3 USD
 
-const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances, isDataLoading }) => {
+// Prop totalClaimableUsdt should be renamed to totalClaimableArix
+const UserProfileCard = ({ totalClaimableArix, onWithdrawArix, onRefreshBalances, isDataLoading }) => { // Renamed props
   const userFriendlyAddress = useTonAddress();
   const rawAddress = useTonAddress(false);
   const [arixBalance, setArixBalance] = useState(0);
   const [loadingArix, setLoadingArix] = useState(false);
   const [loadingWithdraw, setLoadingWithdraw] = useState(false);
+  const [currentArxPrice, setCurrentArxPrice] = useState(null); // Fetch current ARIX price
 
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -39,39 +43,56 @@ const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances
     } catch (err) {
       console.error("Failed to fetch ARIX balance:", err);
       setArixBalance(0);
-      // message.error("Could not fetch ARIX balance."); // UserPage can show general refresh message
     } finally {
       setLoadingArix(false);
     }
   }, [rawAddress]);
 
+  const fetchCurrentArxPrice = useCallback(async () => {
+    try {
+      const price = await getArxUsdtPriceFromBackend();
+      setCurrentArxPrice(price);
+    } catch (error) {
+      console.error("Failed to fetch ARIX price for withdrawal check:", error);
+      setCurrentArxPrice(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (rawAddress) {
       fetchArixBalanceOnly();
+      fetchCurrentArxPrice(); // Fetch price on mount/wallet connect
     } else {
       setArixBalance(0);
+      setCurrentArxPrice(null);
     }
-  }, [rawAddress, fetchArixBalanceOnly]);
+  }, [rawAddress, fetchArixBalanceOnly, fetchCurrentArxPrice]);
 
   const handleRefresh = () => {
-    fetchArixBalanceOnly(); // Refreshes ARIX balance specific to this card
-    if (onRefreshBalances) { // Calls parent (UserPage) to refresh its data (stakes, USDT total)
+    fetchArixBalanceOnly(); 
+    fetchCurrentArxPrice(); // Refresh price too
+    if (onRefreshBalances) { 
       onRefreshBalances();
     }
     message.success("Balance refresh initiated!");
   };
   
   const handleWithdrawClick = async () => {
-    if (parseFloat(totalClaimableUsdt || 0) < MIN_USDT_WITHDRAWAL) {
-        message.warn(`Minimum USDT withdrawal is $${MIN_USDT_WITHDRAWAL}.`);
+    if (!currentArxPrice || currentArxPrice <= 0) {
+        message.warn("Cannot process withdrawal: ARIX price not available.");
+        return;
+    }
+    const minArixWithdrawalAmount = MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice;
+
+    if (parseFloat(totalClaimableArix || 0) < minArixWithdrawalAmount) { // Check against ARIX balance
+        message.warn(`Minimum ARIX withdrawal is approx. ${minArixWithdrawalAmount.toFixed(ARIX_DECIMALS)} ARIX (equivalent to $${MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE.toFixed(2)} USD).`);
         return;
     }
     setLoadingWithdraw(true);
-    if (onWithdrawUsdt) {
+    if (onWithdrawArix) { // Call the renamed prop function
         try {
-            await onWithdrawUsdt(); // This is the function passed from UserPage
+            await onWithdrawArix(parseFloat(totalClaimableArix)); // Pass the actual ARIX amount
         } catch (e) {
-            // Error messages should be handled by onWithdrawUsdt or UserPage
             console.error("Withdrawal error in UserProfileCard caught:", e);
         }
     }
@@ -91,10 +112,10 @@ const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances
             console.error('Failed to copy address using navigator.clipboard:', err);
             message.error('Failed to copy address.');
         });
-    } else { // Fallback for older browsers or insecure contexts
+    } else { 
       const textArea = document.createElement("textarea");
       textArea.value = textToCopy;
-      textArea.style.position = "fixed"; // Prevent scrolling to bottom of page
+      textArea.style.position = "fixed"; 
       textArea.style.left = "-9999px";
       document.body.appendChild(textArea);
       textArea.focus();
@@ -111,7 +132,6 @@ const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances
   };
 
   if (!userFriendlyAddress) {
-    // This state is primarily handled by UserPage, but as a standalone component guard:
     return (
       <Card className="neumorphic-glass-card profile-card" style={{ marginBottom: 24, textAlign: 'center' }}>
         <Text style={{ color: '#aaa' }}>Please connect your wallet to view profile details.</Text>
@@ -161,10 +181,10 @@ const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances
               </div>
                <div className="balance-item" style={{marginTop: 10}}>
                   <AntdStatistic 
-                    title={<Text className="profile-text-label">Claimable USDT Rewards</Text>} 
-                    value={parseFloat(totalClaimableUsdt || 0)} 
-                    precision={2} 
-                    suffix="USDT" 
+                    title={<Text className="profile-text-label">Claimable ARIX Rewards</Text>} {/* Updated title */}
+                    value={parseFloat(totalClaimableArix || 0)} // Using totalClaimableArix
+                    precision={ARIX_DECIMALS} // Display ARIX precision
+                    suffix="ARIX" // Changed suffix
                     valueStyle={{color: '#52c41a', fontSize: isMobile ? '1.3em' : '1.5em', lineHeight: '1.2'}}
                   />
               </div>
@@ -176,9 +196,13 @@ const UserProfileCard = ({ totalClaimableUsdt, onWithdrawUsdt, onRefreshBalances
                        <Button 
                           type="primary" icon={<DollarCircleOutlined />} 
                           onClick={handleWithdrawClick} 
-                          disabled={parseFloat(totalClaimableUsdt || 0) < MIN_USDT_WITHDRAWAL || loadingWithdraw || isDataLoading}
+                          disabled={
+                            !currentArxPrice || currentArxPrice <= 0 || // Disable if price not available
+                            parseFloat(totalClaimableArix || 0) < (MIN_ARIX_WITHDRAWAL_APPROX_USD_VALUE / currentArxPrice) || // Check ARIX amount against USD equivalent
+                            loadingWithdraw || isDataLoading
+                          }
                           loading={loadingWithdraw} block
-                      > Withdraw USDT </Button>
+                      > Withdraw ARIX </Button> {/* Changed button text */}
                   </Col>
               </Row>
           </Col>
