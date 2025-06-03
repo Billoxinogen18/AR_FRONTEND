@@ -123,14 +123,14 @@ const UserPage = () => {
   const tabItems = [
     {
       key: 'stakes',
-      label: <span style={{fontSize: isMobile ? '0.9em' : '1em'}}>Stakes & ARIX Rewards</span>, {/* Updated label */}
+      label: <span style={{fontSize: isMobile ? '0.9em' : '1em'}}>Stakes & ARIX Rewards</span>, 
       children: (
         <TransactionList 
           items={profileAndStakeData.stakes} 
           isLoading={loadingData && activeTab === 'stakes'} 
           renderItemDetails={renderStakeHistoryItem} 
           itemType="staking activity" 
-          listTitle="Your ARIX Stakes & ARIX Earnings" {/* Updated title */}
+          listTitle="Your ARIX Stakes & ARIX Earnings" 
         />
       ),
     },
@@ -149,6 +149,7 @@ const UserPage = () => {
     },
   ];
 
+  
   const renderContent = () => {
     if (loadingData && !profileAndStakeData.stakes.length && !coinflipHistory.length && userFriendlyAddress) {
         return <div style={{textAlign: 'center', padding: '50px 0'}}><Spin size="large" tip="Loading Your Hub Data..." /></div>;
