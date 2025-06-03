@@ -57,19 +57,19 @@ const StakingPlans = ({ plans, onSelectPlan, currentArxPrice }) => {
                   valueStyle={{ color: '#00adee', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>USD Reward APR</Text>} {/* Updated title */}
+                  title={<Text style={{color: '#aaa'}}>USD Reward APR</Text>} 
                   value={`${displayUsdApr}%`} // Displaying USD APR
                   suffix={<Text style={{color: '#52c41a', fontSize: '0.8em', marginLeft: 4}}> USD (Paid in ARIX)</Text>} // Updated suffix
                   valueStyle={{ color: '#52c41a', fontWeight: 'bold', fontSize: '1.8em' }}
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>Min. USD Stake</Text>} {/* Updated title */}
+                  title={<Text style={{color: '#aaa'}}>Min. USD Stake</Text>} 
                   value={`$${minStakeUsdNum.toFixed(2)} USD`} // Displaying USD amount
                   valueStyle={{ color: '#e0e0e0', fontWeight: 'normal', fontSize: '1.1em' }}
                   suffix={minStakeArixApprox ? <Text style={{color: '#888', fontSize: '0.8em', marginLeft: 4}}>(~${minStakeArixApprox} ARIX)</Text> : ""} // Updated suffix for ARIX equivalent
                 />
                 <Statistic
-                  title={<Text style={{color: '#aaa'}}>ARIX Early Unstake Penalty <Tooltip title={`Penalty on ARIX principal if unstaked before ${plan.duration} days. ARIX rewards are separate.`}><InfoCircleOutlined style={{marginLeft: '4px', color: '#aaa'}}/></Tooltip></Text>} {/* Updated tooltip */}
+                  title={<Text style={{color: '#aaa'}}>ARIX Early Unstake Penalty <Tooltip title={`Penalty on ARIX principal if unstaked before ${plan.duration} days. ARIX rewards are separate.`}><InfoCircleOutlined style={{marginLeft: '4px', color: '#aaa'}}/></Tooltip></Text>} 
                   value={`${displayArixPenalty}%`}
                   valueStyle={{ color: '#ff7875', fontWeight: '500', fontSize: '1.1em' }}
                 />
