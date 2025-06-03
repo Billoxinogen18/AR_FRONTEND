@@ -82,55 +82,63 @@
   z-index: 1000;
   display: flex !important;
   justify-content: space-around !important;
-  background: #1c1c1e !important; /* Card-like dark grey */
-  border-top: 1px solid #38383a !important; /* Subtle top border */
+  align-items: stretch !important; /* Make items stretch to fill height */
+  background: #1c1c1e !important; 
+  border-top: 1px solid #38383a !important; 
   box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
   height: 56px !important;
   padding: 0 !important;
 }
 
 .mobile-bottom-nav .ant-menu-item {
-  flex-grow: 1;
+  flex: 1 1 0px; /* Allow items to grow and shrink, basis 0 for equal distribution */
+  min-width: 0; /* Prevent items from overflowing if text is long (though labels are short) */
   text-align: center;
-  padding: 4px 0 !important; /* Minimal padding for icon and small text */
+  padding: 0 !important; 
   margin: 0 !important;
   height: 100% !important;
-  display: flex !important;
+  display: flex !important; 
   flex-direction: column !important;
-  justify-content: center !important;
+  justify-content: center !important; 
   align-items: center !important;
-  line-height: 1 !important; /* Tight line height for icon and label */
+  line-height: 1 !important; 
   border-radius: 0 !important;
-  color: #8e8e93 !important; /* Default grey icon/text color from screenshots */
+  color: #8e8e93 !important; 
+  transition: color 0.2s ease-in-out; /* Smooth color transition */
 }
 .mobile-bottom-nav .ant-menu-item .anticon {
-  font-size: 20px !important; /* Icons a bit smaller */
-  margin-bottom: 3px !important;
+  font-size: 20px !important; 
+  margin-bottom: 4px !important; /* Increased space between icon and label */
+  line-height: 1; /* Ensure icon is tight */
 }
 .mobile-bottom-nav .mobile-menu-label {
-  font-size: 10px !important;
+  font-size: 10px !important; 
   display: block;
   font-weight: 500;
+  line-height: 1; /* Ensure label is tight */
+  white-space: nowrap; /* Prevent label wrapping */
 }
 
 .mobile-bottom-nav .ant-menu-item-selected {
-  background-color: transparent !important; /* No background on selected */
+  background-color: transparent !important; 
 }
 .mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
 .mobile-bottom-nav .ant-menu-item-selected .anticon {
-  color: #7e73ff !important; /* Selected accent color */
+  color: #7e73ff !important; 
 }
-.mobile-bottom-nav .ant-menu-item::after {
-  display: none !important; /* Remove default AntD selected indicator */
+/* Remove AntD default :after selected indicator if it appears */
+.mobile-bottom-nav .ant-menu-item::after, 
+.mobile-bottom-nav .ant-menu-submenu-title::after { 
+  display: none !important;
+  border-bottom: none !important;
 }
 
 
-/* Desktop Sider - Kept for completeness if user has wider screen layouts for this. */
+/* Desktop Sider */
 .desktop-sider {
-  background: #121212 !important; /* Match header */
-  backdrop-filter: none; /* No blur for flat style */
+  background: #121212 !important;
   border-right: 1px solid #2a2a2a !important;
-  height: calc(100vh - 64px); /* Full height minus header */
+  height: calc(100vh - 64px); 
   position: sticky !important;
   top: 64px !important;
   z-index: 999;
@@ -142,9 +150,13 @@
 }
 .desktop-sider .ant-menu-item {
   color: #a0a0a5 !important;
+  border-radius: 6px;
+  margin: 4px 8px !important; /* Add some margin around items */
+  width: calc(100% - 16px) !important;
 }
 .desktop-sider .ant-menu-item .anticon {
   font-size: 16px;
+  margin-right: 10px;
 }
 .desktop-sider .ant-menu-item-selected {
   background-color: #2c2c2e !important;
@@ -153,6 +165,10 @@
 .desktop-sider .ant-menu-item-selected .anticon {
  color: #7e73ff !important;
 }
+.desktop-sider .ant-menu-item-selected::after { /* Remove vertical bar indicator for sider */
+    border-right: none !important;
+}
+
 
 /* Style for AntD Components based on the new flat dark theme */
 .ant-btn-primary {
@@ -199,6 +215,9 @@
   background: #2c2c2e !important;
   border-color: #38383a !important;
   color: #e0e0e5 !important;
+  height: auto !important; /* Ensure flexible height */
+  padding: 6px 15px !important; /* Adjust padding as needed */
+  line-height: inherit !important; /* Use natural line height */
 }
 .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   background: #7e73ff !important;
@@ -216,9 +235,9 @@
     border-radius: 8px 8px 0 0 !important;
 }
 .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active, .ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab-active {
-    background: #1c1c1e !important; /* Same as card body to make it "pop" into the content */
+    background: #1c1c1e !important; 
     border-color: #38383a !important;
-    border-bottom-color: #1c1c1e !important; /* Match content area */
+    border-bottom-color: #1c1c1e !important; 
     color: #ffffff !important;
 }
 .ant-tabs-ink-bar {
@@ -245,10 +264,12 @@
 .ant-statistic-title {
     color: #8e8e93 !important;
     font-size: 0.85rem !important;
+    margin-bottom: 2px !important; /* Tighter spacing */
 }
 .ant-statistic-content {
     color: #ffffff !important;
     font-size: 1.3rem !important;
+    line-height: 1.2 !important; /* Adjust line height */
 }
 .ant-statistic-content-suffix {
     color: #8e8e93 !important;
@@ -279,11 +300,9 @@
 .ant-alert-description {
   color: #a0a0a5 !important;
 }
-.ton-connect-button {
-  height: 36px !important; /* Match size better with screenshot styles */
-  border-radius: 8px !important;
-  /* background-image: linear-gradient(to right, #7e73ff, #5b4fff) !important; */
-}
+/* .ton-connect-button custom styling if default isn't enough, 
+   otherwise its internal styles or theme should work */
+
 
 /* Custom card style based on screenshot games/earn page */
 .game-info-card {
@@ -292,41 +311,49 @@
   padding: 16px;
   margin-bottom: 16px;
   border: 1px solid #38383a;
-  text-align: left; /* Default text align */
+  text-align: left; 
+  display: flex; /* For flex grow */
+  flex-direction: column; /* For flex grow */
+  height: 100%; /* For consistent height in grid */
+}
+.game-info-card .card-content-grow { /* Wrapper for title and description */
+    flex-grow: 1;
 }
 
-.game-info-card img.card-image { /* Example specific class for images in cards */
+
+.game-info-card img.card-image { 
   width: 100%;
-  height: 120px; /* Or adjust as needed */
+  height: 120px; 
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 12px;
 }
 
 .game-info-card .ant-typography {
-  color: #d1d1d6; /* Slightly lighter text color for paragraphs */
+  color: #d1d1d6; 
 }
 .game-info-card .ant-typography strong,
 .game-info-card .ant-typography-title {
   color: #ffffff;
 }
 
-.game-info-card .ant-btn { /* Style buttons inside these cards */
-    margin-top: 12px;
+.game-info-card .ant-btn { 
+    margin-top: 16px; /* Pushes button to bottom if card content grows */
 }
 
 
 .dark-segmented-control .ant-radio-group {
     width: 100%;
+    display: flex;
 }
 .dark-segmented-control .ant-radio-button-wrapper {
     flex: 1;
     text-align: center;
     font-weight: 500;
-    padding: 8px 12px !important; /* Custom padding for segment buttons */
-    height: auto !important; /* Override fixed height */
+    padding: 8px 10px !important; 
+    height: auto !important; 
     line-height: 1.2 !important;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Slightly smaller for compact segments */
 }
 
 
@@ -338,9 +365,9 @@
 @media (min-width: 768px) { .coinflip-card .ant-card-body { padding: 24px !important; } }
 
 .coin-display-container {
-  width: 100px; height: 100px; border-radius: 50%; background: #2c2c2e; /* Darker grey */
+  width: 100px; height: 100px; border-radius: 50%; background: #2c2c2e; 
   margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center;
-  border: 2px solid #38383a; /* Subtle border */
+  border: 2px solid #38383a; 
   box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
   overflow: hidden;
 }
@@ -359,7 +386,7 @@
 .game-result-info .result-title.win { color: #4CAF50; }
 .game-result-info .result-title.loss { color: #F44336; }
 .game-result-info .result-text { color: #a0a0a5; display: block; margin-bottom: 3px; font-size: 0.9em;}
-.game-result-info .result-text strong { color: #7e73ff; } /* Use accent for choice/coin */
+.game-result-info .result-text strong { color: #7e73ff; } 
 .game-result-info .result-text.delta { margin-top: 6px; font-size: 1.05em; }
 .game-result-info .game-id-text { font-size: 0.75em; color: #6a6a6e; margin-top: 8px; }
 
@@ -374,8 +401,20 @@
 .task-list-item .ant-card, .history-list-item .ant-card {
   /* uses .dark-theme-card by className prop */
 }
+.task-description { /* For TaskPage description Paragraph */
+    color: #d1d1d6;
+    min-height: 40px; /* Ensures a minimum space */
+    font-size: 0.9rem;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Show 2 lines, then ellipsis */
+    -webkit-box-orient: vertical;
+    margin-bottom: 12px; /* Add some space below description */
+}
 
-.profile-card .ant-statistic-title { /* Style for UserProfileCard stats specifically */
+
+.profile-card .ant-statistic-title { 
   color: #8e8e93 !important;
   font-size: 0.9rem !important;
 }
@@ -411,72 +450,72 @@
 .user-settings-section {
   margin-bottom: 24px;
 }
-.user-settings-section .section-title {
-  color: #aaa; /* Grey section titles */
+.user-settings-section .section-title { /* Shared classname now defined in UserPage JSX */
+  color: #aaa;
   text-align: left;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
+  font-size: 0.85rem; /* Made a bit smaller */
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 .user-settings-section .ant-btn {
-  margin-right: 8px; /* Spacing for grouped buttons */
+  margin-right: 8px; 
   margin-bottom: 8px;
 }
 
-.referral-code-display {
-  background-color: #2c2c2e;
-  border: 1px solid #38383a;
-  border-radius: 8px;
-  padding: 10px 12px;
-  text-align: center;
-  color: #a0a0a5;
-  font-size: 0.95rem;
-  letter-spacing: 1px; /* More space for "code" */
-  margin-bottom: 10px;
-}
 
 .support-guide-buttons .ant-btn {
-  width: 100%; /* Make them full width if in a single column on mobile */
+  width: 100%; 
   margin-bottom: 10px;
 }
 @media (min-width: 576px) {
   .support-guide-buttons .ant-btn {
-    width: auto; /* Auto width on larger screens if they are side by side */
+    width: auto; 
   }
 }
 
 .social-links-container {
     display: flex;
     justify-content: center;
-    gap: 16px; /* Spacing between social links */
+    gap: 16px; 
     margin-top: 16px;
 }
 .social-links-container .ant-btn {
     border: none !important;
     padding: 0 12px !important;
-    color: #8e8e93 !important; /* Grey social icons */
+    color: #8e8e93 !important; 
 }
 .social-links-container .ant-btn:hover {
-    color: #7e73ff !important; /* Accent on hover */
+    color: #7e73ff !important; 
 }
 
-.page-image-container { /* For pages like Push (original screenshot) */
+.page-image-container { 
   text-align: center;
   margin-bottom: 24px;
 }
 .page-image-container img {
   max-width: 100%;
-  max-height: 250px; /* Example constraint */
+  max-height: 250px; 
   object-fit: contain;
   border-radius: 12px;
 }
 
-.centered-message { /* For pages like default Push or Earn */
+.centered-message { 
   text-align: center;
   padding: 40px 20px;
   color: #a0a0a5;
 }
 .centered-message .ant-typography-title {
     margin-bottom: 16px !important;
+}
+
+.announcement-list-item .ant-list-item {
+    border-bottom: 1px solid #2a2a2a !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 16px !important;
+}
+.announcement-list-item:last-child .ant-list-item {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
 }

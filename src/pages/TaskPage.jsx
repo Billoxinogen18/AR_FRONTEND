@@ -87,7 +87,14 @@ const TaskPage = () => {
             handleModalSubmit(); 
         } else if (task.action_url) {
             window.open(task.action_url, '_blank');
-            setIsModalVisible(true); // Still open modal to confirm completion for action_url tasks
+            // For tasks with action_url, prompt for confirmation *after* they've (hopefully) done it.
+            // It's possible to auto-open modal, but might be disruptive if they just wanted to see the link.
+            // Better to let them click a separate "I've done this / Submit Proof" button after returning.
+            // So, we'll just open the link here, and they can click "Submit" button on card again which will then open modal.
+            // OR, we can decide to open modal for action_url if it doesn't need specific proof (e.g. "Visit Page and confirm").
+            // For now, the existing 'Submit' or 'Go To Task' button will re-trigger this handleTaskAction
+            // and if it's not link/text, it would go to setIsModalVisible for confirmation.
+            setIsModalVisible(true); // Open modal to confirm they've done the action_url task.
         } else {
              setIsModalVisible(true);
         }
@@ -158,12 +165,15 @@ const TaskPage = () => {
     const renderTaskItem = (task) => (
         <List.Item className="task-list-item">
             <Card 
-                className="dark-theme-card" // Updated class
+                className="dark-theme-card" 
                 title={<Text style={{color: '#ffffff', fontWeight: '600', fontSize:'1.05rem'}}>{task.title}</Text>}
                 extra={getTaskStatusTag(task)}
+                style={{height: '100%', display: 'flex', flexDirection: 'column'}} 
             >
-                <Paragraph style={{color: '#d1d1d6', minHeight: '3em', fontSize: '0.9rem'}}>{task.description}</Paragraph>
-                <Row justify="space-between" align="middle" style={{marginTop: 12}}>
+                <div style={{flexGrow: 1}}> {/* This div will allow description to take available space */}
+                    <Paragraph className="task-description">{task.description}</Paragraph>
+                </div>
+                <Row justify="space-between" align="middle" style={{marginTop: 'auto', paddingTop: 12}}> {/* Push reward & button to bottom */}
                     <Col>
                         <Text strong style={{color: '#4CAF50', fontSize: '1.1rem'}}>
                             Reward: {parseFloat(task.reward_arix_amount).toFixed(ARIX_DECIMALS)} ARIX
@@ -173,21 +183,25 @@ const TaskPage = () => {
                         {task.can_attempt ? (
                             <Button 
                                 type="primary" 
-                                icon={task.action_url ? <LinkOutlined /> : <SendOutlined />}
+                                icon={task.action_url && task.validation_type !== 'auto_approve' ? <LinkOutlined /> : <SendOutlined />} // Icon logic for action
                                 onClick={() => handleTaskAction(task)}
-                                disabled={!userFriendlyAddress} // Still disable if no wallet for actual submission
+                                disabled={!userFriendlyAddress} 
                                 size="middle"
                             >
-                                {task.validation_type === 'auto_approve' && !task.action_url ? 'Claim' : (task.action_url ? 'Go to Task' : 'Submit')}
+                                {task.validation_type === 'auto_approve' && !task.action_url ? 'Claim' : 
+                                (task.action_url && (task.validation_type === 'auto_approve' || !task.validation_type.includes('submission')) ? 'Visit & Claim' : 
+                                (task.action_url ? 'Go to Task' : 'Submit Proof'))}
                             </Button>
                         ) : (
-                            <Button disabled type="dashed" size="middle">{task.user_status === 'pending_verification' ? 'Pending' : 'Completed'}</Button>
+                            <Button disabled type="dashed" size="middle">
+                                {(task.user_status === 'pending_verification' || task.user_status === 'approved') ? 'Pending' : 'Completed'}
+                            </Button>
                         )}
                     </Col>
                 </Row>
                  {task.action_url && task.can_attempt && task.validation_type !== 'auto_approve' && (
                      <Text type="secondary" style={{fontSize: '0.8em', display:'block', marginTop: 8, color: '#8e8e93'}}>
-                         Perform action at link, then confirm completion.
+                         Perform action at link, then confirm or submit proof.
                      </Text>
                  )}
             </Card>
@@ -196,7 +210,7 @@ const TaskPage = () => {
 
     const renderHistoryItem = (item) => (
         <List.Item className="history-list-item">
-             <Card size="small" className="dark-theme-card" style={{borderColor: '#2a2a2a'}}> {/* slightly more subtle inner card */}
+             <Card size="small" className="dark-theme-card" style={{borderColor: '#2a2a2a'}}>
                 <Row justify="space-between" align="top" gutter={[8,4]}>
                     <Col xs={24} sm={16}>
                         <Text strong style={{color: '#e0e0e5', fontSize:'1rem'}}>{item.title}</Text>
@@ -219,17 +233,17 @@ const TaskPage = () => {
     );
 
     return (
-        <div style={{ padding: isMobile ? '16px' : '24px' }}>
+        <div style={{ padding: isMobile ? '0px' : '0px' }}>
             <Title level={2} className="page-title">ARIX Tasks</Title>
 
-            {!userFriendlyAddress && !loadingTasks && ( // Show this prominently if not connected and tasks are loaded/empty
+            {!userFriendlyAddress && !loadingTasks && (
                  <Alert
                     message="Connect Wallet to Participate"
                     description="Please connect your TON wallet to view personalized task statuses, submit tasks, and claim ARIX rewards."
                     type="info"
                     showIcon
                     className="dark-theme-alert"
-                    style={{marginBottom: 24}}
+                    style={{marginBottom: 24, marginLeft: isMobile ? 16 : 0, marginRight: isMobile ? 16: 0}}
                     action={
                         <Button size="small" type="primary" onClick={() => tonConnectUI.openModal()}>
                             Connect Wallet
@@ -238,24 +252,25 @@ const TaskPage = () => {
                 />
             )}
             
-            <div style={{textAlign:'right', marginBottom: 20}}>
-                <Button icon={<RedoOutlined/>} onClick={handleRefreshAll} loading={loadingTasks || loadingHistory}>Refresh</Button>
+            <div style={{textAlign:'right', marginBottom: 20, paddingRight: isMobile? 16:0 }}>
+                <Button icon={<RedoOutlined/>} onClick={handleRefreshAll} loading={loadingTasks || loadingHistory}>Refresh Tasks</Button>
             </div>
 
             {loadingTasks && tasks.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" tip="Loading Available Tasks..." /></div>
             ) : tasks.length > 0 ? (
                 <List
-                    grid={{ gutter: isMobile ? 16 : 24, xs: 1, sm: 1, md: 2 }} // 2 columns for medium up
+                    grid={{ gutter: isMobile ? 16 : 24, xs: 1, sm: 1, md: 2 }}
                     dataSource={tasks}
                     renderItem={renderTaskItem}
+                    style={{padding: isMobile? '0 16px' : '0'}}
                 />
             ) : (
-                !loadingTasks && <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px'}}><Empty description={<Text style={{color: '#a0a0a5'}}>No active tasks available. Check back soon!</Text>} /></Card>
+                !loadingTasks && <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px', margin: isMobile ? '0 16px' : '0'}}><Empty description={<Text style={{color: '#a0a0a5'}}>No active tasks available. Check back soon!</Text>} /></Card>
             )}
 
             {userFriendlyAddress && (
-                <div style={{marginTop: 40}}>
+                <div style={{marginTop: 40, padding: isMobile? '0 16px' : '0'}}>
                     <Title level={3} className="section-title" style={{textAlign: 'center', marginBottom: 24}}>Your Task History</Title>
                     {loadingHistory ? (
                         <div style={{ textAlign: 'center', padding: 30 }}><Spin tip="Loading your history..." /></div>
@@ -263,7 +278,6 @@ const TaskPage = () => {
                          <List
                             dataSource={userTaskHistory}
                             renderItem={renderHistoryItem}
-                            className="history-list-container" // Ensure this class exists or style List directly if needed
                         />
                     ) : (
                         <Card className="dark-theme-card" style={{textAlign:'center', padding: '20px'}}><Empty description={<Text style={{color: '#a0a0a5'}}>You haven't completed any tasks yet.</Text>} /></Card>
@@ -304,13 +318,13 @@ const TaskPage = () => {
                                 style={{marginTop: 12}}
                             />
                         )}
-                        {(selectedTask.validation_type === 'auto_approve' || selectedTask.action_url) && ! (selectedTask.validation_type === 'link_submission' || selectedTask.validation_type === 'text_submission') && (
+                        {(selectedTask.validation_type === 'auto_approve' || (selectedTask.action_url && !(selectedTask.validation_type === 'link_submission' || selectedTask.validation_type === 'text_submission'))) && (
                              <Paragraph style={{color: '#a0a0a5', marginTop:12, fontSize:'0.9rem'}}>
                                 {selectedTask.action_url ? 
-                                 `Please ensure you have completed the action at: ` : 
+                                 `Please ensure you have completed the action at the provided link.` : 
                                  `This task will be automatically processed.`}
-                                {selectedTask.action_url && <a href={selectedTask.action_url} target="_blank" rel="noopener noreferrer" style={{color: '#7e73ff', wordBreak:'break-all'}}> {selectedTask.action_url}</a>}
-                                <br/>Click "Submit" to confirm completion.
+                                {selectedTask.action_url && <div><Text>Task URL:</Text> <a href={selectedTask.action_url} target="_blank" rel="noopener noreferrer" style={{color: '#7e73ff', wordBreak:'break-all'}}> {selectedTask.action_url}</a></div>}
+                                <br/>Click "Submit" to confirm your completion.
                              </Paragraph>
                         )}
                     </>

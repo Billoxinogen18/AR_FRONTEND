@@ -1,39 +1,39 @@
 // File: AR_Proj/AR_FRONTEND/src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid } from 'antd';
 import {
-    DollarCircleOutlined, // EARN
-    ExperimentOutlined, // GAME
-    UserOutlined, // USER
-    BellOutlined, // PUSH
-    CheckSquareOutlined // TASK
+    DollarCircleOutlined, 
+    ExperimentOutlined, 
+    UserOutlined, 
+    BellOutlined, 
+    CheckSquareOutlined 
 } from '@ant-design/icons';
 import './App.css';
 import EarnPage from './pages/EarnPage';
 import GamePage from './pages/GamePage';
 import UserPage from './pages/UserPage';
 import TaskPage from './pages/TaskPage';
-import PushPage from './pages/PushPage'; // Current PushPage (announcements)
+import PushPage from './pages/PushPage';
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-// Define icons and labels directly to match screenshots
 const menuConfig = [
   { key: '/task', icon: <CheckSquareOutlined />, labelText: "TASK" },
   { key: '/game', icon: <ExperimentOutlined />, labelText: "GAME" },
-  { key: '/push', icon: <BellOutlined />, labelText: "PUSH" }, // Using BellOutlined as a generic icon for PUSH
+  { key: '/push', icon: <BellOutlined />, labelText: "PUSH" },
   { key: '/earn', icon: <DollarCircleOutlined />, labelText: "EARN" },
   { key: '/user', icon: <UserOutlined />, labelText: "USER" },
 ];
 
 const AppMenu = ({ mobile }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   let currentPath = location.pathname;
-  if (currentPath === '/' || currentPath === '') { // Default to '/earn'
+  if (currentPath === '/' || currentPath === '') { 
     currentPath = '/earn'; 
   }
 
@@ -42,10 +42,17 @@ const AppMenu = ({ mobile }) => {
   const menuItems = menuConfig.map(item => ({
     key: item.key,
     icon: React.cloneElement(item.icon, { style: { fontSize: mobile ? '20px' : '16px' } }),
-    label: mobile ? <span className="mobile-menu-label">{item.labelText}</span> : <NavLink to={item.key}>{item.labelText}</NavLink>,
+    label: mobile ? <span className="mobile-menu-label">{item.labelText}</span> : item.labelText,
     style: commonItemStyle,
+    onClick: mobile ? () => navigate(item.key) : undefined, // For mobile, handle click directly
   }));
 
+  const desktopMenuItems = menuConfig.map(item => ({ // Separate for desktop NavLink
+    key: item.key,
+    icon: React.cloneElement(item.icon, { style: { fontSize: '16px' } }),
+    label: <NavLink to={item.key}>{item.labelText}</NavLink>,
+    style: commonItemStyle,
+  }));
 
   if (mobile) {
     return (
@@ -53,7 +60,7 @@ const AppMenu = ({ mobile }) => {
         theme="dark"
         mode="horizontal"
         selectedKeys={[currentPath]}
-        items={menuItems}
+        items={menuItems} // Uses items with onClick for navigation
         className="mobile-bottom-nav"
       />
     );
@@ -62,17 +69,17 @@ const AppMenu = ({ mobile }) => {
   // Desktop Sider
   return (
     <Sider
-      width={180} // Slightly narrower Sider
-      className="desktop-sider" // Class for desktop specific sider styles
+      width={180} 
+      className="desktop-sider"
       breakpoint="lg"
       collapsedWidth="0" 
       trigger={null} 
     >
       <Menu
-        theme="dark" // Uses components.Menu.dark*
+        theme="dark"
         mode="inline"
         selectedKeys={[currentPath]}
-        items={menuItems}
+        items={desktopMenuItems} // Uses items with NavLink for desktop
         style={{ height: '100%', borderRight: 0, background: 'transparent', padding: '10px 0' }}
       />
     </Sider>
@@ -86,21 +93,21 @@ function App() {
   const TELEGRAM_DARK_THEME = {
     algorithm: antdTheme.darkAlgorithm,
     token: {
-      colorPrimary: '#7e73ff', // Accent purple-blue from screenshots
+      colorPrimary: '#7e73ff', 
       colorInfo: '#7e73ff',
-      colorSuccess: '#4CAF50', // Standard green
-      colorError: '#F44336',   // Standard red
-      colorWarning: '#FFC107', // Standard amber
-      colorTextBase: '#e0e0e5', // Light grey text
-      colorBgBase: '#000000',      // Pure black background
-      colorBgContainer: '#1c1c1e', // Dark grey for cards, modals
-      colorBgElevated: '#2a2a2a',  // Slightly lighter for elevated like dropdowns
-      colorBorder: '#38383a',      // Subtle borders
-      colorBorderSecondary: '#2a2a2a', // Even more subtle
-      borderRadius: 12,          // Rounded corners for cards (can be overridden)
-      borderRadiusLG: 16,        // Larger border radius
+      colorSuccess: '#4CAF50', 
+      colorError: '#F44336',   
+      colorWarning: '#FFC107', 
+      colorTextBase: '#e0e0e5', 
+      colorBgBase: '#000000',      
+      colorBgContainer: '#1c1c1e', 
+      colorBgElevated: '#2a2a2a',  
+      colorBorder: '#38383a',      
+      colorBorderSecondary: '#2a2a2a', 
+      borderRadius: 12,          
+      borderRadiusLG: 16,        
       fontFamily: "'Inter', sans-serif",
-      controlHeight: 40, // Default height for inputs, buttons
+      controlHeight: 40, 
       controlHeightLG: 44,
       controlHeightSM: 32,
     },
@@ -110,15 +117,17 @@ function App() {
         siderBg: '#121212', 
         bodyBg: '#000000',
       },
-      Menu: { // General Menu styles (for Sider)
+      Menu: { 
         darkItemBg: 'transparent',
         darkItemSelectedBg: '#2c2c2e', 
         darkItemColor: '#a0a0a5',            
         darkItemSelectedColor: '#7e73ff',    
         darkItemHoverBg: '#252527',
         darkItemHoverColor: '#9a91ff',
-        // For mobile, specific .mobile-bottom-nav CSS will override where needed
-        // itemHeight: isMobile ? 56 : 40,
+        itemHeight: isMobile ? 56 : 40, // Adjust for mobile menu item full height
+        // itemMarginInline: 0, // Important for mobile flex distribution
+        // Horizontal Menu (Mobile specific overrides are in App.css)
+        horizontalItemSelectedColor: '#7e73ff', // Ensure selected color works
       },
       Button: {
         colorPrimary: '#7e73ff',
@@ -132,14 +141,14 @@ function App() {
         borderRadius: 8,
         borderRadiusLG: 10,
       },
-      Card: { // Used by .dark-theme-card or if directly using AntD Card with theme
+      Card: { 
          colorBgContainer: '#1c1c1e',
          colorBorderSecondary: '#38383a',
          colorTextHeading: '#ffffff',
          borderRadiusLG: 16,
       },
       Modal: {
-         colorBgElevated: '#1c1c1e', // Modal content background
+         colorBgElevated: '#1c1c1e', 
          colorBorderSecondary: '#38383a',
          colorTextHeading: '#ffffff',
       },
@@ -157,10 +166,10 @@ function App() {
          borderRadius: 8,
       },
       Statistic: {
-        titleFontSize: 13, // Smaller title for stats
-        contentFontSize: 20, // Adjust as needed
-        colorTextDescription: '#8e8e93', // For the title
-        colorText: '#ffffff', // For the value
+        titleFontSize: 13, 
+        contentFontSize: 20, 
+        colorTextDescription: '#8e8e93', 
+        colorText: '#ffffff', 
       },
       Radio: {
         buttonSolidCheckedBg: '#7e73ff',
@@ -168,17 +177,17 @@ function App() {
         buttonSolidCheckedActiveBg: '#6f65e8',
         colorBorder: '#38383a',
         borderRadius: 8,
-        buttonPaddingInline: 15, // AntD default might be too wide for some segments
+        buttonPaddingInline: 15,
       },
-      Tabs: { // For tabbed content like in UserPage
-        cardBg: '#1c1c1e', // Card style tab background
+      Tabs: { 
+        cardBg: '#1c1c1e', 
         itemColor: '#a0a0a5',
         itemSelectedColor: '#ffffff',
         itemHoverColor: '#c0c0c5',
         inkBarColor: '#7e73ff',
         horizontalMargin: '0',
         titleFontSize: isMobile ? 14 : 15,
-        borderRadius: 8, // Tab item border radius for top corners
+        borderRadius: 8, 
       },
       Spin: { colorPrimary: '#7e73ff',},
       Alert: {
@@ -187,7 +196,7 @@ function App() {
         borderRadius: 12,
       },
        List: {
-          colorSplit: '#2a2a2a', // Border color for list items
+          colorSplit: '#2a2a2a', 
       }
     },
   };
@@ -203,15 +212,13 @@ function App() {
             <TonConnectButton className="ton-connect-button" />
           </Header>
 
-          {/* Layout for Sider (desktop) + Main Content OR Main Content (mobile) */}
           <Layout className="app-main-layout-container">
             {!isMobile && <AppMenu mobile={false} />}
 
-            {/* Content Wrapper for consistent padding and scrolling */}
             <Layout className={`app-content-wrapper ${isMobile ? "mobile-view" : ""}`}>
-              <Content className="app-content"> {/* Max width is applied here */}
+              <Content className="app-content"> 
                 <Routes>
-                  <Route path="/" element={<EarnPage />} /> {/* Default to Earn */}
+                  <Route path="/" element={<EarnPage />} /> 
                   <Route path="/earn" element={<EarnPage />} />
                   <Route path="/game" element={<GamePage />} />
                   <Route path="/user" element={<UserPage />} />
