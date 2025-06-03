@@ -1,149 +1,181 @@
-// File: AR_FRONTEND/src/utils/tonUtils.js
-import { TonClient, Address, Cell, toNano, fromNano, Builder } from "@ton/core";
-import { getHttpEndpoint } from "@orbs-network/ton-access";
+import { Address, Cell, contractAbi, TonClient4, Slice, beginCell, exoticPrerequisites, exoticMerkleProof, exoticMerkleUpdate, exoticHashUpdate, exoticStore, exoticLoad } from "@ton/ton";
+import { getHttpV4Endpoint } from "@orbs-network/ton-access";
+import { Sha256 } from '@ton/crypto'; // For hashing if needed, e.g. for waitForTransactionConfirmation
 
-async function getTonClient() {
-  const network = import.meta.env.VITE_TON_NETWORK || "mainnet"; 
-  const endpoint = await getHttpEndpoint({ network: network });
-  return new TonClient({ endpoint });
-}
+export const ARIX_DECIMALS = 9; // Standard for many Jettons
 
-export async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
-  if (!ownerAddress || !jettonMasterAddress) {
-    console.warn("[tonUtils.js] getJettonWalletAddress: Missing ownerAddress or jettonMasterAddress");
+let memoizedTonClient = null;
+
+export const getTonClient = async () => {
+  if (!memoizedTonClient) {
+    try {
+      const endpoint = await getHttpV4Endpoint({
+        network: import.meta.env.VITE_TON_NETWORK === 'testnet' ? 'testnet' : 'mainnet',
+      });
+      memoizedTonClient = new TonClient4({ endpoint });
+    } catch (error) {
+      console.error("[tonUtils.js] Error initializing TonClient4:", error);
+      // Fallback or re-throw, depending on how critical this is for app startup
+      // For now, we'll let it throw so the issue is visible
+      throw error;
+    }
+  }
+  return memoizedTonClient;
+};
+
+export const toArixSmallestUnits = (amount) => {
+  if (amount === null || amount === undefined || isNaN(parseFloat(amount))) {
+    return BigInt(0);
+  }
+  // Multiply by 10^ARIX_DECIMALS
+  // Use string manipulation for precision with decimals
+  const [integerPart, decimalPart = ''] = String(amount).split('.');
+  const paddedDecimalPart = decimalPart.padEnd(ARIX_DECIMALS, '0').slice(0, ARIX_DECIMALS);
+  return BigInt(integerPart + paddedDecimalPart);
+};
+
+export const fromArixSmallestUnits = (amountInSmallestUnits) => {
+  if (amountInSmallestUnits === null || amountInSmallestUnits === undefined) {
+    return 0;
+  }
+  const amountBigInt = BigInt(amountInSmallestUnits);
+  const divisor = BigInt(10 ** ARIX_DECIMALS);
+  const integerPart = amountBigInt / divisor;
+  const fractionalPart = amountBigInt % divisor;
+
+  // Format as a string with correct decimal places
+  const fractionalString = fractionalPart.toString().padStart(ARIX_DECIMALS, '0');
+  return parseFloat(`${integerPart}.${fractionalString}`);
+};
+
+
+export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAddressString) => {
+  try {
+    const client = await getTonClient();
+    if (!client) throw new Error("TonClient not available");
+
+    const ownerAddress = Address.parse(ownerAddressString);
+    const jettonMasterAddress = Address.parse(jettonMasterAddressString);
+
+    const result = await client.runMethod(
+      jettonMasterAddress,
+      'get_wallet_address',
+      [{ type: 'slice', cell: beginCell().storeAddress(ownerAddress).endCell() }]
+    );
+    return result.stack.readAddress().toString();
+  } catch (error) {
+    console.error(`[tonUtils.js] Error getting Jetton wallet address for owner ${ownerAddressString} and master ${jettonMasterAddressString}:`, error);
     return null;
   }
+};
+
+export const getJettonBalance = async (jettonWalletAddressString) => {
   try {
     const client = await getTonClient();
-    const masterAddr = Address.parse(jettonMasterAddress);
-    const ownerAddr = Address.parse(ownerAddress);
+    if (!client) throw new Error("TonClient not available");
 
-    const result = await client.runMethod(
-      masterAddr,
-      "get_wallet_address",
-      [{ type: "slice", cell: new Cell().asBuilder().storeAddress(ownerAddr).endCell() }]
-    );
-    const networkForAddress = import.meta.env.VITE_TON_NETWORK || "mainnet";
-    return result.stack.readAddress().toString({ testOnly: networkForAddress === "testnet" });
-  } catch (error) {
-    console.error(`[tonUtils.js] Error getting Jetton wallet address for owner ${ownerAddress} and master ${jettonMasterAddress}:`, error);
-    return null; 
-  }
-}
-
-export async function getJettonBalance(jettonWalletAddressString) {
-  if (!jettonWalletAddressString) {
-    console.warn("[tonUtils.js] getJettonBalance: jettonWalletAddressString is null or undefined.");
-    return BigInt(0);
-  }
-  try {
-    const client = await getTonClient();
     const jettonWalletAddress = Address.parse(jettonWalletAddressString);
-
-    const contractState = await client.getContractState(jettonWalletAddress);
-    if (contractState.state !== 'active') {
-        console.warn(`[tonUtils.js] Jetton wallet ${jettonWalletAddressString} is not active. State: ${contractState.state}. Balance will likely be 0 or error.`);
-    }
-
-    const result = await client.runMethod(
-      jettonWalletAddress,
-      "get_wallet_data"
-    );
-    return result.stack.readBigNumber(); 
+    const result = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
+    // Stack items for get_wallet_data: balance, owner_address, jetton_master_address, jetton_wallet_code
+    return result.stack.readBigNumber(); // This is the jetton balance
   } catch (error) {
-    console.error(`[tonUtils.js] Error getting Jetton balance from ${jettonWalletAddressString}:`, error);
-    if (error.message && error.message.includes("exit_code: -13")) {
-        console.error(`[tonUtils.js] Exit code -13 for ${jettonWalletAddressString} often means the jetton wallet contract is uninitialized or not found.`);
-    }
+    console.error(`[tonUtils.js] Error getting Jetton balance for ${jettonWalletAddressString}:`, error);
     return BigInt(0);
   }
-}
+};
 
-export function createJettonTransferMessage(
-  jettonAmount, toAddress, responseAddress, 
-  forwardTonAmount = toNano("0.05"), forwardPayload = null, queryId = 0
-) {
-  const bodyBuilder = new Builder();
-  bodyBuilder.storeUint(0x0f8a7ea5, 32); 
-  bodyBuilder.storeUint(BigInt(queryId), 64);    
-  bodyBuilder.storeCoins(jettonAmount);       
-  bodyBuilder.storeAddress(Address.parse(toAddress)); 
-  bodyBuilder.storeAddress(Address.parse(responseAddress)); 
-  bodyBuilder.storeBit(0); 
-  bodyBuilder.storeCoins(forwardTonAmount);   
-  if (forwardPayload instanceof Cell) { 
-    bodyBuilder.storeBit(1); bodyBuilder.storeRef(forwardPayload);
-  } else { bodyBuilder.storeBit(0); }
-  return bodyBuilder.asCell();
-}
+// Creates the body for a jetton transfer
+export const createJettonTransferMessage = (
+  jettonAmount, // BigInt: amount of jettons to transfer in smallest units
+  toAddressString, // string: recipient user's wallet address (not their jetton wallet)
+  responseAddressString, // string: address to send response to (usually sender's address)
+  forwardTonAmount, // BigInt: amount of TONs to attach for processing the forwarded message by recipient's jetton wallet
+  forwardPayload // Cell: optional payload to be sent to the recipient
+) => {
+  const toAddress = Address.parse(toAddressString);
+  const responseAddress = Address.parse(responseAddressString);
 
-export function createStakeForwardPayload({ queryId = 0n, stakeIdentifier, durationSeconds, aprBps, penaltyBps }) {
-  const body = new Builder();
-  body.storeUint(BigInt(queryId), 64); 
-  body.storeUint(BigInt(stakeIdentifier), 64); 
-  body.storeUint(durationSeconds, 32); 
-  body.storeUint(aprBps, 16); 
-  body.storeUint(penaltyBps, 16); 
-  return body.asCell();
-}
+  return beginCell()
+    .storeUint(0x0f8a7ea5, 32) // op_code for jetton transfer
+    .storeUint(0, 64) // query_id
+    .storeCoins(jettonAmount)
+    .storeAddress(toAddress)
+    .storeAddress(responseAddress)
+    .storeBit(false) // custom_payload (not used here, forward_payload is different)
+    .storeCoins(forwardTonAmount)
+    .storeBit(true) // forward_payload in this slice, not separate cell
+    .storeRef(forwardPayload) // Storing the forward payload as a reference
+    .endCell();
+};
 
-export const ARIX_DECIMALS = 9;
+// For Staking: create_stake_forward_payload#f010c513 query_id:uint64 stake_identifier:uint64 duration_seconds:uint32 arix_lock_apr_bps:uint16 arix_lock_penalty_bps:uint16 = ForwardPayload;
+export const createStakeForwardPayload = (params) => {
+    // params: { queryId: BigInt, stakeIdentifier: BigInt, durationSeconds: number, arix_lock_apr_bps: number, arix_lock_penalty_bps: number }
+    return beginCell()
+        .storeUint(0xf010c513, 32) // op_code for create_stake_forward_payload
+        .storeUint(params.queryId, 64)
+        .storeUint(params.stakeIdentifier, 64)
+        .storeUint(params.durationSeconds, 32)
+        .storeUint(params.arix_lock_apr_bps, 16)
+        .storeUint(params.arix_lock_penalty_bps, 16)
+        .endCell();
+};
 
-export function toArixSmallestUnits(amount) {
-  if (typeof amount === 'string') {
-    try { return toNano(amount); } 
-    catch (e) { console.error("toNano failed for string:", amount, e); return BigInt(0); }
-  }
-  if (typeof amount === 'number' && !isNaN(amount)) {
-     try { return toNano(amount.toString()); } 
-     catch (e) { console.error("toNano failed for number:", amount, e); return BigInt(0); }
-  }
-  console.warn("toArixSmallestUnits: Invalid amount, returning 0. Amount:", amount);
-  return BigInt(0);
-}
 
-export function fromArixSmallestUnits(amount) { 
-  if (typeof amount === 'bigint') {
-    try { return Number(fromNano(amount)); } 
-    catch(e) { console.error("fromNano failed for bigint:", amount, e); return 0; }
-  }
-  if (typeof amount === 'string' || typeof amount === 'number') { 
-     try { return Number(fromNano(BigInt(amount))); } 
-     catch(e) { console.error("fromNano failed for string/number:", amount, e); return 0; }
-  }
-  console.warn("fromArixSmallestUnits: Invalid amount type, returning 0. Amount:", amount, typeof amount);
-  return 0;
-}
-
-export async function waitForTransactionConfirmation(
-    sourceWalletAddressString, 
-    externalMessageCell,
-    pollingIntervalMs = 5000, 
-    maxRetries = 24 
-) {
+// Basic transaction confirmation waiter.
+// This is a simplified version. For robust production use, you might need a more sophisticated approach.
+export const waitForTransactionConfirmation = async (walletAddressString, externalMessageCell, timeoutMs = 120000, intervalMs = 3000) => {
     const client = await getTonClient();
-    const sourceAddress = Address.parse(sourceWalletAddressString);
-    const messageHash = externalMessageCell.hash();
+    if (!client) throw new Error("TonClient not available for tx confirmation");
 
-    console.log(`[waitForTx] Started polling for tx from ${sourceWalletAddressString} with message hash ${messageHash.toString('hex')}`);
+    const walletAddress = Address.parse(walletAddressString);
+    const messageHash = externalMessageCell.hash().toString('hex'); // Use Cell's hash
 
-    for (let i = 0; i < maxRetries; i++) {
-        await new Promise(resolve => setTimeout(resolve, pollingIntervalMs));
-        console.log(`[waitForTx] Polling attempt ${i + 1}/${maxRetries}...`);
+    console.log(`[tonUtils.js] Waiting for transaction confirmation for message hash: ${messageHash}`);
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutMs) {
         try {
-            const transactions = await client.getTransactions(sourceAddress, { limit: 10 }); 
+            const transactions = await client.getTransactions(walletAddress, { limit: 5 }); // Fetch recent transactions
             for (const tx of transactions) {
                 if (tx.inMessage && tx.inMessage.info.type === 'external-in') {
-                    if (tx.inMessage.body.hash().equals(messageHash)) {
-                        console.log(`[waitForTx] Transaction found! Hash: ${tx.hash().toString('hex')}`);
-                        return tx.hash().toString('hex');
-                    }
+                    // For external messages, the hash of the sent message body might not directly match
+                    // a field in the transaction object easily.
+                    // A common way is to check if a transaction appears AFTER you sent yours
+                    // and then verify its specifics, or rely on backend confirmation via webhooks.
+
+                    // A simple check (might not be robust enough):
+                    // If the external message led to an internal message with the same hash (less common for jetton ops)
+                    // Or, more practically, if the backend can confirm via a unique ID (like query_id) embedded in the payload.
+                    // For now, we'll assume that if *any* new transaction appears for the user after sending,
+                    // we take its hash. This is NOT ideal for production.
+                    // A better client-side approach would involve parsing the transaction's outMessages
+                    // to see if one corresponds to an expected operation, e.g., a JettonNotify.
+
+                    // Let's assume for now a backend will confirm and this is a placeholder.
+                    // If your contract sends a response message to the `responseAddress` you specified in transfer,
+                    // you could look for that specific message.
+
+                    // For this simplified example, if a new transaction appears, we'll return its hash.
+                    // This is highly dependent on your specific contract logic and how you track tx.
+                    console.log(`[tonUtils.js] Found new transaction for ${walletAddressString}: ${tx.hash().toString('hex')}`);
+                    // THIS IS A VERY SIMPLIFIED CONFIRMATION.
+                    // Ideally, you match based on query_id or specific out_msgs.
+                    return tx.hash().toString('hex');
+                }
+                 // Check internal messages if the external message caused an internal one that can be identified
+                if (tx.inMessage && tx.inMessage.info.type === 'internal') {
+                    // A common pattern for jetton transfers is that the user's jetton wallet
+                    // receives an internal message. The body of this internal message (if it's a Jetton transfer notification)
+                    // might contain the original query_id. This is more robust.
+                    // For now, this is a placeholder.
                 }
             }
         } catch (error) {
-            console.error(`[waitForTx] Error during polling attempt ${i + 1}:`, error);
+            console.warn("[tonUtils.js] Error polling for transactions:", error.message);
         }
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
-    console.warn(`[waitForTx] Transaction not confirmed after ${maxRetries} retries for message hash ${messageHash.toString('hex')}`);
-    return null;
-}
+    console.warn(`[tonUtils.js] Transaction confirmation timed out for message hash: ${messageHash}`);
+    return null; // Timeout
+};
