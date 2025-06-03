@@ -1,17 +1,43 @@
+// File: AR_FRONTEND/src/pages/PushPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { List, Card, Typography, Spin, message, Empty, Tag, Button, Grid, Image as AntImage } from 'antd';
-import { BellOutlined, TagOutlined, CalendarOutlined, LinkOutlined, RedoOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { getAnnouncements } from '../services/api';
+import { List, Card, Typography, Spin, message, Empty, Tag, Button, Grid, Image as AntImage, Row, Col } from 'antd';
+import { BellOutlined, TagOutlined, CalendarOutlined, LinkOutlined, RedoOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { getAnnouncements } from '../services/api'; 
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
+
+// Based on one of the screenshots for "Push", if announcements are empty, or for a different state:
+const PushPlaceholderContent = () => (
+  <div className="page-image-container" style={{padding: '20px 0'}}>
+      <img src="/img/push-main-placeholder.png" alt="Push center graphic" style={{maxWidth: '280px', maxHeight: '280px', objectFit: 'contain'}}/>
+      <Title level={3} style={{color: 'white', marginTop: 16, marginBottom: 8}}>Mystery Zone</Title>
+      <Paragraph style={{color: '#a0a0a5', fontSize: '1rem', maxWidth: '400px', margin: '0 auto'}}>
+          What's that mysterious button? Looks like TopUp & Cashout coming soon to manage your ARIX right here. Stay tuned for updates!
+      </Paragraph>
+      {/* 
+      Example TopUp/Cashout section as in one screenshot:
+      <Card className="dark-theme-card" style={{maxWidth: '350px', margin: '24px auto 0 auto'}}>
+         <AntdStatistic title={<Text style={{color: '#8e8e93', textAlign:'center', display:'block'}}>TOTAL BALANCE</Text>} value={"0.00"} suffix="TON" valueStyle={{textAlign:'center', fontSize: '1.8em'}}/>
+         <Row gutter={16} style={{marginTop: 16}}>
+           <Col span={12}>
+             <Button block icon={<ArrowDownOutlined />}>Top up</Button>
+           </Col>
+           <Col span={12}>
+             <Button block icon={<ArrowUpOutlined />}>Cashout</Button>
+           </Col>
+         </Row>
+      </Card> 
+      */}
+  </div>
+);
+
 
 const PushPage = () => {
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const screens = useBreakpoint();
     const isMobile = !screens.md;
-    const showBigIcon = announcements.length === 0;
 
     const fetchAnnouncementsData = useCallback(async () => {
         setLoading(true);
@@ -31,70 +57,58 @@ const PushPage = () => {
     }, [fetchAnnouncementsData]);
 
     const renderAnnouncementItem = (item) => (
-        <List.Item style={{ padding: '8px 0' }}>
-            <Card
-                className="dark-card announcement-card"
+        <List.Item className="announcement-list-item">
+            <Card 
+                className="dark-theme-card" // Use the new base card style
                 title={
-                    <div style={{display: 'flex', alignItems: 'center'}}>
-                        {item.is_pinned && <Tag color="#00BFFF" style={{marginRight: 8}}>PINNED</Tag>}
-                        <Text style={{color: '#00BFFF', fontWeight: 'bold', fontSize: '1.05em'}}>{item.title}</Text>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        {item.is_pinned && <Tag color="#7e73ff" style={{fontWeight:'bold'}}>PINNED</Tag>}
+                        <Text style={{color: '#ffffff', fontWeight: '600', fontSize: '1.05rem'}}>{item.title}</Text>
                     </div>
                 }
-                style={{width: '100%'}}
             >
                 {item.image_url && (
-                    <div style={{ textAlign: 'center', marginBottom: 12 }}>
-                        <AntImage
-                            src={item.image_url}
-                            alt={item.title}
-                            style={{ maxHeight: isMobile ? '120px' : '180px', borderRadius: '6px', objectFit: 'cover', width: '100%' }}
+                    <div style={{ textAlign: 'center', marginBottom: 12, overflow: 'hidden', borderRadius: '8px' }}>
+                        <AntImage 
+                            src={item.image_url} 
+                            alt={item.title} 
+                            style={{ width: '100%', maxHeight: isMobile ? '180px' : '220px', objectFit: 'cover' }} 
                             preview={false}
-                            fallback="/your-arix-icon.png"
+                            fallback="/img/arix_logo_placeholder_event.png" 
                         />
                     </div>
                 )}
-                <Paragraph style={{color: '#B0B0B0', whiteSpace: 'pre-wrap', fontSize: '0.9em'}}>{item.content}</Paragraph>
-                <div style={{marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px'}}>
-                    <div>
-                        {item.type && <Tag icon={<TagOutlined />} color="blue" style={{marginRight: 5, fontSize: '0.75em'}}>{item.type.toUpperCase()}</Tag>}
-                        <Tag icon={<CalendarOutlined />} style={{fontSize: '0.75em'}}>{new Date(item.published_at).toLocaleDateString()}</Tag>
-                    </div>
+                <Paragraph style={{color: '#d1d1d6', whiteSpace: 'pre-wrap', fontSize: '0.9rem'}}>{item.content}</Paragraph>
+                <Row justify="space-between" align="middle" style={{marginTop: 16}} gutter={[8,8]}>
+                    <Col>
+                        {item.type && <Tag icon={<TagOutlined />} color="blue" style={{marginRight: 5, fontSize:'0.75rem'}}>{item.type.toUpperCase()}</Tag>}
+                        <Tag icon={<CalendarOutlined />} style={{fontSize:'0.75rem'}}>{new Date(item.published_at).toLocaleDateString()}</Tag>
+                    </Col>
                     {item.action_url && (
-                        <Button
-                            type="primary"
-                            href={item.action_url}
-                            target="_blank"
+                       <Col>
+                        <Button 
+                            type="primary" 
+                            href={item.action_url} 
+                            target="_blank" 
                             icon={<LinkOutlined />}
                             size="small"
                         >
                             {item.action_text || 'Learn More'}
                         </Button>
+                       </Col>
                     )}
-                </div>
+                </Row>
             </Card>
         </List.Item>
     );
 
     return (
-        <div style={{ padding: isMobile ? '12px' : '16px', maxWidth: '960px', margin: '0 auto' }}>
-            {!showBigIcon && (
-                <Title level={3} style={{ color: 'white', textAlign: 'center', marginBottom: isMobile ? '15px' : '20px', fontWeight: 'bold' }}>
-                    <BellOutlined style={{marginRight: 10}} /> Platform Updates & News
-                </Title>
-            )}
+        <div style={{ padding: isMobile ? '16px' : '24px'}}>
+            <Title level={2} className="page-title">
+                <BellOutlined style={{marginRight: 10}} /> Updates & News
+            </Title>
 
-            {showBigIcon && !loading && (
-                <div style={{ textAlign: 'center', padding: '30px 0' }}>
-                     <ThunderboltOutlined style={{ fontSize: '80px', color: '#00BFFF', opacity: 0.6, marginBottom: 20 }} className="push-page-image" />
-                     <Title level={3} style={{color: '#00BFFF'}}>Push Notifications</Title>
-                     <Paragraph style={{color: '#8A8A8A'}}>
-                        Stay tuned for important updates and announcements!
-                     </Paragraph>
-                </div>
-            )}
-
-
-            <div style={{textAlign:'right', marginBottom: 12}}>
+            <div style={{textAlign:'right', marginBottom: 16}}>
                 <Button icon={<RedoOutlined/>} onClick={fetchAnnouncementsData} loading={loading}>Refresh</Button>
             </div>
 
@@ -102,14 +116,17 @@ const PushPage = () => {
                  <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" tip="Loading Announcements..." /></div>
             ) : announcements.length > 0 ? (
                 <List
-                    itemLayout="vertical"
+                    grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 2 }} // Display 2 columns on larger screens
                     dataSource={announcements}
                     renderItem={renderAnnouncementItem}
                     className="announcements-list"
-                    split={false}
                 />
             ) : (
-                !showBigIcon && <Card className="dark-card"><Empty description="No announcements available at the moment." /></Card>
+                 // If no announcements, show the placeholder from screenshot for "Push"
+                 <PushPlaceholderContent />
+                //  <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px'}}>
+                //      <Empty description={<Text style={{color:'#a0a0a5'}}>No announcements available at the moment. Stay tuned!</Text>} />
+                //  </Card>
             )}
         </div>
     );

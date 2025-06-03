@@ -1,178 +1,80 @@
 /* File: AR_FRONTEND/src/App.css */
 
-/* Base body style is in index.css */
-
-/* Custom Ant Design overrides for Neumorphic/Glassmorphic */
-
-/* Sider and Header styles are primarily controlled via inline styles/theme tokens in App.jsx
-   using backdrop-filter for the glass effect. */
-
-/* Main Content Area - Use global background */
-#root > .ant-layout > .ant-layout { /* Targeting the nested Layout for main content */
-  background: transparent !important; /* Ensure it's transparent to show body background */
+/* Main Layout styles */
+.app-layout {
+  background-color: #000000 !important;
 }
 
-.ant-layout-content { /* This is a general AntD class, use with caution or more specificity */
-    /* Our App.jsx uses className="app-content" for targeted styling */
-}
-
-
-/* Neumorphic & Glassmorphic Card Base Style */
-.neumorphic-glass-card {
-  background: rgba(40, 42, 58, 0.5) !important; /* Slightly more transparent for glass */
-  backdrop-filter: blur(12px) !important; /* Adjusted blur */
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-radius: 16px !important; /* Softer radius */
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow:
-    -6px -6px 12px rgba(55, 58, 78, 0.8), /* Dark theme outer light */
-    6px 6px 12px rgba(12, 12, 18, 0.8) !important; /* Dark theme outer dark */
-  transition: all 0.25s ease-in-out !important;
-  color: #e0e0e0 !important;
-  overflow: hidden;
-}
-
-.neumorphic-glass-card:hover {
-  transform: translateY(-3px); /* Subtle hover lift */
-  box-shadow:
-    -8px -8px 16px rgba(60, 63, 83, 0.9),
-    8px 8px 16px rgba(10, 10, 15, 0.9) !important;
-}
-
-.neumorphic-glass-card .ant-card-head {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  padding: 16px 20px !important; /* Adjusted padding */
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-.neumorphic-glass-card .ant-card-head-title {
-  color: #00adee !important;
-  font-weight: 600 !important;
-  font-size: 1.15em !important; /* Slightly larger */
-}
-
-.neumorphic-glass-card .ant-card-body {
-    padding: 20px !important; /* Adjusted padding */
-}
-
-.neumorphic-glass-card .ant-card-actions {
-  background: transparent !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important; /* Softer top border */
-  padding: 12px 20px !important; /* Adjusted padding */
-  margin-top: 0px !important; /* Usually actions are flush or part of body padding flow */
-}
-.neumorphic-glass-card .ant-card-actions > li { margin: 0 4px !important; padding: 0 !important; }
-.neumorphic-glass-card .ant-card-actions > li > span { width: 100%; display: block; }
-.neumorphic-glass-card .ant-card-actions .ant-btn { margin: 0 auto; display: block; }
-
-
-/* General Button Styling (Neumorphic Inspired) */
-.ant-btn { /* Theme tokens should primarily handle this */ }
-
-.ant-btn-primary { /* Theme tokens should primarily handle this */ }
-.ant-btn-primary:hover { /* Theme tokens */ }
-.ant-btn-primary:active, .ant-btn-primary:focus { /* Theme tokens */ }
-.ant-btn-primary:disabled { /* Theme tokens */ }
-
-.ant-btn-default { /* Theme tokens */ }
-.ant-btn-default:hover { /* Theme tokens */ }
-.ant-btn-default:active, .ant-btn-default:focus { /* Theme tokens */ }
-.ant-btn-default:disabled { /* Theme tokens */ }
-
-/* Input Number specific styling if theme tokens are not enough */
-.neumorphic-input-number.ant-input-number { /* Custom class for targeted styling */
-  background: rgba(20, 22, 30, 0.6) !important;
-  border-radius: 10px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: inset 3px 3px 6px rgba(12,12,18,0.6), inset -3px -3px 6px rgba(45,48,68,0.6) !important;
-}
-.neumorphic-input-number .ant-input-number-input {
-    text-align: center;
-    color: #e0e0e0 !important;
-    background: transparent !important;
-    height: 46px !important; /* For size="large" */
-    line-height: 46px !important;
-    font-size: 1.1em;
-}
-/* AntD InputNumber Handlers (Up/Down arrows) */
-.ant-input-number-handler-wrap { background: transparent !important; border-left: 1px solid rgba(255, 255, 255, 0.1) !important; }
-.ant-input-number-handler { color: #00adee !important; border: none !important; }
-.ant-input-number-handler:hover { background: rgba(0, 173, 238, 0.1) !important; }
-
-
-/* Modal styling (className="glass-pane" and theme tokens) */
-.glass-pane.ant-modal .ant-modal-content { /* Theme tokens should handle this */ }
-
-/* Alert Styling (className="glass-pane-alert") */
-.glass-pane-alert.ant-alert {
-    background: rgba(40, 42, 58, 0.6) !important; /* Darker, more consistent glass */
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #e0e0e0 !important;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border-radius: 10px;
-}
-.glass-pane-alert.ant-alert-info {
-    background-color: rgba(0, 173, 238, 0.2) !important; /* ARIX blue tint */
-    border-color: rgba(0, 173, 238, 0.4) !important;
-}
-.glass-pane-alert .ant-alert-message { color: #e0e0e0 !important; font-weight: 500; }
-.glass-pane-alert .ant-alert-description { color: #b0b0c0 !important; }
-.glass-pane-alert .ant-alert-icon { font-size: 1.2em; margin-top: 2px; }
-.glass-pane-alert.ant-alert-info .ant-alert-icon { color: #00adee !important; }
-.glass-pane-alert.ant-alert-warning .ant-alert-icon { color: #faad14 !important; }
-
-
-/* Menu Item Styling (Desktop Sider) - Theme tokens should handle most */
-/* App.jsx provides inline styles for sider menu items */
-
-/* Typography Copy Icon */
-.ant-typography-copy { color: #00adee; margin-left: 8px; }
-.ant-typography-copy:hover { color: #3cf4ff; }
-
-/* Spin color - Theme tokens */
-.ant-spin-dot-item { /* Theme tokens */ }
-
-
-/* --- App.jsx Responsive Layout Specific Styles --- */
+/* Header specific styles */
 .app-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px; /* Default padding */
-  position: sticky !important; top: 0; z-index: 1001; /* Changed to sticky for header */
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  /* Background and border from theme */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px !important; /*Consistent padding */
+  position: sticky !important; 
+  top: 0; 
+  z-index: 1001;
+  background-color: #121212 !important; /* Slightly off-black header for depth */
+  border-bottom: 1px solid #2a2a2a !important; /* Subtle border */
+  height: 56px !important; /* Adjusted height like screenshots */
 }
-@media (max-width: 767px) {
-  .app-header { padding: 0 16px; }
+.app-header-title {
+  color: #ffffff !important;
+  margin: 0 !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+@media (min-width: 768px) {
+  .app-header {
+    padding: 0 24px !important;
+    height: 64px !important;
+  }
+  .app-header-title {
+    font-size: 1.25rem !important;
+  }
 }
 
-/* .app-content is within the main Layout (the one next to Sider or taking full width if Sider is hidden) */
+/* Content Wrapper */
 .app-content-wrapper {
-    padding-top: 64px; /* Height of the sticky header */
-    background: transparent;
-    flex: 1; /* Allow this Layout to grow and enable scrolling if content overflows */
-    overflow-y: auto; /* Enable scrolling on this part, not the entire body or outer Layout */
+  padding-top: 56px; /* Match header height */
+  background: transparent; /* Show main app background */
+  flex: 1; 
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+@media (min-width: 768px) {
+  .app-content-wrapper {
+    padding-top: 64px;
+  }
 }
 .app-content-wrapper.mobile-view {
-    padding-bottom: 60px; /* Height of the fixed bottom nav */
+  padding-bottom: 56px; /* Match bottom nav height */
 }
 
+/* App Content Padding and Max Width */
 .app-content {
-  padding: 24px; margin: 0;
-  min-height: calc(100vh - 64px); /* Fallback/Desktop min-height if not mobile with bottom nav */
-  background: transparent; /* Ensures it uses body or theme background */
-}
-
-.mobile-view .app-content { /* This is now nested within app-content-wrapper */
   padding: 16px;
-  min-height: auto; /* min-height will be handled by parent Layout */
-  /* padding-bottom: 70px; -> this padding-bottom is now on .app-content-wrapper.mobile-view */
-  /* min-height: calc(100vh - 64px - 60px);  -> this is complex and better handled by flex layout of app-content-wrapper */
+  margin: 0 auto;
+  min-height: calc(100vh - 56px); /* Fallback for desktop */
+  background: transparent;
+  max-width: 900px; /* Max width for content on larger screens */
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .app-content {
+    padding: 24px;
+    min-height: calc(100vh - 64px); /* Fallback for desktop */
+  }
+}
+
+.mobile-view .app-content {
+  min-height: calc(100vh - 56px - 56px); /* Full viewport minus header and bottom nav */
 }
 
 
-/* MOBILE BOTTOM NAV STYLING */
-.mobile-bottom-nav.ant-menu { /* More specificity to target the Menu directly */
+/* Mobile Bottom Navigation - Matches screenshot style */
+.mobile-bottom-nav.ant-menu {
   position: fixed !important;
   bottom: 0;
   left: 0;
@@ -180,109 +82,401 @@
   z-index: 1000;
   display: flex !important;
   justify-content: space-around !important;
-  
-  /* Frosted Glass Effect */
-  background: rgba(25, 25, 35, 0.6) !important; /* Match Sider background transparency */
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 -2px 15px rgba(0,0,0,0.3) !important; /* Slightly enhanced shadow */
-  height: 60px !important; /* Keep fixed height */
-  padding-bottom: 0 !important; /* Ensure no extra padding affects height */
-  padding-top: 0 !important;
+  background: #1c1c1e !important; /* Card-like dark grey */
+  border-top: 1px solid #38383a !important; /* Subtle top border */
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
+  height: 56px !important;
+  padding: 0 !important;
 }
 
 .mobile-bottom-nav .ant-menu-item {
-  flex-grow: 1; text-align: center;
-  padding: 0 !important; /* Reset padding, use flex for centering */
-  height: 100% !important; /* Occupy full height of nav bar */
-  display: flex !important; flex-direction: column !important;
-  justify-content: center !important; align-items: center !important;
-  line-height: 1.2 !important; /* Adjusted for better icon+text spacing */
-  color: rgba(220, 220, 230, 0.75) !important; /* Default item color from theme */
-  border-radius: 0 !important; /* Remove individual item radius if any */
+  flex-grow: 1;
+  text-align: center;
+  padding: 4px 0 !important; /* Minimal padding for icon and small text */
+  margin: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  line-height: 1 !important; /* Tight line height for icon and label */
+  border-radius: 0 !important;
+  color: #8e8e93 !important; /* Default grey icon/text color from screenshots */
 }
 .mobile-bottom-nav .ant-menu-item .anticon {
-  font-size: 20px !important; /* Slightly smaller for better fit */
-  margin-bottom: 2px !important;
-  margin-right: 0 !important; /* Remove if any right margin exists from default AntD */
-  line-height: 1; /* Ensure icon is tight */
+  font-size: 20px !important; /* Icons a bit smaller */
+  margin-bottom: 3px !important;
 }
 .mobile-bottom-nav .mobile-menu-label {
-  font-size: 10px !important; display: block;
-  line-height: 1; /* Ensure label is tight */
+  font-size: 10px !important;
+  display: block;
+  font-weight: 500;
 }
 
-/* Selected/Active Item Styles */
 .mobile-bottom-nav .ant-menu-item-selected {
-  background-color: rgba(0, 173, 238, 0.15) !important; /* Subtle background tint */
+  background-color: transparent !important; /* No background on selected */
 }
 .mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
 .mobile-bottom-nav .ant-menu-item-selected .anticon {
-  color: #00adee !important; /* Active color from theme */
+  color: #7e73ff !important; /* Selected accent color */
 }
 .mobile-bottom-nav .ant-menu-item::after {
-    border-bottom: none !important; /* Remove underline for horizontal mobile nav */
+  display: none !important; /* Remove default AntD selected indicator */
 }
 
 
-/* --- CoinflipGame.jsx Responsive Styles --- */
-.coinflip-card .ant-card-body { padding: 16px !important; }
+/* Desktop Sider - Kept for completeness if user has wider screen layouts for this. */
+.desktop-sider {
+  background: #121212 !important; /* Match header */
+  backdrop-filter: none; /* No blur for flat style */
+  border-right: 1px solid #2a2a2a !important;
+  height: calc(100vh - 64px); /* Full height minus header */
+  position: sticky !important;
+  top: 64px !important;
+  z-index: 999;
+  overflow: auto;
+}
+.desktop-sider .ant-menu {
+  background: transparent !important;
+  border-right: 0 !important;
+}
+.desktop-sider .ant-menu-item {
+  color: #a0a0a5 !important;
+}
+.desktop-sider .ant-menu-item .anticon {
+  font-size: 16px;
+}
+.desktop-sider .ant-menu-item-selected {
+  background-color: #2c2c2e !important;
+  color: #7e73ff !important;
+}
+.desktop-sider .ant-menu-item-selected .anticon {
+ color: #7e73ff !important;
+}
+
+/* Style for AntD Components based on the new flat dark theme */
+.ant-btn-primary {
+  background-color: #7e73ff !important;
+  border-color: #7e73ff !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(126, 115, 255, 0.3) !important;
+}
+.ant-btn-primary:hover, .ant-btn-primary:focus {
+  background-color: #9a91ff !important;
+  border-color: #9a91ff !important;
+}
+.ant-btn-default {
+  background-color: #2c2c2e !important;
+  border-color: #38383a !important;
+  color: #e0e0e5 !important;
+}
+.ant-btn-default:hover, .ant-btn-default:focus {
+  border-color: #7e73ff !important;
+  color: #7e73ff !important;
+  background-color: #303032 !important;
+}
+.ant-input, .ant-input-number, .ant-select-selector {
+  background-color: #2c2c2e !important;
+  border-color: #38383a !important;
+  color: #e0e0e5 !important;
+}
+.ant-input::placeholder, .ant-input-number-input::placeholder {
+  color: #6a6a6e !important;
+}
+.ant-input-number-handler-wrap {
+  background-color: #2c2c2e !important;
+  border-left: 1px solid #38383a !important;
+}
+.ant-input-number-handler {
+  color: #8e8e93 !important;
+  border-color: #38383a !important;
+}
+.ant-input-number-handler:hover {
+  background-color: #38383a !important;
+}
+
+.ant-radio-button-wrapper {
+  background: #2c2c2e !important;
+  border-color: #38383a !important;
+  color: #e0e0e5 !important;
+}
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  background: #7e73ff !important;
+  border-color: #7e73ff !important;
+  color: #ffffff !important;
+}
+.ant-radio-button-wrapper:hover {
+  color: #7e73ff !important;
+}
+
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab, .ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab {
+    background: #2c2c2e !important;
+    border-color: #38383a !important;
+    color: #a0a0a5 !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active, .ant-tabs-card > div > .ant-tabs-nav .ant-tabs-tab-active {
+    background: #1c1c1e !important; /* Same as card body to make it "pop" into the content */
+    border-color: #38383a !important;
+    border-bottom-color: #1c1c1e !important; /* Match content area */
+    color: #ffffff !important;
+}
+.ant-tabs-ink-bar {
+    background: #7e73ff !important;
+}
+
+.ant-modal-content {
+    background-color: #1c1c1e !important;
+    border-radius: 16px !important;
+    border: 1px solid #38383a !important;
+}
+.ant-modal-header {
+    background-color: #1c1c1e !important;
+    border-bottom: 1px solid #38383a !important;
+    border-radius: 16px 16px 0 0 !important;
+}
+.ant-modal-title {
+    color: #ffffff !important;
+}
+.ant-modal-close-x {
+    color: #8e8e93 !important;
+}
+
+.ant-statistic-title {
+    color: #8e8e93 !important;
+    font-size: 0.85rem !important;
+}
+.ant-statistic-content {
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+}
+.ant-statistic-content-suffix {
+    color: #8e8e93 !important;
+}
+
+.ant-alert {
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+}
+.ant-alert-info {
+  background-color: rgba(126, 115, 255, 0.15) !important;
+  border: 1px solid rgba(126, 115, 255, 0.3) !important;
+}
+.ant-alert-info .ant-alert-icon {
+  color: #7e73ff !important;
+}
+.ant-alert-warning {
+  background-color: rgba(250, 173, 20, 0.15) !important;
+  border: 1px solid rgba(250, 173, 20, 0.3) !important;
+}
+.ant-alert-warning .ant-alert-icon {
+    color: #faad14 !important;
+}
+.ant-alert-message {
+  font-weight: 500;
+  color: #f5f5f7 !important;
+}
+.ant-alert-description {
+  color: #a0a0a5 !important;
+}
+.ton-connect-button {
+  height: 36px !important; /* Match size better with screenshot styles */
+  border-radius: 8px !important;
+  /* background-image: linear-gradient(to right, #7e73ff, #5b4fff) !important; */
+}
+
+/* Custom card style based on screenshot games/earn page */
+.game-info-card {
+  background-color: #1c1c1e;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #38383a;
+  text-align: left; /* Default text align */
+}
+
+.game-info-card img.card-image { /* Example specific class for images in cards */
+  width: 100%;
+  height: 120px; /* Or adjust as needed */
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.game-info-card .ant-typography {
+  color: #d1d1d6; /* Slightly lighter text color for paragraphs */
+}
+.game-info-card .ant-typography strong,
+.game-info-card .ant-typography-title {
+  color: #ffffff;
+}
+
+.game-info-card .ant-btn { /* Style buttons inside these cards */
+    margin-top: 12px;
+}
+
+
+.dark-segmented-control .ant-radio-group {
+    width: 100%;
+}
+.dark-segmented-control .ant-radio-button-wrapper {
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
+    padding: 8px 12px !important; /* Custom padding for segment buttons */
+    height: auto !important; /* Override fixed height */
+    line-height: 1.2 !important;
+    font-size: 0.9rem;
+}
+
+
+/* Coinflip specific for dark theme, removing neumorphic specifics */
+.coinflip-card {
+  /* Uses .dark-theme-card */
+}
+.coinflip-card .ant-card-body { padding: 20px !important; }
 @media (min-width: 768px) { .coinflip-card .ant-card-body { padding: 24px !important; } }
 
 .coin-display-container {
-  width: 120px; height: 120px; border-radius: 50%; background: #2a2d3a;
-  margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.25); border: 2px solid #333749;
+  width: 100px; height: 100px; border-radius: 50%; background: #2c2c2e; /* Darker grey */
+  margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #38383a; /* Subtle border */
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
   overflow: hidden;
 }
 @media (min-width: 768px) {
-  .coin-display-container { width: 160px; height: 160px; margin-bottom: 20px; }
+  .coin-display-container { width: 120px; height: 120px; margin-bottom: 20px; }
 }
-.coin-image { width: 85%; height: 85%; object-fit: contain; }
+.coin-image { width: 80%; height: 80%; object-fit: contain; }
 
-.game-result-info { padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; text-align: center; }
-.game-result-info.win { background: rgba(82, 196, 26, 0.15); border: 1px solid rgba(82, 196, 26, 0.3); }
-.game-result-info.loss { background: rgba(255, 77, 79, 0.15); border: 1px solid rgba(255, 77, 79, 0.3); }
-.game-result-info .result-title { margin: 0 0 5px 0; font-size: 1.1em; }
-.game-result-info .result-text { color: #ccc; display: block; margin-bottom: 2px; font-size: 0.85em;}
-.game-result-info .result-text strong { color: #00adee; }
-.game-result-info .result-text.delta { margin-top: 5px; font-size: 1em; }
-.game-result-info .game-id-text { font-size: 0.7em; color: #777; margin-top: 5px; }
-
-.coinflip-controls .input-label { color: #aaa; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9em; }
-.coinflip-radio-group { width: 100%; display: flex; }
-.coinflip-radio-button {
-    flex: 1; text-align: center; height: 44px !important; line-height: 42px !important; font-size: 1em;
+.game-result-info { 
+  padding: 12px; border-radius: 10px; margin-top: 16px; margin-bottom: 16px; text-align: center; 
+  border-width: 1px; border-style: solid;
 }
-.flip-button { height: 48px !important; font-size: 1.05em !important; font-weight: 500; }
+.game-result-info.win { background: rgba(76, 175, 80, 0.15); border-color: rgba(76, 175, 80, 0.4); }
+.game-result-info.loss { background: rgba(244, 67, 54, 0.15); border-color: rgba(244, 67, 54, 0.4); }
+.game-result-info .result-title { margin: 0 0 6px 0; font-size: 1.2em; font-weight: 600; }
+.game-result-info .result-title.win { color: #4CAF50; }
+.game-result-info .result-title.loss { color: #F44336; }
+.game-result-info .result-text { color: #a0a0a5; display: block; margin-bottom: 3px; font-size: 0.9em;}
+.game-result-info .result-text strong { color: #7e73ff; } /* Use accent for choice/coin */
+.game-result-info .result-text.delta { margin-top: 6px; font-size: 1.05em; }
+.game-result-info .game-id-text { font-size: 0.75em; color: #6a6a6e; margin-top: 8px; }
 
-/* --- UserProfileCard.jsx Responsive Styles --- */
-.profile-card .ant-card-body { padding: 16px !important; }
-@media (min-width: 768px) { .profile-card .ant-card-body { padding: 20px !important; } }
+.coinflip-controls .input-label { color: #a0a0a5; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9em; font-weight: 500; }
+.coinflip-radio-group.ant-radio-group { width: 100%; display: flex; }
+.coinflip-radio-button.ant-radio-button-wrapper {
+    flex: 1; text-align: center; height: 40px !important; line-height: 38px !important; font-size: 0.95em;
+}
+.flip-button.ant-btn { height: 44px !important; font-size: 1rem !important; font-weight: 600; }
+
+/* Task Card Styles */
+.task-list-item .ant-card, .history-list-item .ant-card {
+  /* uses .dark-theme-card by className prop */
+}
+
+.profile-card .ant-statistic-title { /* Style for UserProfileCard stats specifically */
+  color: #8e8e93 !important;
+  font-size: 0.9rem !important;
+}
+.profile-card .ant-statistic-content {
+    color: #ffffff !important;
+    font-size: 1.4rem !important;
+}
+.profile-text-label { color: #a0a0a5; font-weight: 500;}
 .profile-text-item { margin-bottom: 10px !important; word-break: break-word; font-size: 0.95em; }
-.profile-text-label { color: #aaa; font-weight: 500; }
-.copy-button-inline { color: #00adee; margin-left: 6px; padding: 0 4px !important; height: auto !important; }
-.balances-col .balance-item { margin-bottom: 12px; }
-.balances-col .ant-statistic-title { font-size: 0.9em !important; color: #aaa !important; }
-.balances-col .ant-statistic-content { font-size: 1.2em !important; line-height: 1.2; font-weight: 500; }
-@media (min-width: 768px) {
-    .balances-col .ant-statistic-content { font-size: 1.4em !important; }
+.profile-text-item .ant-typography {color: #e0e0e5 !important; }
+.profile-text-item .ant-typography-copy { color: #7e73ff !important; }
+
+
+.transaction-list-item, .history-list-item .ant-list-item {
+    border-bottom: 1px solid #2a2a2a !important;
+    padding: 12px 0px !important;
+}
+.transaction-list-item:last-child, .history-list-item .ant-list-item:last-child {
+    border-bottom: none !important;
 }
 
-/* --- TransactionList.jsx Responsive Styles --- */
-.transaction-list-card .ant-card-head-title { font-size: 1.1em; }
-.transaction-list-item { padding: 12px 0px !important; } /* Mobile first padding */
-@media (min-width: 768px) { .transaction-list-item { padding: 16px 0px !important; } }
-
-.stake-history-item .ant-tag, .game-history-item .ant-tag { margin-right: 0; font-size: 0.8em; padding: 2px 6px;}
-.history-text-item { color: #b0b0b0; font-size: 0.9em; margin-bottom: 5px !important; line-height: 1.4;}
-.history-text-item.small-text { font-size: 0.8em; color: #888; }
+.stake-history-item .ant-tag, .game-history-item .ant-tag, .task-history-item .ant-tag { margin-right: 0; font-size: 0.8em; padding: 2px 6px;}
+.history-text-item { color: #a0a0a5; font-size: 0.9em; margin-bottom: 5px !important; line-height: 1.4;}
+.history-text-item.small-text { font-size: 0.8em; color: #6a6a6e; }
 .history-text-item.tx-hash { word-break: break-all; }
+.history-text-item.tx-hash .ant-typography-copy {color: #7e73ff !important; font-size: 0.9em;}
 .history-text-item strong { color: #f0f0f0; }
 
-.game-history-item .game-win { color: #52c41a !important; font-weight: bold; }
-.game-history-item .game-loss { color: #ff4d4f !important; font-weight: bold; }
+.game-history-item .game-win { color: #4CAF50 !important; font-weight: bold; }
+.game-history-item .game-loss { color: #F44336 !important; font-weight: bold; }
 
-.status-tag { font-weight: bold; }
+/* User Page - Specific settings section layout */
+.user-settings-section {
+  margin-bottom: 24px;
+}
+.user-settings-section .section-title {
+  color: #aaa; /* Grey section titles */
+  text-align: left;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.user-settings-section .ant-btn {
+  margin-right: 8px; /* Spacing for grouped buttons */
+  margin-bottom: 8px;
+}
+
+.referral-code-display {
+  background-color: #2c2c2e;
+  border: 1px solid #38383a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  color: #a0a0a5;
+  font-size: 0.95rem;
+  letter-spacing: 1px; /* More space for "code" */
+  margin-bottom: 10px;
+}
+
+.support-guide-buttons .ant-btn {
+  width: 100%; /* Make them full width if in a single column on mobile */
+  margin-bottom: 10px;
+}
+@media (min-width: 576px) {
+  .support-guide-buttons .ant-btn {
+    width: auto; /* Auto width on larger screens if they are side by side */
+  }
+}
+
+.social-links-container {
+    display: flex;
+    justify-content: center;
+    gap: 16px; /* Spacing between social links */
+    margin-top: 16px;
+}
+.social-links-container .ant-btn {
+    border: none !important;
+    padding: 0 12px !important;
+    color: #8e8e93 !important; /* Grey social icons */
+}
+.social-links-container .ant-btn:hover {
+    color: #7e73ff !important; /* Accent on hover */
+}
+
+.page-image-container { /* For pages like Push (original screenshot) */
+  text-align: center;
+  margin-bottom: 24px;
+}
+.page-image-container img {
+  max-width: 100%;
+  max-height: 250px; /* Example constraint */
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.centered-message { /* For pages like default Push or Earn */
+  text-align: center;
+  padding: 40px 20px;
+  color: #a0a0a5;
+}
+.centered-message .ant-typography-title {
+    margin-bottom: 16px !important;
+}

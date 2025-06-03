@@ -1,48 +1,323 @@
-import React from 'react';
-import { Typography, Grid, Button } from 'antd';
-import { Link } from 'react-router-dom'; // Assuming you might link to tasks later
+// File: AR_FRONTEND/src/pages/TaskPage.jsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { List, Card, Button, Typography, Spin, message, Modal, Input, Empty, Tag, Tooltip, Row, Col, Grid } from 'antd';
+import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LinkOutlined, SendOutlined, RedoOutlined } from '@ant-design/icons';
+import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { getActiveTasks, submitTaskCompletion, getUserTaskHistory } from '../services/api';
+import { ARIX_DECIMALS } from '../utils/tonUtils';
 
 const { Title, Text, Paragraph } = Typography;
+const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
 const TaskPage = () => {
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+    const [tasks, setTasks] = useState([]);
+    const [userTaskHistory, setUserTaskHistory] = useState([]);
+    const [loadingTasks, setLoadingTasks] = useState(true);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [submissionInput, setSubmissionInput] = useState('');
+    const [submitLoading, setSubmitLoading] = useState(false);
 
-  return (
-    <div style={{
-        padding: isMobile ? '20px 12px' : '30px 16px',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 56px - 60px - 130px)', // Adjust based on header/footer/balance heights
-    }}>
-      <img
-        src="/img/terminal_character_money.png"
-        alt="ARIX Terminal Character with Money"
-        style={{
-          maxWidth: isMobile ? '280px' : '350px',
-          width: '80%',
-          marginBottom: '20px',
-          filter: 'drop-shadow(0 0 20px rgba(0, 191, 255, 0.2))'
-        }}
-        onError={(e) => { e.currentTarget.src = 'https://placehold.co/350x300/0D0D0D/1A1A1A?text=Task+Art&font=inter'; }}
-      />
-        <Title level={3} style={{ color: '#00BFFF', marginBottom: '10px' }}>
-            Tasks Coming Soon
-        </Title>
-        <Paragraph style={{ color: '#8A8A8A', fontSize: isMobile ? '0.9em': '1em', maxWidth: '450px', lineHeight: '1.6' }}>
-            Exciting tasks and challenges are being prepared. Complete them to earn ARIX and other rewards. Check back soon for updates!
-        </Paragraph>
-        {/*
-        <Button type="primary" size="large" style={{marginTop: '20px'}} onClick={() => message.info("Task system is under development!")}>
-            Notify Me
-        </Button>
-        */}
-    </div>
-  );
+    const userFriendlyAddress = useTonAddress();
+    const rawAddress = useTonAddress(false);
+    const [tonConnectUI] = useTonConnectUI();
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
+
+    const fetchTasks = useCallback(async () => {
+        setLoadingTasks(true);
+        try {
+            const response = await getActiveTasks(rawAddress || undefined); 
+            setTasks(response.data || []);
+        } catch (error) {
+            message.error("Failed to load tasks.");
+            console.error("Fetch tasks error:", error);
+        } finally {
+            setLoadingTasks(false);
+        }
+    }, [rawAddress]);
+
+    const fetchUserHistory = useCallback(async () => {
+        if (!rawAddress) {
+            setUserTaskHistory([]);
+            return;
+        }
+        setLoadingHistory(true);
+        try {
+            const response = await getUserTaskHistory(rawAddress);
+            setUserTaskHistory(response.data || []);
+        } catch (error) {
+            message.error("Failed to load your task history.");
+            console.error("Fetch task history error:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    }, [rawAddress]);
+
+    useEffect(() => {
+        fetchTasks();
+        if (userFriendlyAddress) {
+            fetchUserHistory();
+        } else {
+            setUserTaskHistory([]);
+        }
+    }, [userFriendlyAddress, fetchTasks, fetchUserHistory]);
+
+    const handleRefreshAll = () => {
+        fetchTasks();
+        if (userFriendlyAddress) {
+            fetchUserHistory();
+        } else {
+            message.info("Connect wallet to see your task history.")
+        }
+    }
+
+    const handleTaskAction = (task) => {
+        if (!userFriendlyAddress) {
+            message.warn("Please connect your wallet to participate in tasks.");
+            tonConnectUI.openModal();
+            return;
+        }
+        setSelectedTask(task);
+        if (task.validation_type === 'link_submission' || task.validation_type === 'text_submission') {
+            setIsModalVisible(true);
+        } else if (task.validation_type === 'auto_approve') {
+            handleModalSubmit(); 
+        } else if (task.action_url) {
+            window.open(task.action_url, '_blank');
+            setIsModalVisible(true); // Still open modal to confirm completion for action_url tasks
+        } else {
+             setIsModalVisible(true);
+        }
+    };
+
+    const handleModalSubmit = async () => {
+        if (!selectedTask || !rawAddress) return;
+
+        setSubmitLoading(true);
+        const loadingMessageKey = 'taskSubmit';
+        message.loading({ content: `Submitting task '${selectedTask.title}'...`, key: loadingMessageKey, duration: 0});
+
+        let submissionPayload = {};
+        if (selectedTask.validation_type === 'link_submission') {
+            if (!submissionInput || !(submissionInput.startsWith('http://') || submissionInput.startsWith('https://'))) {
+                message.error({ content: 'Please enter a valid link (http:// or https://).', key: loadingMessageKey, duration: 3 });
+                setSubmitLoading(false);
+                return;
+            }
+            submissionPayload = { link: submissionInput };
+        } else if (selectedTask.validation_type === 'text_submission') {
+             submissionPayload = { text: submissionInput };
+        }
+
+        try {
+            const response = await submitTaskCompletion(selectedTask.task_id, {
+                userWalletAddress: rawAddress,
+                submissionData: Object.keys(submissionPayload).length > 0 ? submissionPayload : null,
+            });
+            message.success({ content: response.data.message || 'Task submitted successfully!', key: loadingMessageKey, duration: 4 });
+            setIsModalVisible(false);
+            setSubmissionInput('');
+            setSelectedTask(null);
+            fetchTasks(); 
+            fetchUserHistory();
+        } catch (error) {
+            message.error({ content: error?.response?.data?.message || 'Task submission failed.', key: loadingMessageKey, duration: 4 });
+            console.error("Submit task error:", error);
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
+
+    const getTaskStatusTag = (task) => {
+        const statusText = task.user_status?.replace(/_/g, ' ').toUpperCase();
+        if (task.user_status === 'completed' || task.user_status === 'reward_credited') {
+            return <Tag icon={<CheckCircleOutlined />} color="success">{statusText}</Tag>;
+        }
+        if (task.user_status === 'pending_verification' || task.user_status === 'approved') {
+            return <Tag icon={<ClockCircleOutlined />} color="processing">{statusText}</Tag>;
+        }
+        if (task.user_status === 'rejected') {
+            return <Tag icon={<ExclamationCircleOutlined />} color="error">{statusText}</Tag>;
+        }
+        return null; 
+    };
+    
+    const getHistoryStatusTag = (status) => {
+        const statusText = status?.replace(/_/g, ' ').toUpperCase();
+        if (status === 'reward_credited' || status === 'completed') return <Tag color="success" style={{fontWeight: '500'}}>{statusText}</Tag>;
+        if (status === 'approved') return <Tag color="blue" style={{fontWeight: '500'}}>{statusText}</Tag>;
+        if (status === 'pending_verification') return <Tag color="gold" style={{fontWeight: '500'}}>{statusText}</Tag>;
+        if (status === 'rejected') return <Tag color="error" style={{fontWeight: '500'}}>{statusText}</Tag>;
+        return <Tag style={{fontWeight: '500'}}>{statusText}</Tag>;
+    };
+
+
+    const renderTaskItem = (task) => (
+        <List.Item className="task-list-item">
+            <Card 
+                className="dark-theme-card" // Updated class
+                title={<Text style={{color: '#ffffff', fontWeight: '600', fontSize:'1.05rem'}}>{task.title}</Text>}
+                extra={getTaskStatusTag(task)}
+            >
+                <Paragraph style={{color: '#d1d1d6', minHeight: '3em', fontSize: '0.9rem'}}>{task.description}</Paragraph>
+                <Row justify="space-between" align="middle" style={{marginTop: 12}}>
+                    <Col>
+                        <Text strong style={{color: '#4CAF50', fontSize: '1.1rem'}}>
+                            Reward: {parseFloat(task.reward_arix_amount).toFixed(ARIX_DECIMALS)} ARIX
+                        </Text>
+                    </Col>
+                    <Col>
+                        {task.can_attempt ? (
+                            <Button 
+                                type="primary" 
+                                icon={task.action_url ? <LinkOutlined /> : <SendOutlined />}
+                                onClick={() => handleTaskAction(task)}
+                                disabled={!userFriendlyAddress} // Still disable if no wallet for actual submission
+                                size="middle"
+                            >
+                                {task.validation_type === 'auto_approve' && !task.action_url ? 'Claim' : (task.action_url ? 'Go to Task' : 'Submit')}
+                            </Button>
+                        ) : (
+                            <Button disabled type="dashed" size="middle">{task.user_status === 'pending_verification' ? 'Pending' : 'Completed'}</Button>
+                        )}
+                    </Col>
+                </Row>
+                 {task.action_url && task.can_attempt && task.validation_type !== 'auto_approve' && (
+                     <Text type="secondary" style={{fontSize: '0.8em', display:'block', marginTop: 8, color: '#8e8e93'}}>
+                         Perform action at link, then confirm completion.
+                     </Text>
+                 )}
+            </Card>
+        </List.Item>
+    );
+
+    const renderHistoryItem = (item) => (
+        <List.Item className="history-list-item">
+             <Card size="small" className="dark-theme-card" style={{borderColor: '#2a2a2a'}}> {/* slightly more subtle inner card */}
+                <Row justify="space-between" align="top" gutter={[8,4]}>
+                    <Col xs={24} sm={16}>
+                        <Text strong style={{color: '#e0e0e5', fontSize:'1rem'}}>{item.title}</Text>
+                        <Paragraph style={{color: '#a0a0a5', fontSize: '0.85em', marginBottom: 4}}>
+                            Submitted: {new Date(item.completed_at).toLocaleString()}
+                        </Paragraph>
+                        {item.submission_data?.link && <Text style={{color: '#8e8e93', fontSize:'0.8em'}}>Link: <a href={item.submission_data.link} target="_blank" rel="noopener noreferrer" style={{color: '#7e73ff'}}>{item.submission_data.link.substring(0,isMobile? 25 : 40)}...</a></Text>}
+                        {item.submission_data?.text && <Text style={{color: '#8e8e93', fontSize:'0.8em'}}>Details: {item.submission_data.text.substring(0,isMobile ? 30 : 50)}...</Text>}
+                    </Col>
+                    <Col xs={24} sm={8} style={{textAlign: isMobile ? 'left' : 'right', marginTop: isMobile ? 8 : 0}}>
+                        {getHistoryStatusTag(item.status)}
+                        <Text block style={{color: '#4CAF50', fontSize: '0.9em', marginTop: 4, fontWeight:'500'}}>
+                            + {parseFloat(item.reward_arix_amount).toFixed(ARIX_DECIMALS)} ARIX
+                        </Text>
+                    </Col>
+                </Row>
+                {item.notes && <Paragraph style={{color: '#6a6a6e', fontSize: '0.8em', marginTop: 5, fontStyle:'italic'}}>Note: {item.notes}</Paragraph>}
+            </Card>
+        </List.Item>
+    );
+
+    return (
+        <div style={{ padding: isMobile ? '16px' : '24px' }}>
+            <Title level={2} className="page-title">ARIX Tasks</Title>
+
+            {!userFriendlyAddress && !loadingTasks && ( // Show this prominently if not connected and tasks are loaded/empty
+                 <Alert
+                    message="Connect Wallet to Participate"
+                    description="Please connect your TON wallet to view personalized task statuses, submit tasks, and claim ARIX rewards."
+                    type="info"
+                    showIcon
+                    className="dark-theme-alert"
+                    style={{marginBottom: 24}}
+                    action={
+                        <Button size="small" type="primary" onClick={() => tonConnectUI.openModal()}>
+                            Connect Wallet
+                        </Button>
+                    }
+                />
+            )}
+            
+            <div style={{textAlign:'right', marginBottom: 20}}>
+                <Button icon={<RedoOutlined/>} onClick={handleRefreshAll} loading={loadingTasks || loadingHistory}>Refresh</Button>
+            </div>
+
+            {loadingTasks && tasks.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" tip="Loading Available Tasks..." /></div>
+            ) : tasks.length > 0 ? (
+                <List
+                    grid={{ gutter: isMobile ? 16 : 24, xs: 1, sm: 1, md: 2 }} // 2 columns for medium up
+                    dataSource={tasks}
+                    renderItem={renderTaskItem}
+                />
+            ) : (
+                !loadingTasks && <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px'}}><Empty description={<Text style={{color: '#a0a0a5'}}>No active tasks available. Check back soon!</Text>} /></Card>
+            )}
+
+            {userFriendlyAddress && (
+                <div style={{marginTop: 40}}>
+                    <Title level={3} className="section-title" style={{textAlign: 'center', marginBottom: 24}}>Your Task History</Title>
+                    {loadingHistory ? (
+                        <div style={{ textAlign: 'center', padding: 30 }}><Spin tip="Loading your history..." /></div>
+                    ) : userTaskHistory.length > 0 ? (
+                         <List
+                            dataSource={userTaskHistory}
+                            renderItem={renderHistoryItem}
+                            className="history-list-container" // Ensure this class exists or style List directly if needed
+                        />
+                    ) : (
+                        <Card className="dark-theme-card" style={{textAlign:'center', padding: '20px'}}><Empty description={<Text style={{color: '#a0a0a5'}}>You haven't completed any tasks yet.</Text>} /></Card>
+                    )}
+                </div>
+            )}
+
+            <Modal
+                title={<Text style={{color: '#7e73ff', fontWeight: 'bold'}}>Submit Task: {selectedTask?.title}</Text>}
+                open={isModalVisible}
+                onOk={handleModalSubmit}
+                onCancel={() => { setIsModalVisible(false); setSubmissionInput(''); setSelectedTask(null); }}
+                confirmLoading={submitLoading}
+                okText="Submit"
+                className="dark-theme-modal" 
+                destroyOnClose
+            >
+                {selectedTask && (
+                    <>
+                        <Paragraph style={{color: '#d1d1d6'}}>{selectedTask.description}</Paragraph>
+                        <Paragraph strong style={{color: '#4CAF50', fontSize: '1.05rem'}}>Reward: {parseFloat(selectedTask.reward_arix_amount).toFixed(ARIX_DECIMALS)} ARIX</Paragraph>
+                        
+                        {selectedTask.validation_type === 'link_submission' && (
+                            <Input 
+                                prefix={<LinkOutlined style={{color: '#6a6a6e'}}/>}
+                                placeholder="Paste your submission link here (e.g., post URL)" 
+                                value={submissionInput} 
+                                onChange={(e) => setSubmissionInput(e.target.value)} 
+                                style={{marginTop: 12}}
+                            />
+                        )}
+                        {selectedTask.validation_type === 'text_submission' && (
+                            <TextArea 
+                                rows={3}
+                                placeholder="Enter your submission details here" 
+                                value={submissionInput} 
+                                onChange={(e) => setSubmissionInput(e.target.value)} 
+                                style={{marginTop: 12}}
+                            />
+                        )}
+                        {(selectedTask.validation_type === 'auto_approve' || selectedTask.action_url) && ! (selectedTask.validation_type === 'link_submission' || selectedTask.validation_type === 'text_submission') && (
+                             <Paragraph style={{color: '#a0a0a5', marginTop:12, fontSize:'0.9rem'}}>
+                                {selectedTask.action_url ? 
+                                 `Please ensure you have completed the action at: ` : 
+                                 `This task will be automatically processed.`}
+                                {selectedTask.action_url && <a href={selectedTask.action_url} target="_blank" rel="noopener noreferrer" style={{color: '#7e73ff', wordBreak:'break-all'}}> {selectedTask.action_url}</a>}
+                                <br/>Click "Submit" to confirm completion.
+                             </Paragraph>
+                        )}
+                    </>
+                )}
+            </Modal>
+        </div>
+    );
 };
 
 export default TaskPage;

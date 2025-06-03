@@ -1,311 +1,126 @@
-#root > .ant-layout > .ant-layout {
-  background: transparent !important;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5; /* Standard line height */
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  color-scheme: dark;
+  color: #e0e0e5; 
+  background-color: #000000; /* Pure black base, as per screenshots */
 }
 
-.dark-card {
-  background: #1A1A1A !important;
-  border-radius: 12px !important;
-  border: 1px solid #2C2C2C !important;
-  box-shadow: none !important;
-  color: #E0E0E5 !important;
-  overflow: hidden;
+body {
+  margin: 0;
+  background-color: #000000; 
+  color: #e0e0e5;
+  min-height: 100vh;
+  overscroll-behavior: none; 
 }
 
-.dark-card .ant-card-head {
+#root {
+  min-height: 100vh;
+  background: #000000;
+}
+
+a {
+  font-weight: 500;
+  color: #7e73ff; /* A purple-ish blue from screenshot buttons */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: #9a91ff; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff; /* Pure white for main headings */
+  font-weight: 600; 
+}
+
+/* Custom scrollbar - subtle for dark theme */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a; /* Dark track */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333; /* Grey thumb */
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Base card style resembling screenshots */
+.dark-theme-card {
+  background-color: #1c1c1e !important; /* Dark grey card background */
+  border-radius: 16px !important;
+  border: 1px solid #38383a !important; /* Subtle border */
+  color: #e0e0e5 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* Softer shadow */
+  margin-bottom: 20px; /* Consistent spacing */
+}
+
+.dark-theme-card .ant-card-head {
   background: transparent !important;
-  border-bottom: 1px solid #2C2C2C !important;
+  border-bottom: 1px solid #38383a !important;
   padding: 12px 16px !important;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
-.dark-card .ant-card-head-title {
-  color: #00BFFF !important;
+.dark-theme-card .ant-card-head-title {
+  color: #ffffff !important;
   font-weight: 600 !important;
-  font-size: 1.1em !important;
+  font-size: 1.1rem !important;
+}
+.dark-theme-card .ant-card-body {
+  padding: 16px !important;
 }
 
-.dark-card .ant-card-body {
-    padding: 16px !important;
+/* Custom focus outline - more subtle for this design */
+*:focus-visible {
+  outline: 1px solid #7e73ff; 
+  outline-offset: 1px;
+}
+.ant-input-number-focused,
+.ant-input-focused {
+    outline: none !important; /* Remove default AntD outline if any persists */
+    border-color: #7e73ff !important;
+    box-shadow: 0 0 0 1px #7e73ff !important;
 }
 
-.dark-card .ant-card-actions {
-  background: transparent !important;
-  border-top: 1px solid #2C2C2C !important;
-  padding: 10px 16px !important;
-}
-
-.app-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px;
-  height: 56px;
-  position: sticky !important; top: 0; z-index: 1001;
-}
-
-.app-content-wrapper {
-    padding-top: 0px;
-    background: transparent;
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.app-content-wrapper.mobile-view {
-    padding-bottom: 60px;
-}
-
-.app-content {
-  padding: 16px; margin: 0;
-  min-height: calc(100vh - 56px - 60px);
-  background: transparent;
-}
-
-.mobile-view .app-content {
-  padding: 12px;
-  min-height: auto;
-}
-
-.main-balance-header {
-  padding: 16px;
-  background-color: #121212;
+/* Global title styles based on screenshot hierarchy */
+.page-title {
+  color: #fff;
   text-align: center;
-  border-bottom: 1px solid #2C2C2C;
-}
-
-.main-balance-header .balance-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.main-balance-header .balance-display .anticon-golden { /* Diamond icon */
-  font-size: 20px;
-  color: #00BFFF;
-  margin-right: 8px;
-}
-
-.main-balance-header .balance-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #FFFFFF;
-  margin-right: 8px;
-}
-.main-balance-header .balance-currency {
-  font-size: 14px;
-  color: #8A8A8A;
-  font-weight: 500;
-}
-.main-balance-header .ant-btn {
-  margin: 0 8px;
-}
-
-.coinflip-banner {
-  background-color: #213728;
-  color: #A6FFBE;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: center;
-  margin-top: 16px;
-  font-size: 0.9em;
-  font-weight: 500;
-}
-.coinflip-banner a {
-  color: #A6FFBE;
-  text-decoration: underline;
-}
-
-
-.mobile-bottom-nav.ant-menu {
-  position: fixed !important;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  display: flex !important;
-  justify-content: space-around !important;
-  background: #181818 !important;
-  border-top: 1px solid #2C2C2C !important;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
-  height: 60px !important;
-  padding: 0 !important;
-}
-
-.mobile-bottom-nav .ant-menu-item {
-  flex-grow: 1; text-align: center;
-  padding: 0 !important;
-  height: 100% !important;
-  display: flex !important; flex-direction: column !important;
-  justify-content: center !important; align-items: center !important;
-  line-height: 1.2 !important;
-  color: #8A8A8A !important;
-  border-radius: 0 !important;
-}
-
-.mobile-bottom-nav .ant-menu-item .anticon {
-  font-size: 20px !important;
-  margin-bottom: 2px !important;
-  margin-right: 0 !important;
-  line-height: 1;
-}
-.mobile-bottom-nav .mobile-menu-label {
-  font-size: 10px !important; display: block;
-  line-height: 1;
-}
-
-.mobile-bottom-nav .ant-menu-item-selected {
-  background-color: transparent !important;
-}
-.mobile-bottom-nav .ant-menu-item-selected .mobile-menu-label,
-.mobile-bottom-nav .ant-menu-item-selected .anticon {
-  color: #00BFFF !important;
-}
-.mobile-bottom-nav .ant-menu-item::after {
-    border-bottom: none !important;
-}
-
-.mobile-bottom-nav .push-nav-item .anticon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #333;
-  font-size: 16px !important;
-}
-.mobile-bottom-nav .push-nav-item.ant-menu-item-selected .anticon {
- background-color: #00BFFF;
- color: #181818 !important;
-}
-
-
-.dark-alert.ant-alert {
-    background: #2C2C2C !important;
-    border: 1px solid #3E3E3E !important;
-    color: #D0D0D0 !important;
-    border-radius: 8px;
-}
-.dark-alert.ant-alert-info {
-    background-color: rgba(0, 191, 255, 0.1) !important;
-    border-color: rgba(0, 191, 255, 0.3) !important;
-}
-.dark-alert .ant-alert-message { color: #E0E0E0 !important; font-weight: 500; }
-.dark-alert .ant-alert-description { color: #A0A0A0 !important; }
-.dark-alert .ant-alert-icon { font-size: 1.2em; margin-top: 2px; }
-.dark-alert.ant-alert-info .ant-alert-icon { color: #00BFFF !important; }
-
-.ant-typography-copy { color: #00BFFF; margin-left: 8px; }
-.ant-typography-copy:hover { color: #61dafb; }
-
-.coinflip-card .ant-card-body { padding: 16px !important; }
-@media (min-width: 768px) { .coinflip-card .ant-card-body { padding: 20px !important; } }
-
-.coin-display-container {
-  width: 100px; height: 100px; border-radius: 50%; background: #252525;
-  margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.2); border: 2px solid #333;
-  overflow: hidden;
+  font-weight: 700 !important;
+  font-size: 24px !important;
+  margin-bottom: 24px !important;
 }
 @media (min-width: 768px) {
-  .coin-display-container { width: 120px; height: 120px; margin-bottom: 20px; }
-}
-.coin-image { width: 85%; height: 85%; object-fit: contain; }
-
-.game-result-info { padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; text-align: center; }
-.game-result-info.win { background: rgba(76, 175, 80, 0.15); border: 1px solid rgba(76, 175, 80, 0.3); }
-.game-result-info.loss { background: rgba(244, 67, 54, 0.15); border: 1px solid rgba(244, 67, 54, 0.3); }
-.game-result-info .result-title { margin: 0 0 5px 0; font-size: 1.1em; }
-.game-result-info .result-text { color: #ccc; display: block; margin-bottom: 2px; font-size: 0.85em;}
-.game-result-info .result-text strong { color: #00BFFF; }
-.game-result-info .result-text.delta { margin-top: 5px; font-size: 1em; }
-.game-result-info .game-id-text { font-size: 0.7em; color: #777; margin-top: 5px; }
-
-.coinflip-controls .input-label { color: #aaa; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9em; }
-.coinflip-radio-group { width: 100%; display: flex; }
-.coinflip-radio-button {
-    flex: 1; text-align: center; height: 40px !important; line-height: 38px !important; font-size: 1em;
-}
-.flip-button { height: 44px !important; font-size: 1.05em !important; font-weight: 500; }
-
-.profile-text-item { margin-bottom: 8px !important; word-break: break-word; font-size: 0.95em; }
-.profile-text-label { color: #999; font-weight: 500; }
-.copy-button-inline { color: #00BFFF; margin-left: 6px; padding: 0 4px !important; height: auto !important; }
-
-.balances-col .balance-item { margin-bottom: 10px; }
-.balances-col .ant-statistic-title { font-size: 0.9em !important; color: #999 !important; }
-.balances-col .ant-statistic-content { font-size: 1.2em !important; line-height: 1.2; font-weight: 500; color: #fff; }
-
-.transaction-list-card .ant-card-head-title { font-size: 1.1em; }
-.transaction-list-item { padding: 12px 0px !important; border-bottom: 1px solid #2C2C2C !important;}
-.transaction-list-item:last-child { border-bottom: none !important; }
-@media (min-width: 768px) { .transaction-list-item { padding: 16px 0px !important; } }
-
-.stake-history-item .ant-tag, .game-history-item .ant-tag { margin-right: 0; font-size: 0.8em; padding: 2px 6px;}
-.history-text-item { color: #b0b0b0; font-size: 0.9em; margin-bottom: 4px !important; line-height: 1.4;}
-.history-text-item.small-text { font-size: 0.8em; color: #777; }
-.history-text-item.tx-hash { word-break: break-all; }
-.history-text-item strong { color: #f0f0f0; }
-
-.game-history-item .game-win { color: #4CAF50 !important; font-weight: bold; }
-.game-history-item .game-loss { color: #F44336 !important; font-weight: bold; }
-
-.status-tag { font-weight: bold; }
-
-.settings-section { margin-bottom: 24px; }
-.settings-title {
-  font-size: 1em;
-  color: #8A8A8A;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-.settings-card {
-  background: #1A1A1A;
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid #2C2C2C;
-}
-.settings-card .ant-radio-group { width: 100%; }
-.settings-card .ant-radio-button-wrapper {
-  flex-grow: 1;
-  text-align: center;
-  background: #252525 !important;
-  border-color: #333 !important;
-  color: #ccc !important;
-}
-.settings-card .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-  background: #00BFFF !important;
-  border-color: #00BFFF !important;
-  color: #111 !important;
-}
-.settings-card .ant-radio-button-wrapper:hover {
-  color: #00BFFF !important;
-}
-.settings-social-links {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-.settings-social-links .ant-btn {
-  background: #252525;
-  border-color: #333;
-  color: #ccc;
-}
-.settings-social-links .ant-btn:hover {
-  color: #00BFFF;
-  border-color: #00BFFF;
+  .page-title {
+    font-size: 28px !important;
+    margin-bottom: 32px !important;
+  }
 }
 
-.push-page-image {
-  max-width: 250px;
-  width: 70%;
-  display: block;
-  margin: 30px auto;
-  filter: drop-shadow(0 0 15px rgba(0, 191, 255, 0.3));
+.section-title {
+  color: #f5f5f7;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  margin-bottom: 16px !important;
 }
-
-.earn-page-illustration {
-    max-width: 280px;
-    width: 80%;
-    margin: 20px auto;
-    display: block;
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 20px !important;
+    margin-bottom: 20px !important;
+  }
 }
