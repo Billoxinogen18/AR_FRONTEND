@@ -91,7 +91,7 @@ const EarnPage = () => {
   const fetchArixBalance = useCallback(async () => {
     if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) { setArixBalance(0); return; }
     try {
-      const userArixJettonWallet = await getJettonWalletAddress(rawAddress, AIX_JETTON_MASTER_ADDRESS);
+      const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
       if (userArixJettonWallet) {
         const balanceSmallestUnits = await getJettonBalance(userArixJettonWallet);
         setArixBalance(fromArixSmallestUnits(balanceSmallestUnits));
@@ -339,10 +339,10 @@ const EarnPage = () => {
     try {
         // Call the renamed API function
         const response = await requestArixRewardWithdrawal({ userWalletAddress: rawAddress, amountArix: totalClaimableArix }); // Pass ARIX amount
-        message.success(response.data.message || "ARIX withdrawal request submitted!", 6); // Updated message
+        message.success({ content: response.data.message || "ARIX withdrawal request submitted!", duration: 6 }); // Updated message
         refreshAllData(false); 
     } catch (error) {
-        message.error(error?.response?.data?.message || "ARIX withdrawal request failed.", 5); // Updated message
+        message.error({ content: error?.response?.data?.message || "ARIX withdrawal request failed.", duration: 5 }); // Updated message
         console.error("[EarnPage] ARIX Withdrawal Error:", error); // Updated message
     } finally { hideMsg(); setActionLoading(false); }
   };
@@ -460,7 +460,7 @@ const EarnPage = () => {
           </div>
         )}
          {userFriendlyAddress && activeStakes.length === 0 && !loading && stakingConfigData && (
-             <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">You have no active ARIX stakes yet. Choose a plan above to start earning ARIX rewards!</div> {/* Updated text */}
+             <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">You have no active ARIX stakes yet. Choose a plan above to start earning ARIX rewards!</div>
          )}
          {!userFriendlyAddress && !loading && stakingConfigData && (
               <div style={{textAlign: 'center', color: '#aaa', marginTop: 40, padding: 20}} className="glass-pane">Connect your wallet to view and manage your stakes.</div>
@@ -510,7 +510,7 @@ const EarnPage = () => {
                 </Paragraph>
               )}
                {(inputUsdtAmount !== null && inputUsdtAmount <= 0 && selectedPlan) && (
-                   <Paragraph style={{color: '#ff7875', marginTop: 10}}>Stake amount must correspond to a value greater than $0.00 USD.</Paragraph> {/* Updated text */}
+                   <Paragraph style={{color: '#ff7875', marginTop: 10}}>Stake amount must correspond to a value greater than $0.00 USD.</Paragraph> 
                )}
             </>
           )}
