@@ -195,7 +195,7 @@ const CoinflipGame = ({ onBack }) => {
                     <Title level={4} className="cf-game-title">COINFLIP</Title>
                     <Button
                         type="text"
-                        icon={isSoundOn ? <SoundOutlined /> : <AudioMutedOutlined />} {/* Corrected Icon */}
+                        icon={isSoundOn ? <SoundOutlined /> : <AudioMutedOutlined />} 
                         onClick={() => setIsSoundOn(!isSoundOn)}
                         className="cf-sound-button"
                         aria-label={isSoundOn ? "Mute Sound" : "Unmute Sound"}
