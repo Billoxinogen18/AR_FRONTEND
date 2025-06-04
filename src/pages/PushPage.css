@@ -1,22 +1,23 @@
+/* General Page Styles */
 .push-page-container {
     background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
-    min-height: calc(100vh - 56px - 60px); /* Assuming 56px header, 60px footer */
+    min-height: calc(100vh - 56px - 60px); /* Adjust if header/footer heights differ */
     display: flex;
     flex-direction: column;
     align-items: center;
     color: #E0E0E5;
     padding: 20px 16px;
     box-sizing: border-box;
-    overflow: hidden; /* Prevents scrollbars if content overflows temporarily during animations */
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Balance Section - Centered at Top (Matches Image 1) */
+/* Balance Section */
 .push-balance-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 8px; /* Reduced from image for tighter layout if TON text is directly under */
-    margin-top: 20px; /* Spacing from top */
+    margin-bottom: 8px;
+    margin-top: 20px;
 }
 
 .push-balance-display {
@@ -24,7 +25,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    margin-bottom: 8px; /* Space before the currency text */
+    margin-bottom: 8px;
 }
 
 .balance-icon-container {
@@ -39,15 +40,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #333; /* Dark border for the circle */
+    border: 2px solid #333;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.balance-icon-text { /* For the 'V' or similar icon if text-based */
+.balance-icon-text {
     color: #FFFFFF;
     font-weight: bold;
     font-size: 18px;
-    font-family: 'Arial', sans-serif; /* Fallback font, ideally match with app's font */
+    font-family: 'Arial', sans-serif;
 }
 
 .balance-amount-display {
@@ -58,20 +59,20 @@
 .push-balance-amount {
     color: #FFFFFF !important;
     font-weight: 700 !important;
-    font-size: 2.5rem !important; /* Large, prominent balance */
+    font-size: 2.5rem !important;
     line-height: 1 !important;
     margin: 0 !important;
 }
 
 .push-balance-currency {
-    color: #8E8E93 !important; /* Greyish text for "TON" or "Arix" */
+    color: #8E8E93 !important;
     font-size: 1rem !important;
     font-weight: 500 !important;
     text-transform: uppercase;
-    margin-top: 4px; /* Small space below the numeric balance */
+    margin-top: 4px;
 }
 
-/* Top Buttons - Centered Below Balance (Matches Image 1) */
+/* Top Buttons */
 .push-top-buttons {
     display: flex;
     gap: 16px;
@@ -79,11 +80,11 @@
 }
 
 .push-top-button {
-    background-color: #2a2a2a !important; /* Dark grey button */
-    border: 1px solid #404040 !important; /* Slightly lighter border */
+    background-color: #2a2a2a !important;
+    border: 1px solid #404040 !important;
     color: #FFFFFF !important;
     font-weight: 500 !important;
-    border-radius: 20px !important; /* Rounded corners */
+    border-radius: 20px !important;
     padding: 8px 24px !important;
     height: 44px !important;
     font-size: 0.9rem !important;
@@ -102,20 +103,21 @@
 }
 
 .push-top-button .anticon {
-    font-size: 1em;
+    font-size: 1em; /* AntD default is usually fine */
     margin-right: 6px;
 }
 
-/* Banner - Yellow Alert Style (Matches Image 1) */
+
+/* Banner */
 .push-banner-container {
     width: 100%;
-    max-width: 400px; /* Max width for the banner */
-    margin-bottom: 40px; /* Space below banner, before wheel */
+    max-width: 400px;
+    margin-bottom: 40px;
 }
 
 .push-banner-content {
-    background: linear-gradient(135deg, #4a4a00 0%, #3a3a00 100%); /* Dark yellow gradient */
-    border: 1px solid #6a6a00; /* Darker yellow border */
+    background: linear-gradient(135deg, #4a4a00 0%, #3a3a00 100%);
+    border: 1px solid #6a6a00;
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -123,8 +125,8 @@
     gap: 12px;
 }
 
-.banner-icon { /* For the RiseOutlined icon */
-    color: #FFFF00; /* Bright yellow */
+.banner-icon {
+    color: #FFFF00;
     font-size: 20px;
     flex-shrink: 0;
 }
@@ -138,54 +140,54 @@
 }
 
 .banner-title {
-    color: #FFFF00 !important; /* Bright yellow text */
+    color: #FFFF00 !important;
     font-weight: 500 !important;
     font-size: 0.9rem !important;
     line-height: 1.3;
     margin: 0 !important;
 }
 
-.banner-play-button { /* Circular yellow button with black arrow */
+.banner-play-button.ant-btn { /* Target Ant Button specifically */
     background-color: #FFFF00 !important;
     border: none !important;
-    color: #000000 !important; /* Black icon color */
+    color: #000000 !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
-    min-width: 32px !important;
+    min-width: 32px !important; /* Important for Ant Button */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-size: 16px !important; /* Icon size */
-    padding: 0 !important;
+    padding: 0 !important; /* Remove padding for icon only */
     flex-shrink: 0;
 }
 
-.banner-play-button:hover {
-    background-color: #FFFF33 !important; /* Slightly lighter yellow on hover */
+.banner-play-button.ant-btn:hover {
+    background-color: #FFFF33 !important;
     transform: scale(1.05);
 }
 
-/* Wheel Area - Centered (Matches Image 1) */
+/* Wheel Area */
 .push-wheel-area {
     flex-grow: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 300px; /* Ensure enough vertical space for the wheel */
-    margin-bottom: 40px; /* Spacing from bottom or next element */
+    min-height: 300px;
+    margin-bottom: 40px;
 }
 
 .push-wheel-container {
     position: relative;
-    width: 280px; /* Diameter of the wheel */
+    width: 280px;
     height: 280px;
     cursor: pointer;
     transition: transform 0.3s ease;
 }
 
 .push-wheel-container:hover {
-    transform: scale(1.02); /* Subtle zoom on hover */
+    transform: scale(1.02);
 }
 
 .push-wheel-container.animating {
@@ -194,7 +196,7 @@
 
 @keyframes wheelSpin {
     0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.05); } /* Slight grow mid-spin */
+    50% { transform: rotate(180deg) scale(1.05); }
     100% { transform: rotate(360deg) scale(1); }
 }
 
@@ -203,35 +205,32 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid #333; /* Dark border for the main ring */
-    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); /* Dark gradient for ring bg */
-    box-shadow: 
-        0 0 20px rgba(0,0,0,0.5), /* Outer shadow */
-        inset 0 0 20px rgba(0,0,0,0.3); /* Inner shadow */
+    border: 3px solid #333;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
 }
 
 .wheel-tick {
     position: absolute;
-    width: 2px;  /* Thickness of the tick */
-    height: 25px; /* Length of the tick */
-    background: linear-gradient(to top, 
-        rgba(128, 128, 128, 0.8) 0%,  /* Greyish gradient for ticks */
-        rgba(160, 160, 160, 0.6) 50%,
-        rgba(200, 200, 200, 0.3) 100%
-    );
-    top: 5px; /* Distance from the edge of the outer ring */
+    width: 2px;
+    height: 25px;
+    background: linear-gradient(to top, rgba(128, 128, 128, 0.8) 0%, rgba(160, 160, 160, 0.6) 50%, rgba(200, 200, 200, 0.3) 100%);
+    top: 5px;
     left: 50%;
-    transform-origin: 1px 135px; /* (width/2) (ring_radius - top_offset) */
-    margin-left: -1px; /* -(width/2) */
+    transform-origin: 1px 135px;
+    margin-left: -1px;
     border-radius: 1px;
-    opacity: 0; /* Start inactive */
-    transition: opacity 0.6s ease; /* Animation for appearing/disappearing */
+    opacity: 0;
+    transition: opacity 0.5s ease; /* Slightly faster transition for responsiveness */
 }
 
 .wheel-tick.active {
-    opacity: 1; /* Fully visible when active */
+    opacity: 1;
 }
-/* Staggered animation for ticks appearing */
+.wheel-tick.inactive {
+    opacity: 0;
+}
+
 .wheel-tick.active:nth-child(6n+1) { transition-delay: 0.05s; }
 .wheel-tick.active:nth-child(6n+2) { transition-delay: 0.1s; }
 .wheel-tick.active:nth-child(6n+3) { transition-delay: 0.15s; }
@@ -239,100 +238,111 @@
 .wheel-tick.active:nth-child(6n+5) { transition-delay: 0.25s; }
 .wheel-tick.active:nth-child(6n+0) { transition-delay: 0.3s; }
 
-/* For "volume turning down" effect (lines disappearing when modal is shown / isWheelActive is false)
-   The .inactive class is added in JSX. The transition on opacity takes care of fade-out.
-   If sequential fade-out is desired, add similar transition-delay for .wheel-tick.inactive */
-.wheel-tick.inactive {
-    opacity: 0;
-}
-
+/* If sequential fade-out for inactive is desired: */
+/*
+.wheel-tick.inactive:nth-child(6n+1) { transition-delay: 0.05s; }
+.wheel-tick.inactive:nth-child(6n+2) { transition-delay: 0.1s; }
+... and so on
+*/
 
 .push-wheel-center {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120px; /* Diameter of the center button */
+    width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); /* Dark gradient for center */
-    border: 2px solid #444; /* Border for center */
+    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+    border: 2px solid #444;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 
-        0 4px 15px rgba(0,0,0,0.4), /* Outer shadow for center */
-        inset 0 2px 10px rgba(255,255,255,0.05); /* Subtle inner highlight */
-    z-index: 10; /* Above the ticks */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 2px 10px rgba(255,255,255,0.05);
+    z-index: 10;
 }
 
-.wheel-center-icon { /* Container for the pixel icon */
+.wheel-center-icon {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Pixel Icon in the Center of the Wheel (Matches Image 1) */
 .pixel-icon {
     display: flex;
     flex-direction: column;
-    gap: 3px; /* Gap between pixel rows */
-    transform: scale(4); /* Makes the 4x4 pixel icon larger */
+    gap: 3px;
+    transform: scale(4);
 }
 
 .pixel-row {
     display: flex;
-    gap: 3px; /* Gap between pixels in a row */
+    gap: 3px;
 }
 
 .pixel {
-    width: 4px;  /* Size of one "pixel" */
+    width: 4px;
     height: 4px;
-    background-color: transparent; /* For 'empty' pixels */
-    border-radius: 0px; /* Sharp edges for pixels */
+    background-color: transparent;
+    border-radius: 0px;
 }
 
 .pixel.filled {
-    background-color: #666; /* Color of 'filled' pixels */
+    background-color: #666;
 }
 
 .push-wheel-container:hover .pixel.filled {
-    background-color: #999; /* Lighter color on hover for filled pixels */
+    background-color: #999;
 }
 
-/* Bottom Sheet Modal (Matches slide-up animation and general dark theme) */
-.push-bottom-sheet-modal-wrapper { /* Wrapper for Ant Modal to make it a bottom sheet */
+/* Bottom Sheet Modal (Revised for reliable visibility) */
+.push-bottom-sheet-modal-wrapper {
     position: fixed !important;
-    bottom: 0 !important;
+    top: 0 !important;
     left: 0 !important;
+    bottom: 0 !important;
     right: 0 !important;
-    top: auto !important; /* Overrides Ant Modal's centering */
-    transform: none !important;
-    display: flex;
-    justify-content: center; /* Center the modal if it has a max-width */
+    display: flex !important;
+    align-items: flex-end !important; /* Aligns .ant-modal to the bottom */
+    justify-content: center !important; /* Centers .ant-modal horizontally if it has a max-width */
+    pointer-events: none; /* Wrapper doesn't intercept mouse events, only the modal itself */
+    z-index: 1000; /* Standard modal z-index for wrapper/mask area */
+}
+
+.push-bottom-sheet-modal-wrapper .ant-modal-mask {
+    /* AntD default mask is usually fine. Ensure it's behind the modal content. */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    background-color: rgba(0, 0, 0, 0.45) !important; /* Default AntD mask color */
+    z-index: 1; /* Relative to wrapper */
 }
 
 .push-bottom-sheet-modal-wrapper .ant-modal {
-    position: absolute !important; /* Relative to its wrapper */
-    bottom: 0 !important;
-    left: 0 !important; /* Stretch to edges or use auto margins if max-width */
-    right: 0 !important;
-    top: auto !important;
+    /* .ant-modal is the container that will be animated */
+    position: relative !important; /* Let flexbox do the positioning */
     width: 100% !important;
-    max-width: 100% !important; /* Full width for mobile, can be restricted on larger screens */
+    max-width: 100% !important; /* Full width on mobile */
     margin: 0 !important;
     padding: 0 !important;
-    transform: none !important;
+    pointer-events: auto; /* Modal should be interactive */
+    z-index: 2; /* Above the mask within the wrapper */
+    /* The animation is now on .ant-modal-content, remove from here if it was */
+    /* animation: slideUp 0.3s ease-out forwards !important; */
 }
 
 .push-bottom-sheet-modal-wrapper .ant-modal-content {
-    background-color: #1A1A1A !important; /* Dark background for modal content */
-    border-radius: 20px 20px 0 0 !important; /* Rounded top corners */
-    padding: 0 !important; /* Padding will be in .push-bottom-sheet-content */
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.5) !important; /* Shadow for depth */
-    animation: slideUp 0.3s ease-out !important;
+    background-color: #1A1A1A !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 0 !important; /* Padding is in .push-bottom-sheet-content */
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5) !important;
+    animation: slideUp 0.3s ease-out forwards !important; /* 'forwards' keeps the end state */
     border: none !important;
-    margin: 0 !important;
+    width: 100% !important;
+    /* Opacity and transform are handled by the animation */
+    overflow: hidden; /* Good practice for animated containers */
 }
 
 @keyframes slideUp {
@@ -347,16 +357,16 @@
 }
 
 .push-bottom-sheet-modal-wrapper .ant-modal-body {
-    padding: 0 !important;
+    padding: 0 !important; /* Content padding handled by custom div */
 }
 
 .push-bottom-sheet-content {
-    padding: 24px 20px 32px; /* Inner padding for modal content */
+    padding: 24px 20px 32px;
     text-align: center;
-    position: relative; /* For absolute positioning of close button */
+    position: relative; /* For the close button */
 }
 
-.close-bottom-sheet-button { /* Close button for the bottom sheet */
+.close-bottom-sheet-button.ant-btn {
     position: absolute !important;
     top: 16px !important;
     right: 16px !important;
@@ -365,16 +375,16 @@
     color: #FFFFFF !important;
     width: 32px !important;
     height: 32px !important;
-    min-width: 32px !important; /* Ensure consistent size for Ant Button */
-    padding: 0 !important; /* Reset padding for icon-only button */
+    min-width: 32px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 50% !important; /* Make it circular */
-    z-index: 20;
+    z-index: 10; /* Above content in the sheet */
 }
 
-.close-bottom-sheet-button:hover {
+.close-bottom-sheet-button.ant-btn:hover {
     background-color: #444 !important;
     border-color: #555 !important;
 }
@@ -384,7 +394,7 @@
     font-weight: 600 !important;
     font-size: 1.4rem !important;
     margin-bottom: 16px !important;
-    margin-top: 8px !important; /* Space from top if close button is not interfering */
+    margin-top: 8px !important;
 }
 
 .bottom-sheet-text {
@@ -394,8 +404,8 @@
     margin-bottom: 20px !important;
 }
 
-.bottom-sheet-next-steps { /* Container for "Next steps" list */
-    background-color: #252525; /* Slightly lighter dark background */
+.bottom-sheet-next-steps {
+    background-color: #252525;
     padding: 16px;
     border-radius: 12px;
     margin-bottom: 24px;
@@ -411,17 +421,17 @@
     margin-bottom: 12px;
 }
 
-.next-steps-title .anticon { /* For the RiseOutlined icon in "Next steps" */
-    color: #FFD700; /* Gold/Yellow color for the icon */
-    margin-right: 8px; /* From JSX inline style */
+.next-steps-title .anticon {
+    color: #FFD700;
+    /* margin-right is set inline in JSX */
 }
 
 .next-steps-list {
     list-style-type: decimal;
-    padding-left: 20px; /* Indent for list numbers */
+    padding-left: 20px;
     color: #A0A0A5;
     font-size: 0.9rem;
-    margin: 0; /* Reset default list margin */
+    margin: 0;
 }
 
 .next-steps-list li {
@@ -436,27 +446,28 @@
     color: #E0E0E5 !important;
 }
 
-.play-coinflip-button-sheet { /* "Play Coinflip!" button in bottom sheet */
+.play-coinflip-button-sheet.ant-btn {
     height: 50px !important;
     font-size: 1.1rem !important;
     font-weight: 600 !important;
     border-radius: 12px !important;
-    background: #7065F0 !important; /* Purple button from your original CSS */
+    background: #7065F0 !important;
     border: none !important;
     width: 100% !important;
+    color: #FFFFFF !important; /* Ensure text is visible */
 }
 
-.play-coinflip-button-sheet:hover {
-    background: #8c80f3 !important; /* Lighter purple on hover */
+.play-coinflip-button-sheet.ant-btn:hover {
+    background: #8c80f3 !important;
     transform: translateY(-1px);
 }
 
-/* TopUp & Cashout Modal Styles (General Dark Theme) */
-.push-topup-modal-wrapper .ant-modal-content,
+/* TopUp & Cashout Modal Styles */
+.push-topup-modal-wrapper .ant-modal-content, /* These are standard centered modals */
 .push-cashout-modal-wrapper .ant-modal-content {
-    background-color: #1A1A1A !important; /* Consistent dark background */
+    background-color: #1A1A1A !important;
     border-radius: 16px !important;
-    padding: 0 !important; /* Padding will be in content div */
+    padding: 0 !important;
     border: 1px solid #333 !important;
     box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
 }
@@ -469,10 +480,10 @@
 .push-topup-content, .push-cashout-content {
     padding: 24px;
     text-align: center;
-    position: relative; /* For close button positioning */
+    position: relative;
 }
 
-.close-topup-button, .close-cashout-button { /* Close button for TopUp/Cashout modals */
+.close-topup-button.ant-btn, .close-cashout-button.ant-btn {
     position: absolute !important;
     top: 16px !important;
     right: 16px !important;
@@ -482,18 +493,17 @@
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
+    border-radius: 50% !important;
     padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 50% !important;
     z-index: 20;
 }
-.close-topup-button:hover, .close-cashout-button:hover {
+.close-topup-button.ant-btn:hover, .close-cashout-button.ant-btn:hover {
     background-color: #444 !important;
     border-color: #555 !important;
 }
-
 
 .topup-modal-header, .cashout-modal-header {
     display: flex;
@@ -503,49 +513,40 @@
     margin-bottom: 20px;
 }
 
-.push-page-arix-icon { /* Arix diamond icon used in modals */
-    width: 24px;
-    height: 24px;
-}
-/* This rule from Claude's CSS is more specific and thus preferred if icon only used here */
-.topup-modal-header .push-page-arix-icon,
-.cashout-modal-header .push-page-arix-icon {
+.push-page-arix-icon {
     width: 24px;
     height: 24px;
 }
 
-.topup-modal-title, .cashout-modal-title { /* "Balance" title in modals */
+.topup-modal-title, .cashout-modal-title {
     color: #8E8E93 !important;
     font-weight: 500 !important;
-    font-size: 1rem !important; /* Adjust as needed */
+    font-size: 1rem !important;
     margin: 0 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.topup-modal-actions, .cashout-modal-actions { /* Container for TopUp/Cashout buttons within modals */
+.topup-modal-actions, .cashout-modal-actions {
     display: flex;
-    gap: 12px; /* Spacing between the two buttons */
+    gap: 12px;
     margin-bottom: 20px;
 }
 
 .topup-modal-actions .push-top-button,
 .cashout-modal-actions .push-top-button {
-    flex: 1; /* Make buttons share space equally */
-    /* General .push-top-button styles apply, override if needed for modal context */
+    flex: 1;
 }
 
-.topup-modal-actions .push-top-button.active,
+.topup-modal-actions .push-top-button.active, /* Style for active button in modal */
 .cashout-modal-actions .push-top-button.active {
-    /* Style for the active button in the modal, e.g., slightly different background or border */
-    background-color: #383838 !important; /* Example: darker active state */
+    background-color: #383838 !important;
     border-color: #505050 !important;
 }
 
-
 /* Alert Styling in Modals */
 .topup-warning-alert.ant-alert {
-    background-color: rgba(255, 179, 0, 0.1) !important; /* Transparent yellow background */
+    background-color: rgba(255, 179, 0, 0.1) !important;
     border: 1px solid rgba(255, 179, 0, 0.4) !important;
     border-radius: 8px !important;
     margin-bottom: 20px !important;
@@ -553,53 +554,52 @@
     padding: 12px 16px !important;
 }
 .topup-warning-alert .ant-alert-icon {
-    color: #FFB300 !important; /* Warning icon color */
+    color: #FFB300 !important;
     font-size: 18px;
-    margin-top: 2px;
+    margin-top: 2px; /* Align icon nicely */
 }
 .topup-warning-alert .ant-alert-message {
-    color: #FFD54F !important; /* Warning message color */
+    color: #FFD54F !important;
     font-weight: 500;
     font-size: 0.9rem;
 }
 .topup-warning-alert .ant-alert-description {
-    color: #FFE082 !important; /* Warning description color */
+    color: #FFE082 !important;
     font-size: 0.85rem;
 }
 
 .cashout-condition-alert.ant-alert {
-    background-color: rgba(239, 83, 80, 0.1) !important; /* Transparent red background */
+    background-color: rgba(239, 83, 80, 0.1) !important;
     border: 1px solid rgba(239, 83, 80, 0.4) !important;
     border-radius: 8px !important;
-    margin-top: 20px !important;
+    margin-top: 20px !important; /* From JSX */
     text-align: left;
     padding: 12px 16px !important;
 }
 .cashout-condition-alert .ant-alert-icon {
-    color: #EF5350 !important; /* Error icon color */
+    color: #EF5350 !important;
     font-size: 18px;
     margin-top: 2px;
 }
 .cashout-condition-alert .ant-alert-message {
-    color: #FFCDD2 !important; /* Error message color */
+    color: #FFCDD2 !important; /* Ensure good contrast */
     font-weight: 500 !important;
     font-size: 0.9rem !important;
 }
-.cashout-condition-alert .cashout-play-button.ant-btn { /* "Play" button inside cashout alert */
-    background-color: #EF5350 !important; /* Red to match error theme */
+.cashout-condition-alert .cashout-play-button.ant-btn {
+    background-color: #EF5350 !important;
     border-color: #EF5350 !important;
     color: #FFFFFF !important;
-    font-weight: 500 !important;
+    font-weight: 500 !important; /* Adjusted from 600 to 500 for consistency */
     border-radius: 6px !important;
-    font-size: 0.85rem;
-    height: 30px;
-    padding: 0 12px;
+    font-size: 0.85rem; /* Adjusted from 0.8rem */
+    height: 30px; /* Adjusted from 28px */
+    padding: 0 12px; /* Adjusted from 0 10px */
 }
 .cashout-condition-alert .cashout-play-button.ant-btn:hover {
     background-color: #E53935 !important;
     border-color: #E53935 !important;
 }
-
 
 .topup-instructions {
     display: flex;
@@ -616,7 +616,7 @@
     cursor: pointer;
 }
 .instruction-link:hover {
-    color: #7065F0 !important; /* Purple hover from your original theme */
+    color: #7065F0 !important;
 }
 .instruction-link .anticon {
     margin-left: 4px;
@@ -634,21 +634,33 @@
 }
 
 .address-display-box {
-    background-color: #252525; /* Darker box for address */
+    background-color: #252525;
     padding: 12px 16px;
     border-radius: 8px;
     border: 1px solid #333;
     margin-bottom: 8px;
     text-align: left;
 }
+.address-display-box .ant-typography-copy { /* Style the copy icon if needed */
+    color: #8E8E93;
+}
+.address-display-box .ant-typography-copy:hover {
+    color: #FFFFFF;
+}
 
-.deposit-address-text {
+
+.deposit-address-text { /* This class is on the <Text> component */
     color: #E0E0E5 !important;
     font-size: 0.9rem;
     font-weight: 500;
-    word-break: break-all; /* Prevent overflow */
+    word-break: break-all;
     line-height: 1.4;
 }
+/* If using AntD's copyable prop, you might need to style the text within its structure */
+.address-display-box .ant-typography {
+    color: #E0E0E5 !important; /* Ensure text color */
+}
+
 
 .fee-info-text {
     color: #8E8E93;
@@ -674,7 +686,7 @@
     border-radius: 8px;
 }
 .min-deposit-info .anticon {
-    color: #A0A0A5; /* Icon color */
+    color: #A0A0A5;
     font-size: 1em;
 }
 .min-deposit-info strong {
@@ -682,25 +694,25 @@
     font-weight: 600;
 }
 
-.copy-address-button.ant-btn { /* Main action button in TopUp modal */
+.copy-address-button.ant-btn {
     height: 50px !important;
     font-size: 1.1rem !important;
     font-weight: 600 !important;
     border-radius: 12px !important;
-    background: #7065F0 !important; /* Purple button */
+    background: #7065F0 !important;
     border: none !important;
     width: 100% !important;
     color: #FFFFFF !important;
 }
 .copy-address-button.ant-btn:hover {
-    background: #8c80f3 !important; /* Lighter purple on hover */
+    background: #8c80f3 !important;
     transform: translateY(-1px);
 }
 .copy-address-button.ant-btn .anticon {
     margin-right: 8px;
 }
 
-/* Responsive Adjustments if necessary */
+/* Responsive Adjustments */
 @media (max-width: 380px) {
     .push-balance-amount {
         font-size: 2rem !important;
@@ -722,7 +734,7 @@
         height: 240px;
     }
     .wheel-tick {
-        transform-origin: 1px 115px; /* Adjusted for smaller wheel */
+        transform-origin: 1px 115px; /* (width/2) (new_ring_radius - top_offset) */
     }
     .push-wheel-center {
         width: 100px;
@@ -737,7 +749,7 @@
     .bottom-sheet-text {
         font-size: 0.9rem !important;
     }
-    .play-coinflip-button-sheet, .copy-address-button.ant-btn {
+    .play-coinflip-button-sheet.ant-btn, .copy-address-button.ant-btn {
         height: 46px !important;
         font-size: 1rem !important;
     }
