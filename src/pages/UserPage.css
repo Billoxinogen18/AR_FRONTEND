@@ -1,4 +1,4 @@
-/* File: AR_FRONTEND/src/pages/UserPage.css */
+
 
 .user-page-container {
     padding: 0px 0px 24px 0px;
@@ -16,16 +16,16 @@
 
 .dashboard-column {
     padding: 12px;
-    /* border-right: 1px solid #252525; */ /* Removed for cleaner look */
+
 }
 .dashboard-column:last-child {
     border-right: none;
 }
 
-@media (max-width: 991px) { /* lg breakpoint */
+@media (max-width: 991px) {
     .dashboard-column {
         border-right: none;
-        border-bottom: 1px solid #252525; /* colorSplit */
+        border-bottom: 1px solid #252525;
         padding-bottom: 20px;
         margin-bottom: 20px;
     }
@@ -44,7 +44,7 @@
     letter-spacing: 0.5px;
     margin-bottom: 16px !important;
     text-align: left;
-    border-bottom: 1px solid #303030; /* theme.token.colorBorder */
+    border-bottom: 1px solid #303030;
     padding-bottom: 8px;
 }
 
@@ -130,10 +130,10 @@
     color: #7065F0 !important;
 }
 .dashboard-button.withdraw-usdt-button {
-    /* Uses AntD primary styles defined in App.jsx theme */
+
 }
 .dashboard-button.withdraw-arix-button {
-    background-color: #FFC107 !important; /* theme.token.colorWarning */
+    background-color: #FFC107 !important;
     border-color: #FFC107 !important;
     color: #1A1A1A !important;
 }
@@ -152,7 +152,7 @@
     border-color: #d32f2f !important;
 }
 .dashboard-button.view-referral-button.ant-btn-default {
-    /* Uses default button styles, can be customized further if needed */
+
 }
 
 
@@ -195,7 +195,7 @@
 }
 
 
-/* User History Tabs */
+
 .user-page-divider {
     margin: 32px 0 20px 0 !important;
     border-color: #303030 !important;
@@ -224,22 +224,22 @@
     gap: 8px;
 }
 .user-history-tabs .ant-tabs-tab-active {
-    background-color: #1A1A1A; /* Match card background for active tab */
+    background-color: #1A1A1A;
 }
 .user-history-tabs .ant-tabs-nav::before {
-    border-bottom: 1px solid #1A1A1A !important; /* Make tab nav bottom border match card bg */
+    border-bottom: 1px solid #1A1A1A !important;
 }
 
 
-/* Transaction List Item Specifics */
+
 .transaction-list-card {
-    border-top-left-radius: 0 !important; /* If tabs are directly above */
+    border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    border-top: none !important; /* Remove top border if tabs act as header */
+    border-top: none !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 .transaction-list-card.empty-list-card {
-    border-radius: 14px !important; /* Restore radius if it's an empty state without tabs */
+    border-radius: 14px !important;
     border-top: 1px solid #303030 !important;
 }
 .transaction-list-card.empty-list-card .ant-card-body {
@@ -255,7 +255,7 @@
 }
 
 .stake-history-item, .game-history-item {
-    padding: 16px 4px; /* Add some horizontal padding within the item */
+    padding: 16px 4px;
 }
 .stake-item-header, .game-item-header {
     margin-bottom: 12px;
@@ -274,7 +274,7 @@
     font-size: 0.75rem;
     padding: 2px 8px;
     border-radius: 6px;
-    margin: 0; /* Remove default margin if any */
+    margin: 0;
 }
 
 .stake-item-details {
@@ -388,7 +388,7 @@
     color: #6A6A6E !important;
 }
 
-/* Modal specific styles */
+
 .modal-title-text {
     color: #7065F0 !important;
     font-weight: 600;
@@ -426,10 +426,10 @@
     font-size: 0.85rem;
 }
 .stake-selection-modal-content .ant-select {
-    /* Uses themed-select from App.jsx theme */
+
 }
 .stake-selection-modal-content .ant-select-selector {
-    /* Uses themed-select from App.jsx theme */
+
 }
 .stake-selection-modal-content .ant-select-arrow {
     color: #A0A0A5 !important;

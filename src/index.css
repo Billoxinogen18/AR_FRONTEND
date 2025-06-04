@@ -1,4 +1,4 @@
-/* File: AR_FRONTEND/src/index.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -12,8 +12,8 @@
   -webkit-text-size-adjust: 100%;
 
   color-scheme: dark;
-  color: #E0E0E5; /* Default text color from AntD theme */
-  background-color: #0D0D0D; /* Default background from AntD theme */
+  color: #E0E0E5;
+  background-color: #0D0D0D;
 }
 
 html, body {
@@ -39,12 +39,12 @@ body {
 
 a {
   font-weight: 500;
-  color: #7065F0; /* Primary accent from AntD theme */
+  color: #7065F0;
   text-decoration: none;
   transition: color 0.2s ease-in-out;
 }
 a:hover {
-  color: #8c80f3; /* Lighter shade of primary for hover */
+  color: #8c80f3;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -54,24 +54,24 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5em;
 }
 
-/* Custom scrollbar */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1A1A1A; /* Card background color */
+  background: #1A1A1A;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #38383A; /* Border color */
+  background: #38383A;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #505052;
 }
 
-/* Custom focus outline for accessibility */
+
 *:focus-visible {
   outline: 2px solid #7065F0;
   outline-offset: 2px;
@@ -85,33 +85,33 @@ h1, h2, h3, h4, h5, h6 {
   outline: none !important;
 }
 
-/* General Page Title Style */
+
 .page-title {
   color: #FFFFFF !important;
   text-align: center;
   font-weight: 600 !important;
-  font-size: 1.75rem !important; /* Approx 28px */
+  font-size: 1.75rem !important;
   margin-bottom: 24px !important;
   line-height: 1.3 !important;
 }
 @media (max-width: 767px) {
   .page-title {
-    font-size: 1.5rem !important; /* Approx 24px */
+    font-size: 1.5rem !important;
     margin-bottom: 20px !important;
   }
 }
 
-/* General Section Title Style */
+
 .section-title {
   color: #F5F5F7 !important;
   font-weight: 600 !important;
-  font-size: 1.25rem !important; /* Approx 20px */
+  font-size: 1.25rem !important;
   margin-bottom: 16px !important;
   line-height: 1.4 !important;
 }
 @media (max-width: 767px) {
   .section-title {
-    font-size: 1.15rem !important; /* Approx 18px */
+    font-size: 1.15rem !important;
     margin-bottom: 12px !important;
   }
 }

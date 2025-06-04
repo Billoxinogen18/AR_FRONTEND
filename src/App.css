@@ -1,6 +1,6 @@
-/* File: AR_FRONTEND/src/App.css */
 
-/* --- Main App Layout --- */
+
+
 .app-layout {
     background-color: #0D0D0D !important;
     min-height: 100vh;
@@ -8,7 +8,7 @@
     flex-direction: column;
 }
 
-/* --- App Header --- */
+
 .app-header {
     display: flex;
     align-items: center;
@@ -25,23 +25,23 @@
 .app-header-logo-area {
     display: flex;
     align-items: center;
-    gap: 8px; /* Space between logo and title */
+    gap: 8px;
 }
 .app-header-logo {
     height: 28px;
-    width: auto; /* Maintain aspect ratio */
+    width: auto;
     object-fit: contain;
 }
 .app-header-title {
     color: #FFFFFF !important;
     margin: 0 !important;
     font-weight: 600 !important;
-    font-size: 1.05rem !important; /* Slightly smaller to fit "TERMINAL" */
+    font-size: 1.05rem !important;
     letter-spacing: 0.5px;
-    text-transform: uppercase; /* As per mockups */
+    text-transform: uppercase;
 }
 
-@media (min-width: 992px) { /* lg breakpoint */
+@media (min-width: 992px) {
     .app-header {
         padding: 0 24px !important;
         height: 64px !important;
@@ -54,8 +54,8 @@
     }
 }
 
-/* --- TonConnectButton Customization --- */
-/* Apply styles to the wrapper div TonConnectUI creates */
+
+
 .ton-connect-button-custom .tc-button {
     background-color: #7065F0 !important;
     color: #FFFFFF !important;
@@ -73,7 +73,7 @@
 }
 
 
-/* --- Main Content Area --- */
+
 .app-main-layout-container {
     display: flex;
     flex: 1;
@@ -90,7 +90,7 @@
     background-color: #0D0D0D;
 }
 .app-content-wrapper.mobile-view {
-    padding-bottom: 60px; /* Height of mobile nav */
+    padding-bottom: 60px;
 }
 
 @media (min-width: 992px) {
@@ -114,7 +114,7 @@
 }
 
 
-/* --- Desktop Sider --- */
+
 .desktop-sider {
     background: #1A1A1A !important;
     border-right: 1px solid #303030 !important;
@@ -128,7 +128,7 @@
     padding: 16px;
     text-align: center;
     border-bottom: 1px solid #303030;
-    /* Add styles for logo image if you have one */
+
 }
 .desktop-sider .ant-menu {
     background: transparent !important;
@@ -165,7 +165,7 @@
 }
 
 
-/* --- Responsive Mobile Navigation --- */
+
 .responsive-mobile-nav-container {
     position: fixed;
     bottom: 0;
@@ -185,7 +185,7 @@
 .responsive-nav-item {
     flex-grow: 1;
     flex-shrink: 1;
-    /* flex-basis is set by JS */
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -196,15 +196,15 @@
     min-width: 0;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    position: relative; /* For potential ::before/::after pseudo-elements if needed */
+    position: relative;
 }
 
-/* Selected state styling for mobile nav items */
+
 .responsive-nav-item.selected .nav-item-icon,
 .responsive-nav-item.selected .nav-item-label {
-    color: #7065F0 !important; /* theme.token.colorPrimary */
+    color: #7065F0 !important;
 }
-.responsive-nav-item.selected.more-button .nav-item-icon, /* Ensure "More" also gets selected color */
+.responsive-nav-item.selected.more-button .nav-item-icon,
 .responsive-nav-item.selected.more-button .nav-item-label {
     color: #7065F0 !important;
 }
@@ -216,13 +216,13 @@
 
 .nav-item-icon {
     line-height: 1;
-    margin-bottom: 4px; /* Increased space slightly */
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.15s ease-in-out;
 }
-/* Icon size is set dynamically in JS based on containerWidth */
+
 
 .nav-item-label {
     font-size: 10px;
@@ -233,11 +233,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    padding: 0 2px; /* Prevent text touching edges */
+    padding: 0 2px;
     transition: color 0.15s ease-in-out;
 }
 
-/* Dropdown menu for "More" items in mobile nav */
+
 .responsive-nav-dropdown-overlay .ant-dropdown-menu {
     background-color: #252525 !important;
     border-radius: 10px !important;
@@ -247,7 +247,7 @@
 }
 .responsive-nav-dropdown-overlay .ant-dropdown-menu-item {
     color: #A0A0A5 !important;
-    padding: 8px 16px !important; /* More padding for dropdown items */
+    padding: 8px 16px !important;
     font-size: 0.9rem;
 }
 .responsive-nav-dropdown-overlay .ant-dropdown-menu-item:hover {
@@ -264,7 +264,7 @@
     margin-right: 10px !important;
 }
 
-/* --- General AntD Component Overrides for Theme Consistency --- */
+
 .ant-card {
     box-shadow: var(--antd-boxShadow, 0 4px 12px rgba(0, 0, 0, 0.3)) !important;
 }
@@ -293,7 +293,7 @@
     border-bottom: 1px solid #252525 !important;
 }
 
-/* --- Specific Component Styles (Example for Coinflip, can be moved to component's CSS) --- */
+
 .coinflip-card .ant-card-body {
     padding: 20px !important;
 }
@@ -305,26 +305,26 @@
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: #252525; /* Darker background for coin area */
-    margin: 0 auto 20px auto; /* Increased bottom margin */
+    background: #252525;
+    margin: 0 auto 20px auto;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid #38383A;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.4); /* More pronounced inset shadow */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
     overflow: hidden;
 }
 @media (min-width: 768px) {
     .coin-display-container {
-        width: 130px; /* Larger on desktop */
+        width: 130px;
         height: 130px;
         margin-bottom: 24px;
     }
 }
 .coin-image {
-    width: 100%; /* Image fills the container */
+    width: 100%;
     height: 100%;
-    object-fit: cover; /* Cover to fill, might crop if aspect ratio differs */
+    object-fit: cover;
 }
 
-/* Add other specific component styles as needed, or in their own CSS files */
+

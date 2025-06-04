@@ -1,4 +1,4 @@
-/* File: AR_FRONTEND/src/pages/GamePage.css */
+
 
 .game-page-container {
     padding: 0px 0px 24px 0px;
@@ -7,7 +7,7 @@
 .game-page-banner.ant-alert {
     border-radius: 12px;
     margin-bottom: 24px;
-    background-color: #252525 !important; /* Darker background for banner */
+    background-color: #252525 !important;
     border: 1px solid #38383A !important;
     padding: 16px 20px;
 }
@@ -48,20 +48,20 @@
 }
 
 .coinflip-promo-card .ant-card-body {
-    padding: 0 !important; /* Remove padding to let rows handle it */
+    padding: 0 !important;
 }
 
 .game-promo-image-col {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #121212; /* Darker bg for image part */
+    background-color: #121212;
     padding: 20px;
-    border-radius: 12px 0 0 12px; /* Rounded on one side */
+    border-radius: 12px 0 0 12px;
 }
 .game-promo-image {
     max-width: 100%;
-    max-height: 150px; /* Control mascot size */
+    max-height: 150px;
     object-fit: contain;
 }
 
@@ -70,12 +70,12 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start; /* Align text to the left */
+    align-items: flex-start;
     text-align: left;
 }
 
 .game-promo-title {
-    color: #7065F0 !important; /* Accent color for title */
+    color: #7065F0 !important;
     font-weight: 700 !important;
     font-size: 1.6rem !important;
     margin-bottom: 8px !important;
@@ -110,9 +110,9 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 575px) { /* sm breakpoint */
+@media (max-width: 575px) {
     .game-promo-image-col {
-        border-radius: 12px 12px 0 0; /* Top rounded for mobile stacked view */
+        border-radius: 12px 12px 0 0;
         min-height: 160px;
     }
     .game-promo-content-col {

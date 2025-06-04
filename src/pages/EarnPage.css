@@ -1,11 +1,11 @@
-/* File: AR_FRONTEND/src/pages/EarnPage.css */
+
 
 .earn-page-container {
     padding: 0px 0px 24px 0px;
 }
 
 .earn-page-spinner-wrapper .ant-spin-text {
-    color: #A0A0A5; /* Lighter spinner text */
+    color: #A0A0A5;
 }
 
 .earn-page-header-actions {
@@ -17,15 +17,15 @@
     font-size: 0.9rem;
 }
 .earn-page-header-actions .ant-btn {
-    /* Uses default button styling from App.jsx theme */
+
 }
 
 .earn-summary-card {
     margin-bottom: 32px !important;
     text-align: center;
-    background-color: #1A1A1A; /* Slightly lighter than page bg for emphasis */
+    background-color: #1A1A1A;
     border: 1px solid #303030;
-    border-radius: 14px; /* Consistent with other cards */
+    border-radius: 14px;
 }
 .earn-summary-card .ant-card-body {
     padding: 20px !important;
@@ -48,7 +48,7 @@
     margin-bottom: 12px;
 }
 
-/* StakingPlans specific styling */
+
 .staking-plans-container {
     margin-bottom: 32px;
 }
@@ -85,11 +85,11 @@
 }
 .staking-plan-card .ant-card-body {
     flex-grow: 1;
-    padding: 20px !important; /* Increased padding */
+    padding: 20px !important;
 }
 .plan-key-tag.ant-tag {
     position: absolute;
-    top: 16px; /* Adjusted positioning */
+    top: 16px;
     right: 16px;
     background-color: rgba(112, 101, 240, 0.2) !important;
     border-color: rgba(112, 101, 240, 0.4) !important;
@@ -102,30 +102,30 @@
 .plan-card-title {
     color: #E0E0E5 !important;
     font-weight: 600 !important;
-    font-size: 1.25rem !important; /* Larger plan title */
-    margin-bottom: 18px !important; /* More space after title */
+    font-size: 1.25rem !important;
+    margin-bottom: 18px !important;
     text-align: left;
 }
 .plan-stat-item {
-    margin-bottom: 14px; /* Increased spacing between stats */
+    margin-bottom: 14px;
     line-height: 1.4;
 }
 .plan-stat-label {
     color: #A0A0A5;
-    font-size: 0.9rem; /* Slightly larger label */
+    font-size: 0.9rem;
     display: block;
     margin-bottom: 3px;
     font-weight: 500;
 }
 .plan-stat-label .info-icon {
     margin-left: 5px;
-    color: #8E8E93; /* Softer info icon */
+    color: #8E8E93;
     cursor: help;
 }
 .plan-stat-value {
     color: #FFFFFF;
-    font-size: 1.1rem; /* Larger stat value */
-    font-weight: 600; /* Bolder stat value */
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 .plan-stat-value.success-text { color: #4CAF50; }
 .plan-stat-value.error-text { color: #F44336; }
@@ -155,27 +155,27 @@
     margin-bottom: 4px;
 }
 .select-plan-button.ant-btn {
-    width: calc(100% - 0px); /* Full width within actions */
-    margin: 8px 0 0 0; /* Remove horizontal margin if actions handle padding */
-    font-weight: 600 !important; /* Bolder button text */
-    height: 40px !important; /* Standard button height */
+    width: calc(100% - 0px);
+    margin: 8px 0 0 0;
+    font-weight: 600 !important;
+    height: 40px !important;
     font-size: 0.95rem !important;
 }
 .staking-plan-card .ant-card-actions {
     background-color: #1A1A1A !important;
     border-top: 1px solid #303030 !important;
-    padding: 12px 20px !important; /* Padding for actions area */
+    padding: 12px 20px !important;
 }
 .staking-plan-card .ant-card-actions > li {
-    margin: 0 !important; /* Remove default margin from AntD actions */
+    margin: 0 !important;
 }
 .staking-plan-card .ant-card-actions > li > span {
-    width: 100%; /* Make action span take full width */
+    width: 100%;
     display: block;
 }
 
 
-/* Active Stakes Section */
+
 .active-stakes-section {
     margin-top: 40px;
 }
@@ -184,7 +184,7 @@
     margin-bottom: 20px;
 }
 
-/* Stake Modal */
+
 .stake-modal .modal-input-label {
     color: #A0A0A5;
     display: block;
@@ -198,10 +198,10 @@
 .stake-modal .modal-calculated-arix {
     font-weight: 500;
     margin-top: 12px;
-    padding: 10px; /* More padding */
-    background: rgba(112, 101, 240, 0.08); /* Subtle primary accent background */
+    padding: 10px;
+    background: rgba(112, 101, 240, 0.08);
     border-radius: 8px;
-    font-size: 0.95rem; /* Slightly larger */
+    font-size: 0.95rem;
     border: 1px solid rgba(112, 101, 240, 0.2);
     color: #E0E0E5;
 }
@@ -218,14 +218,14 @@
     display: block;
     font-size: 0.85rem;
     margin-top: 4px;
-    color: #F44336; /* Ensure warning text is also red */
+    color: #F44336;
 }
 .stake-modal .modal-divider {
     border-color: #303030 !important;
     margin: 20px 0 !important;
 }
 
-/* Unstake Modal (shares some styles with stake-modal) */
+
 .unstake-confirm-modal .modal-text {
     font-size: 0.95rem;
 }
@@ -236,10 +236,10 @@
     margin-top: 16px;
 }
 
-/* General Modal Buttons - Ensure they use theme defaults or override here */
+
 .dark-theme-modal .ant-modal-footer .modal-cancel-button.ant-btn-default {
-    /* Uses default button styling from App.jsx theme */
+
 }
 .dark-theme-modal .ant-modal-footer .modal-confirm-button.ant-btn-primary {
-    /* Uses primary button styling from App.jsx theme */
+
 }

@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/components/user/UserProfileCard.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Typography, Button, Spin, message, Tooltip, Row, Col, Grid, Statistic as AntdStatistic, Alert } from 'antd';
 import {
@@ -9,9 +9,9 @@ import {
   WalletOutlined,
   LogoutOutlined,
   TeamOutlined,
-  RiseOutlined, // Used for ARIX price trend or general info
+  RiseOutlined, 
   InfoCircleOutlined,
-  LinkOutlined // For connect wallet button
+  LinkOutlined 
 } from '@ant-design/icons';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +39,7 @@ const UserProfileCard = ({
                            currentArxPrice,
                            onRefreshAllData,
                            isDataLoading,
-                           onInitiateUnstakeProcess, // Callback to UserPage to handle unstake flow
+                           onInitiateUnstakeProcess, 
                          }) => {
   const userFriendlyAddress = useTonAddress();
   const rawAddress = useTonAddress(false);
@@ -68,7 +68,7 @@ const UserProfileCard = ({
         if (showMsg) message.success("ARIX wallet balance refreshed!");
       } else {
         setArixWalletBalance(0);
-        // Do not show info message if wallet not found, as it might be normal for new users
+        
       }
     } catch (err) {
       console.error("Failed to fetch ARIX wallet balance:", err);

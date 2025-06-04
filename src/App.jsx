@@ -1,34 +1,34 @@
-// File: AR_FRONTEND/src/App.jsx
+
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid, Spin } from 'antd';
 import {
-  DollarCircleOutlined, // EARN
-  ExperimentOutlined,   // GAME (Using this for now, mockups have a dice/controller like icon)
-  UserOutlined,         // USER
-  BellOutlined,         // PUSH (Mockups have a play button in circle, Bell is a common alternative)
-  TeamOutlined,         // New for REFERRAL (replaces Task icon from original code)
+  DollarCircleOutlined, 
+  ExperimentOutlined,   
+  UserOutlined,         
+  BellOutlined,         
+  TeamOutlined,         
 } from '@ant-design/icons';
 
-import './App.css'; // Main app styles
-import ResponsiveMobileNav from './components/ResponsiveMobileNav'; // Mobile navigation
+import './App.css'; 
+import ResponsiveMobileNav from './components/ResponsiveMobileNav'; 
 import { TELEGRAM_BOT_USERNAME, REFERRAL_LINK_BASE, TONCONNECT_MANIFEST_URL } from './utils/constants';
 
-// Lazy load pages for better initial load time
+
 const EarnPage = lazy(() => import('./pages/EarnPage'));
 const GamePage = lazy(() => import('./pages/GamePage'));
 const UserPage = lazy(() => import('./pages/UserPage'));
-const TaskPage = lazy(() => import('./pages/TaskPage')); // General tasks if still used
-const ReferralPage = lazy(() => import('./pages/ReferralPage')); // New page for referrals
+const TaskPage = lazy(() => import('./pages/TaskPage')); 
+const ReferralPage = lazy(() => import('./pages/ReferralPage')); 
 const PushPage = lazy(() => import('./pages/PushPage'));
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-// Updated menuConfig based on mockups and new ReferralPage
-// The "TASK" tab from original code is now "REFERRAL" based on mockups and requirements
+
+
 const menuConfig = [
   { key: '/earn', icon: <DollarCircleOutlined />, labelText: "EARN" },
   { key: '/game', icon: <ExperimentOutlined />, labelText: "GAME" },
@@ -41,7 +41,7 @@ const DesktopMenu = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let currentPath = location.pathname;
-  // Default to Earn page if at root or unrecognized path for selection
+  
   if (!menuConfig.some(item => item.key === currentPath)) {
     currentPath = '/earn';
   }
@@ -52,20 +52,20 @@ const DesktopMenu = () => {
     icon: React.cloneElement(item.icon, { style: { fontSize: '16px' } }),
     label: item.labelText,
     onClick: () => navigate(item.key),
-    style: { padding: '0 18px', fontSize: '0.9rem', fontWeight: 500 }, // Adjusted padding and font weight
+    style: { padding: '0 18px', fontSize: '0.9rem', fontWeight: 500 }, 
   }));
 
   return (
       <Sider
-          width={200} // Slightly wider sider
+          width={200} 
           className="desktop-sider"
-          breakpoint="lg" // Breakpoint at which sider collapses
-          collapsedWidth="0" // Fully collapse
-          trigger={null} // No native trigger, controlled by layout
+          breakpoint="lg" 
+          collapsedWidth="0" 
+          trigger={null} 
       >
         <div className="desktop-sider-logo-container">
-          {/* You can add a logo here if you have one */}
-          {/* <img src="/img/arix-logo-sidebar.png" alt="ARIX Logo" style={{ height: '40px', margin: '12px auto', display: 'block' }} /> */}
+          {}
+          {}
         </div>
         <Menu
             theme="dark"
@@ -80,89 +80,89 @@ const DesktopMenu = () => {
 
 function App() {
   const screens = useBreakpoint();
-  const isMobile = !screens.lg; // Use AntD's lg breakpoint for "desktop" view
+  const isMobile = !screens.lg; 
   const [tonConnectUI, setOptions] = useTonConnectUI();
 
   useEffect(() => {
-    // Update TonConnectUI options if needed, e.g., language
-    // setOptions({ language: 'en' });
+    
+    
 
-    // Extract referral code from URL and store it
+    
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     if (refCode) {
       localStorage.setItem('arixReferralCode', refCode);
-      // Clean the URL
-      // window.history.replaceState({}, document.title, window.location.pathname);
+      
+      
     }
 
-    // Initialize Telegram Web App SDK
+    
     if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
-      // Set theme params based on the app's dark theme
-      // These colors should match your TELEGRAM_DARK_THEME for consistency
-      tg.setHeaderColor('#121212'); // Match app-header background
-      tg.setBackgroundColor('#000000'); // Match app-layout background
+      
+      
+      tg.setHeaderColor('#121212'); 
+      tg.setBackgroundColor('#000000'); 
 
-      // If you want to use Telegram's theme params instead:
-      // const themeParams = tg.themeParams;
-      // console.log("Telegram Theme Params:", themeParams);
-      // You could then adapt your AntD theme dynamically, but for now, we use a fixed dark theme.
+      
+      
+      
+      
     }
   }, [setOptions]);
 
-  // Theme configuration to match mockups (dark, purple/blue accents)
+  
   const TELEGRAM_DARK_THEME = {
     algorithm: antdTheme.darkAlgorithm,
     token: {
-      colorPrimary: '#7065F0', // Main accent color from mockups (buttons, highlights) - A bit more vibrant purple
-      colorInfo: '#58D6FF',    // Light blue for info elements or alternative accents
-      colorSuccess: '#4CAF50', // Green for success
-      colorError: '#F44336',   // Red for errors
-      colorWarning: '#FFC107', // Yellow for warnings
-      colorTextBase: '#E0E0E5', // Primary light text on dark backgrounds
-      colorTextSecondary: '#A0A0A5', // Softer text for less important info
-      colorTextTertiary: '#8E8E93',  // Even softer text
-      colorTextQuaternary: '#6A6A6E',// Very subtle text, like placeholders
-      colorBgBase: '#0D0D0D',      // Main app background - very dark grey, almost black
-      colorBgContainer: '#1A1A1A', // Card backgrounds, modal backgrounds - slightly lighter dark grey
-      colorBgElevated: '#252525',  // Popovers, dropdowns - a step lighter
-      colorBgLayout: '#0D0D0D',    // Main layout background (Header, Sider might be slightly different)
-      colorBorder: '#303030',      // Borders for cards, inputs - subtle
-      colorBorderSecondary: '#252525', // Dividers, table borders
-      colorSplit: '#252525',       // Split lines in components like List
-      borderRadius: 10,          // General border radius for cards, buttons
-      borderRadiusLG: 14,        // Larger border radius for modals, main containers
-      borderRadiusSM: 6,         // Smaller border radius for tags, small elements
+      colorPrimary: '#7065F0', 
+      colorInfo: '#58D6FF',    
+      colorSuccess: '#4CAF50', 
+      colorError: '#F44336',   
+      colorWarning: '#FFC107', 
+      colorTextBase: '#E0E0E5', 
+      colorTextSecondary: '#A0A0A5', 
+      colorTextTertiary: '#8E8E93',  
+      colorTextQuaternary: '#6A6A6E',
+      colorBgBase: '#0D0D0D',      
+      colorBgContainer: '#1A1A1A', 
+      colorBgElevated: '#252525',  
+      colorBgLayout: '#0D0D0D',    
+      colorBorder: '#303030',      
+      colorBorderSecondary: '#252525', 
+      colorSplit: '#252525',       
+      borderRadius: 10,          
+      borderRadiusLG: 14,        
+      borderRadiusSM: 6,         
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
-      controlHeight: 38,         // Standard height for inputs, buttons
-      controlHeightLG: 42,       // Large controls
-      controlHeightSM: 30,       // Small controls
+      controlHeight: 38,         
+      controlHeightLG: 42,       
+      controlHeightSM: 30,       
       fontSize: 14,
-      fontSizeLG: 16,            // Larger text size
-      fontSizeSM: 12,            // Smaller text size
-      wireframe: false,          // Set to true to see component outlines
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', // Softer default shadow for cards
-      boxShadowSecondary: '0 6px 20px rgba(0, 0, 0, 0.25)', // For modals/popovers
+      fontSizeLG: 16,            
+      fontSizeSM: 12,            
+      wireframe: false,          
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', 
+      boxShadowSecondary: '0 6px 20px rgba(0, 0, 0, 0.25)', 
     },
     components: {
       Layout: {
-        headerBg: '#1A1A1A', // Header slightly different from main layout bg
-        siderBg: '#1A1A1A',  // Sider background
-        bodyBg: '#0D0D0D',   // Main content area background
+        headerBg: '#1A1A1A', 
+        siderBg: '#1A1A1A',  
+        bodyBg: '#0D0D0D',   
       },
       Menu: {
         darkItemBg: 'transparent',
-        darkItemSelectedBg: 'rgba(112, 101, 240, 0.15)', // Selected item background in menu
+        darkItemSelectedBg: 'rgba(112, 101, 240, 0.15)', 
         darkItemColor: '#A0A0A5',
         darkItemSelectedColor: '#7065F0',
         darkItemHoverBg: 'rgba(112, 101, 240, 0.1)',
         darkItemHoverColor: '#8c80f3',
         itemHeight: 42,
         subMenuItemBg: '#1A1A1A',
-        popupBg: '#252525', // For dropdown menus from "More" in mobile nav
+        popupBg: '#252525', 
       },
       Button: {
         colorPrimary: '#7065F0',
@@ -232,7 +232,7 @@ function App() {
         inkBarColor: '#7065F0',
         horizontalMargin: '0',
         titleFontSize: isMobile ? 14 : 15,
-        cardPadding: '12px 16px', // Padding for tabs card style
+        cardPadding: '12px 16px', 
       },
       Spin: { colorPrimary: '#7065F0',},
       Alert: {
@@ -257,7 +257,7 @@ function App() {
       Empty: {
         colorTextDisabled: '#6A6A6E',
       },
-      Dropdown: { // For "More" menu in mobile nav
+      Dropdown: { 
         colorBgElevated: '#252525',
         colorBorderSecondary: '#303030',
         borderRadiusLG: 10,
@@ -278,7 +278,7 @@ function App() {
         <Layout className="app-layout">
           <Header className="app-header">
             <div className="app-header-logo-area">
-              {/* Placeholder for logo if needed, or just title */}
+              {}
               <img src="/img/arix-logo-header.png" alt="ARIX" className="app-header-logo" onError={(e) => e.currentTarget.style.display='none'}/>
               <Title level={isMobile ? 5 : 4} className="app-header-title">
                 TERMINAL
@@ -313,7 +313,7 @@ function App() {
   );
 }
 
-// Wrap App with Router if it's not already done in main.jsx
+
 const RootApp = () => (
     <Router>
       <App />

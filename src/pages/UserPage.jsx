@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/pages/UserPage.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Typography, Tabs, message, Spin, Button, Grid, Card, Modal, Alert, Empty, Select, Divider } from 'antd';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
@@ -9,10 +9,10 @@ import {
     LinkOutlined,
     HistoryOutlined,
     ExperimentOutlined,
-    // DollarCircleOutlined, // Used in UserProfileCard
-    // RocketOutlined, // Not directly used here, maybe in modal
-    // InfoCircleOutlined, // Used in UserProfileCard
-    InteractionOutlined // For unstake action
+    
+    
+    
+    InteractionOutlined 
 } from '@ant-design/icons';
 
 import UserProfileCard from '../components/user/UserProfileCard';
@@ -26,14 +26,14 @@ import {
     confirmArixUnstake
 } from '../services/api';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
-// ARIX_DECIMALS, USDT_DECIMALS are used in child components or can be imported if needed here
+
 import { toNano, Cell } from '@ton/core';
 import { waitForTransactionConfirmation } from '../utils/tonUtils';
 
 import './UserPage.css';
 
 const { Title, Text, Paragraph } = Typography;
-// const { TabPane } = Tabs; // items prop is preferred now
+
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 

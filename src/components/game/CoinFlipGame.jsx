@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/components/game/CoinFlipGame.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { InputNumber, Button, Typography, Radio, Spin, message, Alert, Tooltip, Grid } from 'antd';
 import {
@@ -20,7 +20,7 @@ import {
     COINFLIP_SPINNING_GIF,  
     COINFLIP_DEFAULT_IMG,   
     FALLBACK_IMAGE_URL      
-} from '../../utils/tonUtils'; // All imports should come from tonUtils.js or other relevant utils
+} from '../../utils/tonUtils'; 
 import './CoinFlipGame.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -82,7 +82,7 @@ const CoinflipGame = ({ onBack }) => {
 
     useEffect(() => { 
         [COINFLIP_HEADS_IMG, COINFLIP_TAILS_IMG, COINFLIP_SPINNING_GIF, COINFLIP_DEFAULT_IMG].forEach(src => {
-            if (src && src.startsWith('/')) { // Ensure only local paths are preloaded
+            if (src && src.startsWith('/')) { 
                 const img = new Image();
                 img.src = src;
             }

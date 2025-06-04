@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/components/earn/StakingPlans.jsx
+
 import React from 'react';
 import { Card, Row, Col, Button, Statistic, Tooltip, Typography, Tag } from 'antd';
 import { InfoCircleOutlined, CheckCircleOutlined, PercentageOutlined, CalendarOutlined, DollarOutlined, SendOutlined } from '@ant-design/icons';
@@ -8,8 +8,8 @@ const { Title: AntTitle, Text, Paragraph } = Typography;
 
 const StakingPlans = ({ plans, onSelectPlan, currentArxPrice, userFriendlyAddress }) => {
     if (!userFriendlyAddress) {
-        // If wallet not connected, we might show a general message or rely on EarnPage to handle this.
-        // For now, StakingPlans will render if plans are available, EarnPage handles connect prompt.
+        
+        
     }
 
     if (!plans || plans.length === 0) {
@@ -37,7 +37,7 @@ const StakingPlans = ({ plans, onSelectPlan, currentArxPrice, userFriendlyAddres
                     const minStakeUsdtNum = parseFloat(plan.minStakeUsdt || 0);
                     const maxStakeUsdtNum = parseFloat(plan.maxStakeUsdt || Infinity);
 
-                    // Calculate approximate ARIX based on current price for display
+                    
                     const minStakeArixApprox = currentArxPrice && minStakeUsdtNum > 0 && currentArxPrice > 0
                         ? (minStakeUsdtNum / currentArxPrice)
                         : null;

@@ -1,48 +1,48 @@
-/* File: AR_FRONTEND/src/components/game/CoinFlipGame.css */
+
 
 .coinflip-game-page {
-    background-color: #0D0D0D; /* Very dark background, almost black like mockups */
-    min-height: calc(100vh - 56px); /* Adjust if main app header height changes */
+    background-color: #0D0D0D;
+    min-height: calc(100vh - 56px);
     display: flex;
     flex-direction: column;
     color: #E0E0E5;
-    padding: 0; /* No padding on the game page itself, header and content will manage */
-    overflow: hidden; /* Prevent scrollbars if content fits perfectly */
+    padding: 0;
+    overflow: hidden;
 }
 
-/* Header specific to Coinflip Game Page */
+
 .coinflip-game-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px; /* Compact header */
-    background-color: #1A1A1A; /* Darker than main content, but not pure black */
-    border-bottom: 1px solid #303030; /* Subtle border */
-    height: 50px; /* Compact header height */
-    flex-shrink: 0; /* Prevent header from shrinking */
+    padding: 8px 12px;
+    background-color: #1A1A1A;
+    border-bottom: 1px solid #303030;
+    height: 50px;
+    flex-shrink: 0;
 }
 
 .cf-back-button.ant-btn-text {
     color: #A0A0A5;
-    font-size: 20px; /* Larger back icon */
+    font-size: 20px;
     padding: 4px 8px;
 }
 .cf-back-button.ant-btn-text:hover {
     color: #FFFFFF;
-    background-color: rgba(112, 101, 240, 0.1); /* Primary color subtle hover */
+    background-color: rgba(112, 101, 240, 0.1);
 }
 
 .cf-game-logo-title {
     display: flex;
     align-items: center;
-    gap: 6px; /* Reduced gap */
+    gap: 6px;
 }
 .cf-header-logo {
-    height: 22px; /* Smaller logo in game header */
+    height: 22px;
     width: auto;
 }
 .cf-header-terminal-text {
-    font-size: 0.9rem; /* Smaller title text */
+    font-size: 0.9rem;
     font-weight: 600;
     color: #FFFFFF;
     letter-spacing: 0.5px;
@@ -53,46 +53,46 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background-color: #252525; /* Darker pill background */
-    padding: 5px 10px; /* Compact pill */
+    background-color: #252525;
+    padding: 5px 10px;
     border-radius: 16px;
     border: 1px solid #38383A;
 }
 .arix-game-icon {
-    width: 16px; /* Smaller icon in balance display */
+    width: 16px;
     height: 16px;
-    filter: drop-shadow(0 0 3px #7065F0); /* Add a subtle glow to ARIX icon */
+    filter: drop-shadow(0 0 3px #7065F0);
 }
 .cf-balance-text {
     color: #FFFFFF;
     font-weight: 600;
-    font-size: 0.85rem; /* Smaller balance text */
+    font-size: 0.85rem;
 }
 .cf-balance-spin .ant-spin-dot-item {
     background-color: #7065F0;
 }
 
 
-/* Main Content Area */
+
 .coinflip-main-content-area {
     flex-grow: 1;
     padding: 16px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Push controls to bottom */
-    overflow-y: auto; /* Allow content to scroll if it exceeds height */
+    justify-content: space-between;
+    overflow-y: auto;
 }
 
 .cf-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px; /* Reduced margin */
+    margin-bottom: 4px;
 }
 .cf-info-button.ant-btn-text,
 .cf-sound-button.ant-btn-text {
     color: #8E8E93 !important;
-    font-size: 22px !important; /* Larger icons */
+    font-size: 22px !important;
     padding: 6px !important;
 }
 .cf-info-button.ant-btn-text:hover,
@@ -103,7 +103,7 @@
 .cf-game-title {
     color: #FFFFFF !important;
     font-weight: 700 !important;
-    font-size: 1.4rem !important; /* Adjusted size */
+    font-size: 1.4rem !important;
     margin: 0 !important;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -111,29 +111,29 @@
 .cf-game-subtitle {
     text-align: center;
     color: #A0A0A5;
-    font-size: 0.85rem; /* Smaller subtitle */
-    margin-bottom: 16px; /* Reduced margin */
+    font-size: 0.85rem;
+    margin-bottom: 16px;
 }
 
-/* Coin Animation Area */
+
 .cf-coin-animation-area {
     display: flex;
-    justify-content: space-between; /* Space out stats and coin */
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    padding: 16px 0; /* Vertical padding */
+    padding: 16px 0;
     position: relative;
     background-image:
-            linear-gradient(rgba(37, 37, 39, 0.3) 1px, transparent 1px), /* Darker grid lines */
+            linear-gradient(rgba(37, 37, 39, 0.3) 1px, transparent 1px),
             linear-gradient(90deg, rgba(37, 37, 39, 0.3) 1px, transparent 1px);
-    background-size: 25px 25px; /* Slightly larger grid */
+    background-size: 25px 25px;
     border-radius: 10px;
 }
 
 .cf-stat-display {
     text-align: center;
-    flex: 1; /* Allow flex to distribute space */
-    padding: 0 5%; /* Percentage padding for responsiveness */
+    flex: 1;
+    padding: 0 5%;
 }
 .cf-stat-label {
     display: block;
@@ -156,19 +156,19 @@
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    background: radial-gradient(circle, #2a2a2e 0%, #18181a 70%); /* Gradient for depth */
+    background: radial-gradient(circle, #2a2a2e 0%, #18181a 70%);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3),
     inset 0 3px 8px rgba(0,0,0,0.5),
-    0 0 30px rgba(112, 101, 240, 0.15); /* Enhanced shadow */
+    0 0 30px rgba(112, 101, 240, 0.15);
     position: relative;
     flex-shrink: 0;
-    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); /* Smooth transition */
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .cf-coin-visual-wrapper.flipping .cf-coin-image {
-    animation: coinFlip3D 1.8s ease-in-out infinite; /* 3D flip animation */
+    animation: coinFlip3D 1.8s ease-in-out infinite;
 }
 .cf-coin-image {
     width: 90px;
@@ -178,16 +178,16 @@
 
 @keyframes coinFlip3D {
     0% { transform: perspective(800px) rotateY(0deg) scale(1); }
-    50% { transform: perspective(800px) rotateY(180deg) scale(1.1); } /* Slight scale for pop */
+    50% { transform: perspective(800px) rotateY(180deg) scale(1.1); }
     100% { transform: perspective(800px) rotateY(360deg) scale(1); }
 }
 
 
-/* Result Banner */
+
 .cf-result-banner {
-    padding: 12px 18px; /* More padding */
-    border-radius: 10px; /* Match other elements */
-    margin: 0 auto 20px auto; /* Centered */
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin: 0 auto 20px auto;
     text-align: center;
     border-width: 1px;
     border-style: solid;
@@ -204,14 +204,14 @@
 }
 .cf-result-banner-title {
     display: block;
-    font-size: 1.15rem; /* Slightly larger */
+    font-size: 1.15rem;
     margin-bottom: 5px;
-    font-weight: 600; /* Bolder title */
+    font-weight: 600;
     color: #FFFFFF;
 }
-.cf-result-banner.win .cf-result-banner-title { color: #81C784; } /* Lighter green */
+.cf-result-banner.win .cf-result-banner-title { color: #81C784; }
 .cf-result-banner.loss .cf-result-banner-title,
-.cf-result-banner.error .cf-result-banner-title { color: #E57373; } /* Lighter red */
+.cf-result-banner.error .cf-result-banner-title { color: #E57373; }
 
 .cf-result-banner-details {
     font-size: 0.9rem;
@@ -219,7 +219,7 @@
 }
 
 
-/* Bet Controls */
+
 .cf-bet-controls {
     background-color: #1A1A1A;
     padding: 16px;
@@ -230,7 +230,7 @@
 .cf-bet-label {
     display: block;
     color: #8E8E93;
-    font-size: 0.75rem; /* Smaller label */
+    font-size: 0.75rem;
     font-weight: 500;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -239,15 +239,15 @@
 .cf-bet-input-wrapper {
     display: flex;
     align-items: center;
-    background-color: #0D0D0D; /* Darker input background for contrast */
+    background-color: #0D0D0D;
     border: 1px solid #38383A;
     border-radius: 8px;
     padding: 0 12px;
-    margin-bottom: 16px; /* More space after input */
+    margin-bottom: 16px;
 }
 .cf-bet-input-wrapper .arix-game-icon {
-    margin-right: 10px; /* More space for icon */
-    width: 22px; /* Larger icon in input */
+    margin-right: 10px;
+    width: 22px;
     height: 22px;
     opacity: 0.8;
 }
@@ -256,11 +256,11 @@
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    height: 46px !important; /* Taller input */
+    height: 46px !important;
 }
 .cf-bet-input .ant-input-number-input {
     color: #FFFFFF !important;
-    font-size: 1.2rem !important; /* Larger bet amount text */
+    font-size: 1.2rem !important;
     font-weight: 600 !important;
     padding-left: 0 !important;
 }
@@ -269,8 +269,8 @@
     height: 50px !important;
     font-size: 1.15rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.8px; /* More spacing */
-    background: linear-gradient(135deg, #7065F0 0%, #8c80f3 100%) !important; /* Gradient button */
+    letter-spacing: 0.8px;
+    background: linear-gradient(135deg, #7065F0 0%, #8c80f3 100%) !important;
     border: none !important;
     text-transform: uppercase;
     box-shadow: 0 4px 10px rgba(112, 101, 240, 0.3);
@@ -286,7 +286,7 @@
 }
 
 
-/* Choice Selection */
+
 .cf-choice-selection {
     margin-top: 16px;
     text-align: center;
@@ -294,7 +294,7 @@
 .cf-choose-side-text {
     color: #A0A0A5;
     font-size: 0.9rem;
-    margin-bottom: 16px; /* More space */
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -303,20 +303,20 @@
 .cf-choose-side-text .anticon {
     color: #4CAF50;
     margin-right: 8px;
-    font-size: 1.2rem; /* Larger check icon */
+    font-size: 1.2rem;
 }
 .cf-choice-radio-group.ant-radio-group {
     display: flex;
-    gap: 20px; /* More space between buttons */
+    gap: 20px;
     justify-content: center;
 }
 .cf-choice-button.ant-radio-button-wrapper {
     flex: 1;
     max-width: 160px;
-    height: 120px !important; /* Even taller buttons */
-    border-radius: 12px !important; /* More rounded */
-    background-color: #1A1A1A !important; /* Darker inactive button */
-    border: 2px solid #303030 !important; /* Darker border */
+    height: 120px !important;
+    border-radius: 12px !important;
+    background-color: #1A1A1A !important;
+    border: 2px solid #303030 !important;
     color: #A0A0A5 !important;
     display: flex;
     flex-direction: column;
@@ -331,19 +331,19 @@
     width: 40px;
     height: 40px;
     margin-bottom: 10px;
-    opacity: 0.6; /* Dimmer inactive icon */
+    opacity: 0.6;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 .cf-choice-button.ant-radio-button-wrapper-checked {
-    background: linear-gradient(135deg, #7065F0 0%, #5448c8 100%) !important; /* Gradient for selected */
+    background: linear-gradient(135deg, #7065F0 0%, #5448c8 100%) !important;
     border-color: #8c80f3 !important;
     color: #FFFFFF !important;
-    transform: translateY(-4px) scale(1.05); /* Pop out effect */
+    transform: translateY(-4px) scale(1.05);
     box-shadow: 0 6px 15px rgba(112, 101, 240, 0.4);
 }
 .cf-choice-button.ant-radio-button-wrapper-checked .cf-choice-button-icon {
     opacity: 1;
-    transform: scale(1.1); /* Icon slightly larger on select */
+    transform: scale(1.1);
 }
 .cf-choice-button.ant-radio-button-wrapper:not(.ant-radio-button-wrapper-checked):hover {
     border-color: #7065F0 !important;
@@ -361,9 +361,9 @@
     letter-spacing: 0.5px;
 }
 
-/* AntD Message Popups for Game (from index.css, ensure they are effective) */
+
 .game-message-popup .ant-message-custom-content {
-    background-color: #1F1F1F !important; /* Slightly different for game messages */
+    background-color: #1F1F1F !important;
     color: #E0E0E5 !important;
     border-radius: 10px !important;
     padding: 14px 18px !important;
@@ -382,13 +382,13 @@
     color: #FFF3CD !important;
 }
 .game-message-popup .anticon {
-    font-size: 1.1em !important; /* Make icon slightly larger in message */
+    font-size: 1.1em !important;
     margin-right: 10px !important;
     color: currentColor !important;
 }
 
 
-/* Responsive adjustments for smaller screens */
+
 @media (max-width: 400px) {
     .cf-game-title {
         font-size: 1.2rem !important;

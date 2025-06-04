@@ -1,6 +1,6 @@
-// File: AR_FRONTEND/src/pages/PushPage.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Button, Modal, Alert, Spin, message } from 'antd'; // Removed Tooltip if not used elsewhere
+import { Typography, Button, Modal, Alert, Spin, message } from 'antd'; 
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowDownOutlined,
@@ -13,14 +13,14 @@ import {
     DollarCircleOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { getUserProfile } from '../services/api'; // Ensure path is correct
-// import { ARIX_DECIMALS, FALLBACK_IMAGE_URL } from '../utils/constants'; // Ensure path is correct
+import { getUserProfile } from '../services/api'; 
+
 import './PushPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 
-// Assuming FALLBACK_IMAGE_URL is defined, e.g.:
-const FALLBACK_IMAGE_URL = '/img/fallback-icon.png'; // Or your actual fallback
+
+const FALLBACK_IMAGE_URL = '/img/fallback-icon.png'; 
 
 const ArixPushIcon = () => (
     <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; }} />
@@ -30,7 +30,7 @@ const PROJECT_ARIX_DEPOSIT_ADDRESS = "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWE
 
 const PushPage = () => {
     const navigate = useNavigate();
-    // const userFriendlyAddress = useTonAddress(); // Not used in current logic
+    
     const rawAddress = useTonAddress(false);
 
     const [isWheelActive, setIsWheelActive] = useState(true);
@@ -67,20 +67,20 @@ const PushPage = () => {
     const handleWheelPress = () => {
         if (animatingWheel) return;
         setAnimatingWheel(true);
-        setIsWheelActive(false); // Lines will start to fade out/animate
+        setIsWheelActive(false); 
         setTimeout(() => {
-            setShowMainBottomSheet(true); // Trigger modal after lines are meant to be "down"
-            setAnimatingWheel(false); // Stop wheel container animation
-        }, 1500); // Duration of wheelSpin animation
+            setShowMainBottomSheet(true); 
+            setAnimatingWheel(false); 
+        }, 1500); 
     };
 
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
-        setShowMainBottomSheet(false); // This will trigger the modal to unmount (due to destroyOnClose)
-                                      // and its animation plays on exit if configured by AntD
+        setShowMainBottomSheet(false); 
+                                      
         if (!playCoinflip) {
-            // Re-activate wheel animation for lines
-            // No need to setAnimatingWheel(true) here unless you want the wheel to spin again
-            setIsWheelActive(true); // Lines will animate back in
+            
+            
+            setIsWheelActive(true); 
         }
     };
 
@@ -106,12 +106,12 @@ const PushPage = () => {
 
     return (
         <div className="push-page-container">
-            {/* Top Balance Display - Centered */}
+            {}
             <div className="push-balance-section">
                 <div className="push-balance-display">
                     <div className="balance-icon-container">
                         <div className="balance-icon-circle">
-                            <span className="balance-icon-text">V</span> {/* Or your preferred icon */}
+                            <span className="balance-icon-text">V</span> {}
                         </div>
                     </div>
                     <div className="balance-amount-display">
@@ -120,10 +120,10 @@ const PushPage = () => {
                         </Text>
                     </div>
                 </div>
-                <Text className="push-balance-currency">TON</Text> {/* As per image 1 */}
+                <Text className="push-balance-currency">TON</Text> {}
             </div>
 
-            {/* Top Buttons */}
+            {}
             <div className="push-top-buttons">
                 <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
                     <ArrowDownOutlined /> Top up
@@ -133,7 +133,7 @@ const PushPage = () => {
                 </Button>
             </div>
 
-            {/* Banner */}
+            {}
             <div className="push-banner-container">
                 <div className="push-banner-content">
                     <div className="banner-icon">
@@ -146,7 +146,7 @@ const PushPage = () => {
                 </div>
             </div>
 
-            {/* Wheel Area */}
+            {}
             <div className="push-wheel-area">
                 <div
                     className={`push-wheel-container ${animatingWheel ? 'animating' : ''}`}
@@ -186,19 +186,19 @@ const PushPage = () => {
                 </div>
             </div>
 
-            {/* Main Bottom Sheet Modal */}
+            {}
             <Modal
                 open={showMainBottomSheet}
                 onCancel={() => handleCloseMainBottomSheet(false)}
                 footer={null}
-                className="push-bottom-sheet-modal" // For potential direct styling if needed
-                closable={false} // We use a custom close button
+                className="push-bottom-sheet-modal" 
+                closable={false} 
                 maskClosable={true}
-                // centered // <-- REMOVE THIS PROP
-                destroyOnClose // Ensures clean state and re-animation
-                wrapClassName="push-bottom-sheet-modal-wrapper" // Key for custom styling
-                maskTransitionName="" // Disable default mask animation if it conflicts
-                transitionName="" // Disable default modal animation (we use CSS animation)
+                
+                destroyOnClose 
+                wrapClassName="push-bottom-sheet-modal-wrapper" 
+                maskTransitionName="" 
+                transitionName="" 
             >
                 <div className="push-bottom-sheet-content">
                     <Button
@@ -229,7 +229,7 @@ const PushPage = () => {
                 </div>
             </Modal>
 
-            {/* Top Up Modal */}
+            {}
             <Modal
                 open={showTopUpModal}
                 onCancel={() => setShowTopUpModal(false)}
@@ -237,9 +237,9 @@ const PushPage = () => {
                 className="push-topup-modal"
                 closable={false}
                 maskClosable={true}
-                centered // Standard modals can be centered
+                centered 
                 destroyOnClose
-                wrapClassName="push-topup-modal-wrapper" // For potential specific wrapper styles
+                wrapClassName="push-topup-modal-wrapper" 
                 width={400}
             >
                 <div className="push-topup-content">
@@ -255,7 +255,7 @@ const PushPage = () => {
                         <Title level={4} className="topup-modal-title">Balance</Title>
                     </div>
                     <div className="topup-modal-actions">
-                        <Button className="push-top-button top-up active"> {/* Assuming 'active' class is managed or static here */}
+                        <Button className="push-top-button top-up active"> {}
                             <ArrowDownOutlined /> Top up
                         </Button>
                         <Button className="push-top-button cashout" onClick={() => { setShowTopUpModal(false); setShowCashoutModal(true); }}>
@@ -298,7 +298,7 @@ const PushPage = () => {
                 </div>
             </Modal>
 
-            {/* Cashout Modal */}
+            {}
             <Modal
                 open={showCashoutModal}
                 onCancel={() => setShowCashoutModal(false)}
@@ -306,7 +306,7 @@ const PushPage = () => {
                 className="push-cashout-modal"
                 closable={false}
                 maskClosable={true}
-                centered // Standard modals can be centered
+                centered 
                 destroyOnClose
                 wrapClassName="push-cashout-modal-wrapper"
                 width={400}
@@ -327,14 +327,14 @@ const PushPage = () => {
                         <Button className="push-top-button top-up" onClick={() => { setShowCashoutModal(false); setShowTopUpModal(true); }}>
                             <ArrowDownOutlined /> Top up
                         </Button>
-                        <Button className="push-top-button cashout active"> {/* Assuming 'active' class is managed or static here */}
+                        <Button className="push-top-button cashout active"> {}
                             <ArrowUpOutlined /> Cashout
                         </Button>
                     </div>
                     <Alert
                         message="ARIX withdrawal is only possible after playing at least one Coinflip game."
                         type="error"
-                        showIcon // Ensure icon is shown
+                        showIcon 
                         icon={<DollarCircleOutlined />}
                         className="cashout-condition-alert"
                         action={

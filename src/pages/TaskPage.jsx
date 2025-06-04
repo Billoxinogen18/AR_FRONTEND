@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/pages/TaskPage.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { List, Card, Button, Typography, Spin, message, Modal, Input, Empty, Tag, Tooltip, Row, Col, Grid } from 'antd';
 import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LinkOutlined, SendOutlined, RedoOutlined } from '@ant-design/icons';
@@ -87,14 +87,14 @@ const TaskPage = () => {
             handleModalSubmit(); 
         } else if (task.action_url) {
             window.open(task.action_url, '_blank');
-            // For tasks with action_url, prompt for confirmation *after* they've (hopefully) done it.
-            // It's possible to auto-open modal, but might be disruptive if they just wanted to see the link.
-            // Better to let them click a separate "I've done this / Submit Proof" button after returning.
-            // So, we'll just open the link here, and they can click "Submit" button on card again which will then open modal.
-            // OR, we can decide to open modal for action_url if it doesn't need specific proof (e.g. "Visit Page and confirm").
-            // For now, the existing 'Submit' or 'Go To Task' button will re-trigger this handleTaskAction
-            // and if it's not link/text, it would go to setIsModalVisible for confirmation.
-            setIsModalVisible(true); // Open modal to confirm they've done the action_url task.
+            
+            
+            
+            
+            
+            
+            
+            setIsModalVisible(true); 
         } else {
              setIsModalVisible(true);
         }
@@ -170,10 +170,10 @@ const TaskPage = () => {
                 extra={getTaskStatusTag(task)}
                 style={{height: '100%', display: 'flex', flexDirection: 'column'}} 
             >
-                <div style={{flexGrow: 1}}> {/* This div will allow description to take available space */}
+                <div style={{flexGrow: 1}}> {}
                     <Paragraph className="task-description">{task.description}</Paragraph>
                 </div>
-                <Row justify="space-between" align="middle" style={{marginTop: 'auto', paddingTop: 12}}> {/* Push reward & button to bottom */}
+                <Row justify="space-between" align="middle" style={{marginTop: 'auto', paddingTop: 12}}> {}
                     <Col>
                         <Text strong style={{color: '#4CAF50', fontSize: '1.1rem'}}>
                             Reward: {parseFloat(task.reward_arix_amount).toFixed(ARIX_DECIMALS)} ARIX
@@ -183,7 +183,7 @@ const TaskPage = () => {
                         {task.can_attempt ? (
                             <Button 
                                 type="primary" 
-                                icon={task.action_url && task.validation_type !== 'auto_approve' ? <LinkOutlined /> : <SendOutlined />} // Icon logic for action
+                                icon={task.action_url && task.validation_type !== 'auto_approve' ? <LinkOutlined /> : <SendOutlined />} 
                                 onClick={() => handleTaskAction(task)}
                                 disabled={!userFriendlyAddress} 
                                 size="middle"

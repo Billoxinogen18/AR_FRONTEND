@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/pages/ReferralPage.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Typography, Spin, message, Button, Row, Col, Descriptions, List, Empty, Tooltip, Grid, Statistic as AntdStatistic } from 'antd';
 import { ShareAltOutlined, CopyOutlined, UsergroupAddOutlined, DollarCircleOutlined, InfoCircleOutlined, RedoOutlined, TeamOutlined, RiseOutlined, LinkOutlined } from '@ant-design/icons';
@@ -103,7 +103,7 @@ const ReferralPage = () => {
                 .then(() => console.log('Referral link shared successfully.'))
                 .catch((error) => {
                     console.log('Error sharing referral link:', error);
-                    // Fallback to copy if share fails or is cancelled by user
+                    
                     copyToClipboard(linkToShare);
                     message.info('Link copied. You can now share it manually.');
                 });

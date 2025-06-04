@@ -1,15 +1,15 @@
-// File: AR_FRONTEND/src/pages/GamePage.jsx
+
 import React, { useState } from 'react';
 import { Typography, Card, Grid, Row, Col, Button, Alert } from 'antd';
 import {
-    ExperimentOutlined, // Main Game Center icon
-    RightCircleOutlined, // For "Play" buttons
-    RiseOutlined, // For the banner icon
-    CrownOutlined, // Example for Poker if it were included
-    BlockOutlined // Example for coming soon if it were included
+    ExperimentOutlined, 
+    RightCircleOutlined, 
+    RiseOutlined, 
+    CrownOutlined, 
+    BlockOutlined 
 } from '@ant-design/icons';
-import CoinflipGame from '../components/game/CoinFlipGame'; // The main game component
-import './GamePage.css'; // Styles for this page
+import CoinflipGame from '../components/game/CoinFlipGame'; 
+import './GamePage.css'; 
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -28,7 +28,7 @@ const GamePage = () => {
     };
 
     if (showCoinflipGameComponent) {
-        // When true, the CoinflipGame component takes over the full view of this page
+        
         return <CoinflipGame onBack={handleBackToGamesList} />;
     }
 

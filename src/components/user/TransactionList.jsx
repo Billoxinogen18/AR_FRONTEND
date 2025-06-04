@@ -1,4 +1,4 @@
-// File: AR_FRONTEND/src/components/user/TransactionList.jsx
+
 import React from 'react';
 import { List, Card, Typography, Empty, Spin, Tag, Row, Col, Grid, Tooltip, Button } from 'antd';
 import {
@@ -8,8 +8,8 @@ import {
     StopOutlined,
     IssuesCloseOutlined,
     LoadingOutlined,
-    InteractionOutlined, // For generic actions
-    DollarCircleOutlined // For rewards
+    InteractionOutlined, 
+    DollarCircleOutlined 
 } from '@ant-design/icons';
 import { ARIX_DECIMALS, USDT_DECIMALS, TON_EXPLORER_URL } from '../../utils/constants';
 

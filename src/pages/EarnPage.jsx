@@ -1,6 +1,6 @@
-// File: AR_FRONTEND/src/pages/EarnPage.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid, Descriptions } from 'antd'; // Added Descriptions
+import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid, Descriptions } from 'antd'; 
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import {
     CheckCircleOutlined,

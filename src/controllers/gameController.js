@@ -1,9 +1,9 @@
-// File: AR_Proj/ar_backend/src/controllers/gameController.js
-const gameService = require('../services/gameService'); // We'll create this
-const { ARIX_TOKEN_MASTER_ADDRESS } = require('../config/envConfig');
-const { Address } = require('@ton/core'); // For address validation if needed
 
-// Helper to validate TON address string (can be moved to a util if used elsewhere)
+const gameService = require('../services/gameService'); 
+const { ARIX_TOKEN_MASTER_ADDRESS } = require('../config/envConfig');
+const { Address } = require('@ton/core'); 
+
+
 const isValidTonAddress = (addr) => {
     try {
         Address.parse(addr);
@@ -17,7 +17,7 @@ exports.handleCoinflipBet = async (req, res, next) => {
     try {
         const { userWalletAddress, betAmountArix, choice } = req.body;
 
-        // Basic Validations
+        
         if (!userWalletAddress || !betAmountArix || !choice) {
             return res.status(400).json({ message: "Missing required bet information (userWalletAddress, betAmountArix, choice)." });
         }
@@ -32,11 +32,11 @@ exports.handleCoinflipBet = async (req, res, next) => {
             return res.status(400).json({ message: "Invalid choice. Must be 'heads' or 'tails'." });
         }
 
-        // Here, you would typically verify the user's actual ARIX balance.
-        // For an MVP without direct on-chain balance check from backend for *every* bet,
-        // this example proceeds with the game logic. A real system needs robust balance checks.
-        // Consider fetching on-chain balance or checking a reliable off-chain ledger.
-        // For now, we assume frontend did a basic check.
+        
+        
+        
+        
+        
 
         const gameResult = await gameService.playCoinflip({
             userWalletAddress,
@@ -47,7 +47,7 @@ exports.handleCoinflipBet = async (req, res, next) => {
         res.status(200).json(gameResult);
 
     } catch (error) {
-        if (error.message.includes("Insufficient balance for bet") || error.message.includes("Bet amount exceeds limit")) { // Example custom errors from service
+        if (error.message.includes("Insufficient balance for bet") || error.message.includes("Bet amount exceeds limit")) { 
             return res.status(400).json({ message: error.message });
         }
         console.error("CTRL: Error in handleCoinflipBet:", error.message, error.stack);
@@ -55,17 +55,16 @@ exports.handleCoinflipBet = async (req, res, next) => {
     }
 };
 
-// Placeholder for game history controller function
-// exports.getCoinflipHistoryForUser = async (req, res, next) => {
-// try {
-// const { userWalletAddress } = req.params;
-// if (!isValidTonAddress(userWalletAddress)) {
-// return res.status(400).json({ message: "Invalid userWalletAddress format." });
-//     }
-//     const history = await gameService.getCoinflipHistory(userWalletAddress);
-//     res.status(200).json(history);
-//   } catch (error) {
-//     console.error("CTRL: Error in getCoinflipHistoryForUser:", error.message);
-//     next(error);
-//   }
-// };
+
+
+
+
+
+
+
+
+
+
+
+
+
