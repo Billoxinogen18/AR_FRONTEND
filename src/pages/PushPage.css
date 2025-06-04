@@ -1,0 +1,537 @@
+/* File: AR_FRONTEND/src/pages/PushPage.css */
+
+.push-page-container {
+    background-color: #0D0D0D;
+    min-height: calc(100vh - 56px - 60px); /* Full height minus header and mobile nav */
+    display: flex;
+    flex-direction: column;
+    color: #E0E0E5;
+    padding: 16px;
+    padding-bottom: 20px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Top Bar: Balance and Buttons */
+.push-page-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    background-color: #1A1A1A;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #303030;
+}
+
+.push-balance-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #0D0D0D;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #38383A;
+}
+.push-page-arix-icon {
+    width: 18px;
+    height: 18px;
+}
+.push-balance-amount {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.push-balance-currency {
+    color: #A0A0A5;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+.push-top-buttons {
+    display: flex;
+    gap: 10px;
+}
+.push-top-button {
+    background-color: #252525 !important;
+    border-color: #38383A !important;
+    color: #A0A0A5 !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    height: auto !important;
+    font-size: 0.85rem !important;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+.push-top-button:hover,
+.push-top-button.active { /* For active state in modals */
+    border-color: #7065F0 !important;
+    color: #7065F0 !important;
+    background-color: rgba(112, 101, 240, 0.1) !important;
+}
+.push-top-button .anticon {
+    font-size: 1em;
+}
+
+/* Banner Styling */
+.push-page-banner.ant-alert {
+    border-radius: 10px;
+    margin-bottom: 24px;
+    background-color: #252525 !important;
+    border: 1px solid #38383A !important;
+    padding: 12px 16px;
+}
+.push-page-banner .push-banner-icon {
+    font-size: 18px;
+    margin-top: 2px;
+    color: #FFD700; /* Gold/Yellowish icon for banner */
+}
+.push-page-banner .push-banner-message-text .ant-typography {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #E0E0E5;
+}
+.push-page-banner .push-banner-description-text .ant-typography {
+    font-size: 0.85rem;
+    color: #A0A0A5;
+}
+.push-page-banner .push-banner-play-button.ant-btn-sm {
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0 10px;
+    height: 28px;
+    background-color: #FFD700 !important; /* Match banner accent */
+    border-color: #FFD700 !important;
+    color: #1A1A1A !important; /* Dark text on yellow */
+}
+.push-page-banner .push-banner-play-button.ant-btn-sm:hover {
+    background-color: #ffec80 !important;
+    border-color: #ffec80 !important;
+}
+
+
+/* Wheel Area */
+.push-wheel-area {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 300px;
+    margin-bottom: 20px;
+    /* background-color: #080808; */ /* Slightly different bg for wheel area if needed */
+    border-radius: 20px;
+    /* box-shadow: inset 0 0 30px rgba(0,0,0,0.5); */
+}
+
+.push-wheel-clickable-center {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #28282E 0%, #18181A 100%); /* Darker gradient */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+    border: 4px solid #202022; /* Thicker, darker border for center */
+    box-shadow: 0 0 25px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.6);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.push-wheel-clickable-center:hover:not(.disabled) {
+    transform: scale(1.07);
+    box-shadow: 0 0 35px rgba(112, 101, 240, 0.25), inset 0 0 20px rgba(0,0,0,0.6);
+}
+.push-wheel-clickable-center.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.push-wheel-icon-container {
+    /* No specific styles needed if pixel-icon is directly inside */
+}
+
+/* CSS Pixel Icon */
+.pixel-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    transform: scale(3); /* Scale up the pixel icon */
+    filter: drop-shadow(0 0 3px rgba(112, 101, 240, 0.3)); /* Subtle glow */
+}
+.pixel-row {
+    display: flex;
+    gap: 3px;
+}
+.pixel {
+    width: 6px;
+    height: 6px;
+    background-color: transparent;
+    border-radius: 1px;
+}
+.pixel.filled {
+    background-color: #4A4A4E; /* Darker grey for pixels */
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+.push-wheel-clickable-center:hover .pixel.filled {
+    background-color: #7065F0;
+}
+
+
+/* Ridges and Lines */
+.push-wheel-ridges {
+    position: absolute;
+    width: 260px; /* Diameter of the outer ring where lines sit */
+    height: 260px;
+    border-radius: 50%;
+    /* The "third ridge" - subtle border for the track */
+    border: 2px solid #202022;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2), inset 0 0 10px rgba(0,0,0,0.3);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.ridge-line {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2.5px; /* Slightly thicker lines */
+    height: 130px; /* Half the diameter of .push-wheel-ridges */
+    transform-origin: bottom center;
+}
+
+.ridge-line-inner {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(112, 101, 240, 0.8) 0%, rgba(112, 101, 240, 0.3) 70%, transparent 100%);
+    position: absolute;
+    bottom: 0;
+    border-radius: 2px; /* Rounded line ends */
+    transform-origin: bottom center;
+    /* Animation: retract (scaleY to 0), then fade out (opacity to 0) */
+    transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.8s ease-out 0.4s; /* Opacity fades after retraction starts */
+    opacity: 0;
+    transform: scaleY(0.2) translateY(80%); /* Start very short and offset */
+}
+
+.ridge-line.active .ridge-line-inner {
+    opacity: 0.7;
+    transform: scaleY(1) translateY(0%);
+    /* transition-delay for staggered appearance */
+}
+
+.ridge-line.inactive .ridge-line-inner {
+    transform: scaleY(0) translateY(100%); /* Retract fully towards origin */
+    opacity: 0;
+    transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.2s, opacity 0.5s ease-in; /* Delay retraction slightly, faster fade out */
+}
+
+/* Stagger animations for a more organic feel - adjust N and delay for desired effect */
+.push-wheel-ridges .ridge-line:nth-child(6n + 1) .ridge-line-inner { transition-delay: 0.05s; }
+.push-wheel-ridges .ridge-line:nth-child(6n + 2) .ridge-line-inner { transition-delay: 0.1s; }
+.push-wheel-ridges .ridge-line:nth-child(6n + 3) .ridge-line-inner { transition-delay: 0.15s; }
+.push-wheel-ridges .ridge-line:nth-child(6n + 4) .ridge-line-inner { transition-delay: 0.2s; }
+.push-wheel-ridges .ridge-line:nth-child(6n + 5) .ridge-line-inner { transition-delay: 0.25s; }
+.push-wheel-ridges .ridge-line:nth-child(6n + 0) .ridge-line-inner { transition-delay: 0.3s; }
+
+
+/* Bottom Sheet Modal ("Pushing season is over") */
+.push-bottom-sheet-modal-wrapper .ant-modal-content {
+    background-color: #1A1A1A !important; /* Dark card background */
+    border-radius: 20px 20px 0 0 !important; /* Rounded top corners only */
+    padding: 0 !important; /* Remove default modal padding */
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3) !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important; /* Ensure it spans full width on mobile */
+    margin: 0 !important;
+    top: auto !important; /* Override AntD centering */
+}
+.push-bottom-sheet-modal-wrapper .ant-modal-body {
+    padding: 0 !important; /* Remove default body padding */
+}
+
+.push-bottom-sheet-content {
+    padding: 20px;
+    padding-top: 40px; /* Space for close button */
+    text-align: center;
+    position: relative;
+}
+.close-bottom-sheet-button.ant-btn-circle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: #252525 !important;
+    border-color: #38383A !important;
+    color: #A0A0A5 !important;
+    z-index: 10;
+}
+.close-bottom-sheet-button.ant-btn-circle:hover {
+    background-color: #303030 !important;
+    color: #FFFFFF !important;
+}
+
+.bottom-sheet-title {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 1.3rem !important;
+    margin-bottom: 12px !important;
+}
+.bottom-sheet-text {
+    color: #A0A0A5 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6;
+    margin-bottom: 16px !important;
+}
+.bottom-sheet-next-steps {
+    background-color: #252525; /* Darker section for next steps */
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.next-steps-title {
+    color: #E0E0E5 !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.next-steps-list {
+    list-style-type: decimal;
+    padding-left: 20px;
+    color: #A0A0A5;
+    font-size: 0.9rem;
+}
+.next-steps-list li {
+    margin-bottom: 4px;
+}
+.bottom-sheet-text.coinflip-prompt {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+.play-coinflip-button-sheet.ant-btn-primary {
+    height: 48px !important;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+}
+
+/* Top Up Modal Styling */
+.push-topup-modal-wrapper .ant-modal-content {
+    background-color: #1A1A1A !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
+}
+.push-topup-modal-wrapper .ant-modal-body {
+    padding: 0 !important;
+}
+.push-topup-content {
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+.close-topup-button.ant-btn-circle,
+.close-cashout-button.ant-btn-circle { /* Shared style for close buttons */
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background-color: #252525 !important;
+    border-color: #38383A !important;
+    color: #A0A0A5 !important;
+    z-index: 10;
+}
+.topup-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.topup-modal-header .push-page-arix-icon {
+    width: 24px; height: 24px;
+}
+.topup-modal-title {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+}
+.topup-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.topup-modal-actions .push-top-button {
+    flex: 1; /* Make buttons take equal width */
+}
+
+.topup-warning-alert.ant-alert-warning {
+    background-color: rgba(255, 173, 51, 0.15) !important; /* Orangeish warning */
+    border-color: rgba(255, 173, 51, 0.3) !important;
+    border-radius: 8px !important;
+    margin-bottom: 16px !important;
+    text-align: left;
+}
+.topup-warning-alert .ant-alert-message {
+    color: #FFD8A8 !important;
+    font-weight: 500;
+}
+.topup-warning-alert .ant-alert-description {
+    color: #FFCC80 !important;
+}
+.topup-warning-alert .ant-alert-icon {
+    color: #FFA726 !important; /* Brighter orange for icon */
+}
+
+.topup-instructions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.instruction-link {
+    color: #8E8E93 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.instruction-link:hover {
+    color: #7065F0 !important;
+}
+.address-label {
+    color: #8E8E93;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+.address-display-box {
+    background-color: #0D0D0D; /* Darker box for address */
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #303030;
+    margin-bottom: 8px;
+}
+.deposit-address-text {
+    color: #E0E0E5 !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    word-break: break-all;
+}
+.fee-info-text {
+    color: #A0A0A5;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+}
+.fee-info-text strong {
+    color: #E0E0E5;
+}
+.min-deposit-info {
+    color: #8E8E93;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: #252525;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+.min-deposit-info .anticon {
+    color: #A0A0A5;
+}
+.min-deposit-info strong {
+    color: #E0E0E5;
+}
+.copy-address-button.ant-btn-primary {
+    height: 48px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+
+/* Cashout Modal Styling */
+.push-cashout-modal-wrapper .ant-modal-content {
+    /* Shares styles with topup modal wrapper */
+    background-color: #1A1A1A !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
+}
+.push-cashout-modal-wrapper .ant-modal-body {
+    padding: 0 !important;
+}
+.push-cashout-content {
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+.cashout-modal-header { /* Same as topup */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.cashout-modal-title { /* Same as topup */
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+}
+.cashout-modal-actions { /* Same as topup */
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cashout-condition-alert.ant-alert-error {
+    background-color: #D32F2F !important; /* Solid red as per mockup */
+    border-color: #C62828 !important;
+    border-radius: 8px !important;
+    margin-top: 20px !important; /* Space above if it's the main content */
+    padding: 16px !important;
+    text-align: left; /* Align text left within alert */
+}
+.cashout-condition-alert .ant-alert-message {
+    color: #FFFFFF !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+}
+.cashout-condition-alert .ant-alert-icon {
+    color: #FFFFFF !important; /* White icon on red background */
+    font-size: 20px !important; /* Larger icon */
+}
+.cashout-play-button.ant-btn-primary {
+    background-color: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+    color: #D32F2F !important; /* Red text on white button */
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+}
+.cashout-play-button.ant-btn-primary:hover {
+    background-color: #f0f0f0 !important;
+    border-color: #f0f0f0 !important;
+}
+
+@media (max-width: 400px) {
+    .push-wheel-clickable-center { width: 130px; height: 130px; }
+    .push-wheel-ridges { width: 230px; height: 230px; }
+    .ridge-line { height: 115px; }
+    .pixel-icon { transform: scale(3); }
+    .push-top-button { font-size: 0.8rem !important; padding: 5px 10px !important; }
+    .push-balance-amount { font-size: 1rem; }
+    .push-page-banner .push-banner-message-text .ant-typography { font-size: 0.9rem; }
+    .push-page-banner .push-banner-description-text .ant-typography { font-size: 0.8rem; }
+    .topup-modal-title, .cashout-modal-title { font-size: 1.1rem !important; }
+}
+

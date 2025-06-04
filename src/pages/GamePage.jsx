@@ -1,137 +1,102 @@
 // File: AR_FRONTEND/src/pages/GamePage.jsx
-import React from 'react';
-import { Typography, Card, Grid, Row, Col, Button, message, Empty } from 'antd'; // Added Empty
-import { ExperimentOutlined, BlockOutlined, RiseOutlined, CrownOutlined } from '@ant-design/icons';
-import CoinflipGame from '../components/game/CoinFlipGame'; 
+import React, { useState } from 'react';
+import { Typography, Card, Grid, Row, Col, Button, Alert } from 'antd';
+import {
+    ExperimentOutlined, // Main Game Center icon
+    RightCircleOutlined, // For "Play" buttons
+    RiseOutlined, // For the banner icon
+    CrownOutlined, // Example for Poker if it were included
+    BlockOutlined // Example for coming soon if it were included
+} from '@ant-design/icons';
+import CoinflipGame from '../components/game/CoinFlipGame'; // The main game component
+import './GamePage.css'; // Styles for this page
 
 const { Title, Text, Paragraph } = Typography;
-const { useBreakpoint } = Grid; 
-
-// GameCard component can be kept for future use but won't be rendered if no other games
-// const GameCard = ({ title, description, actionText, onAction, icon, imageUrl, comingSoon, bannerText, bannerColor }) => {
-//   const isMobile = !useBreakpoint().md;
-//   return (
-//     <Card className="dark-theme-card game-info-card" style={{ textAlign: 'center' }}> 
-//       <div className="card-content-grow"> 
-//         {bannerText && (
-//             <div style={{
-//                 backgroundColor: bannerColor || '#7e73ff',
-//                 color: 'white',
-//                 padding: '2px 8px',
-//                 borderRadius: '6px 6px 0 0', 
-//                 fontSize: '0.8rem',
-//                 fontWeight: 'bold',
-//                 position: 'absolute',
-//                 top: 0, 
-//                 left: '50%',
-//                 transform: 'translateX(-50%)',
-//                 width: 'auto',
-//                 minWidth: '100px',
-//                 zIndex: 1,
-//                 textAlign:'center'
-//             }}>
-//                 {bannerText}
-//             </div>
-//         )}
-//         {imageUrl && <img src={imageUrl} alt={title} className="card-image" style={{ marginTop: bannerText ? '25px': '0', height: isMobile ? '100px' : '120px', objectFit:'contain'}} />}
-//         <Title level={4} style={{ color: '#ffffff', marginTop: imageUrl ? 8 : 0, marginBottom: 8, fontSize: '1.2rem' }}>{icon}{title}</Title>
-//         <Text style={{ color: '#a0a0a5', display: 'block', minHeight: '40px', fontSize: '0.9rem' }}>{description}</Text>
-//       </div>
-//       <Button 
-//         type={comingSoon ? "default" : "primary"}
-//         onClick={onAction} 
-//         disabled={comingSoon}
-//         icon={comingSoon ? <BlockOutlined /> : null}
-//         style={{ marginTop: 16, width: '80%' }}
-//         size="middle"
-//       >
-//         {actionText}
-//       </Button>
-//     </Card>
-//   );
-// };
-
+const { useBreakpoint } = Grid;
 
 const GamePage = () => {
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
+    const [showCoinflipGameComponent, setShowCoinflipGameComponent] = useState(false);
 
-  // const handleComingSoon = () => {
-  //   message.info("This game is coming soon! Stay tuned.");
-  // };
+    const handlePlayCoinflip = () => {
+        setShowCoinflipGameComponent(true);
+    };
 
-  // Assuming Coinflip is the primary (or only) game for now
-  const hasActiveGames = true; // Set to true if CoinflipGame is always present
+    const handleBackToGamesList = () => {
+        setShowCoinflipGameComponent(false);
+    };
 
-  return (
-    <div style={{ padding: isMobile ? '0px' : '0px' }}>
-      <Title level={2} className="page-title">Games Center</Title>
-      
-      {hasActiveGames ? (
-        <>
-          <Paragraph style={{textAlign: 'center', color: '#a0a0a5', marginTop: '-16px', marginBottom: '32px', fontSize: isMobile ? '0.9rem' : '1rem'}}>
-            Exciting games and generous ARIX rewards are waiting for you!
-          </Paragraph>
-          
-          <Row justify="center" style={{marginBottom: 24}}>
-            <Col xs={24} md={20} lg={16} xl={14}>
-              <CoinflipGame /> 
-            </Col>
-          </Row>
+    if (showCoinflipGameComponent) {
+        // When true, the CoinflipGame component takes over the full view of this page
+        return <CoinflipGame onBack={handleBackToGamesList} />;
+    }
 
-          {/* Placeholder for other games - Commented out as requested */}
-          {/* 
-          <Title level={3} className="section-title" style={{textAlign: 'center', marginBottom: 24}}>More Ways to Play</Title>
-          <Row gutter={[isMobile ? 16 : 24, isMobile ? 16 : 24]} justify="center">
-            <Col xs={24} sm={12} md={8}>
-                <GameCard 
-                    title="Poker (AK Style)"
-                    description="Show who's the king of poker – bet, bluff, and win!"
-                    actionText="Take a seat"
-                    onAction={handleComingSoon}
-                    imageUrl="/img/game-poker-ak.png" 
-                    comingSoon
-                    icon={<CrownOutlined style={{marginRight: 6}}/>}
-                />
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-                 <GameCard 
-                    title="Durak Cards"
-                    description="Become a master of 'Durak' by playing with real opponents!"
-                    actionText="Play"
-                    onAction={handleComingSoon}
-                    imageUrl="/img/game-durak.png" 
-                    comingSoon
-                    icon={<ExperimentOutlined style={{marginRight: 6}} />}
-                />
-            </Col>
-             <Col xs={24} sm={12} md={8}>
-                <GameCard 
-                    title="Future Game"
-                    description="The next game is already in development. We will notify you as soon as it's released!"
-                    actionText="Unavailable"
-                    onAction={handleComingSoon}
-                    imageUrl="/img/game-work-in-progress.png" 
-                    comingSoon
-                    icon={<RiseOutlined style={{marginRight: 6}} />}
-                />
-            </Col>
-          </Row> 
-          */}
-        </>
-      ) : (
-        <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px'}}>
-          <Empty 
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <Title level={4} style={{color: '#a0a0a5'}}>So much empty, engage!</Title>
-            }
-          />
-          <Paragraph style={{color: '#8e8e93'}}>No games available right now. Check back later!</Paragraph>
-        </Card>
-      )}
-    </div>
-  );
+    return (
+        <div className="game-page-container">
+            <Title level={2} className="page-title">
+                <ExperimentOutlined style={{ marginRight: 12 }} />
+                Games Center
+            </Title>
+
+            <Alert
+                message={<Text strong className="banner-message-text">x2 or maybe x256?</Text>}
+                description={<Text className="banner-description-text">Play Coinflip and try your luck! Big ARIX rewards await.</Text>}
+                type="info"
+                showIcon
+                icon={<RiseOutlined className="banner-icon"/>}
+                className="game-page-banner dark-theme-alert"
+                action={
+                    <Button
+                        type="primary"
+                        size="small"
+                        onClick={handlePlayCoinflip}
+                        className="banner-play-button"
+                    >
+                        Play Coinflip <RightCircleOutlined />
+                    </Button>
+                }
+            />
+
+            <Paragraph className="game-page-intro-text">
+                Exciting games and generous ARIX rewards are waiting for you!
+                Take the first step toward victory!
+            </Paragraph>
+
+            <Row justify="center" style={{ marginTop: isMobile ? 20 : 30 }}>
+                <Col xs={24} sm={20} md={18} lg={14} xl={12}>
+                    <Card className="dark-theme-card game-selection-card coinflip-promo-card" hoverable onClick={handlePlayCoinflip}>
+                        <Row gutter={isMobile ? 16 : 24} align="middle">
+                            <Col xs={24} sm={8} md={7} className="game-promo-image-col">
+                                <img
+                                    src="/img/coinflip-card-mascot.png"
+                                    alt="Coinflip Game Mascot"
+                                    className="game-promo-image"
+                                    onError={(e) => { e.currentTarget.src = '/img/coin-default-cf.png'; }}
+                                />
+                            </Col>
+                            <Col xs={24} sm={16} md={17} className="game-promo-content-col">
+                                <Title level={3} className="game-promo-title">COINFLIP</Title>
+                                <Paragraph className="game-promo-description">
+                                    Heads or Tails? Make a choice and increase your balance up to x2! Take a risk and win ARIX!
+                                </Paragraph>
+                                <Button
+                                    type="primary"
+                                    className="game-promo-button"
+                                    size="large"
+                                    icon={<RightCircleOutlined />}
+                                >
+                                    Test Your Luck
+                                </Button>
+                            </Col>
+                        </Row>
+                    </Card>
+                </Col>
+            </Row>
+
+
+        </div>
+    );
 };
 
 export default GamePage;

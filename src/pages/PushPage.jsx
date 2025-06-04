@@ -1,112 +1,326 @@
 // File: AR_FRONTEND/src/pages/PushPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { List, Card, Typography, Spin, message, Empty, Tag, Button, Grid, Image as AntImage, Row, Col } from 'antd';
-import { BellOutlined, TagOutlined, CalendarOutlined, LinkOutlined, RedoOutlined } from '@ant-design/icons';
-import { getAnnouncements } from '../services/api'; 
+import { Typography, Button, Modal, Alert, Spin, message, Tooltip } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import {
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    RightCircleOutlined,
+    RiseOutlined,
+    CloseOutlined,
+    CopyOutlined,
+    InfoCircleOutlined
+} from '@ant-design/icons';
+import { useTonAddress } from '@tonconnect/ui-react';
+import { getUserProfile } from '../services/api';
+import { ARIX_DECIMALS, FALLBACK_IMAGE_URL } from '../utils/constants';
+import './PushPage.css';
 
 const { Title, Text, Paragraph } = Typography;
-const { useBreakpoint } = Grid;
+
+const ArixPushIcon = () => (
+    <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; }} />
+);
+
+// Using the ARIX_TOKEN_MASTER_ADDRESS you provided as the static deposit address
+const PROJECT_ARIX_DEPOSIT_ADDRESS = "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWEK9wfDd";
 
 const PushPage = () => {
-    const [announcements, setAnnouncements] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const navigate = useNavigate();
+    const userFriendlyAddress = useTonAddress();
+    const rawAddress = useTonAddress(false);
 
-    const fetchAnnouncementsData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await getAnnouncements();
-            setAnnouncements(response.data || []);
-        } catch (error) {
-            message.error("Failed to load announcements.");
-            console.error("Fetch announcements error:", error);
-        } finally {
-            setLoading(false);
+    const [isWheelActive, setIsWheelActive] = useState(true);
+    const [showMainBottomSheet, setShowMainBottomSheet] = useState(false);
+    const [animatingWheel, setAnimatingWheel] = useState(false);
+
+    const [showTopUpModal, setShowTopUpModal] = useState(false);
+    const [showCashoutModal, setShowCashoutModal] = useState(false);
+
+    const [claimableArix, setClaimableArix] = useState('0.00');
+    const [loadingBalance, setLoadingBalance] = useState(false);
+
+    const fetchUserArixBalance = useCallback(async () => {
+        if (rawAddress) {
+            setLoadingBalance(true);
+            try {
+                const profileRes = await getUserProfile(rawAddress);
+                setClaimableArix(parseFloat(profileRes.data?.claimableArixRewards || 0).toFixed(ARIX_DECIMALS));
+            } catch (error) {
+                console.error("Error fetching ARIX balance for Push Page:", error);
+                setClaimableArix('0.00');
+            } finally {
+                setLoadingBalance(false);
+            }
+        } else {
+            setClaimableArix('0.00');
         }
-    }, []);
+    }, [rawAddress]);
 
     useEffect(() => {
-        fetchAnnouncementsData();
-    }, [fetchAnnouncementsData]);
+        fetchUserArixBalance();
+    }, [fetchUserArixBalance]);
 
-    const renderAnnouncementItem = (item) => (
-        <List.Item className="announcement-list-item">
-            <Card 
-                className="dark-theme-card" 
-                title={
-                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                        {item.is_pinned && <Tag color="#7e73ff" style={{fontWeight:'bold'}}>PINNED</Tag>}
-                        <Text style={{color: '#ffffff', fontWeight: '600', fontSize: '1.05rem'}}>{item.title}</Text>
-                    </div>
-                }
-            >
-                {item.image_url && (
-                    <div style={{ textAlign: 'center', marginBottom: 12, overflow: 'hidden', borderRadius: '8px' }}>
-                        <AntImage 
-                            src={item.image_url} 
-                            alt={item.title} 
-                            style={{ width: '100%', maxHeight: isMobile ? '180px' : '220px', objectFit: 'cover' }} 
-                            preview={false}
-                            fallback="/img/arix_logo_placeholder_event.png" 
-                        />
-                    </div>
-                )}
-                <Paragraph style={{color: '#d1d1d6', whiteSpace: 'pre-wrap', fontSize: '0.9rem'}}>{item.content}</Paragraph>
-                <Row justify="space-between" align="middle" style={{marginTop: 16}} gutter={[8,8]}>
-                    <Col>
-                        {item.type && <Tag icon={<TagOutlined />} color="blue" style={{marginRight: 5, fontSize:'0.75rem'}}>{item.type.toUpperCase()}</Tag>}
-                        <Tag icon={<CalendarOutlined />} style={{fontSize:'0.75rem'}}>{new Date(item.published_at).toLocaleDateString()}</Tag>
-                    </Col>
-                    {item.action_url && (
-                       <Col>
-                        <Button 
-                            type="primary" 
-                            href={item.action_url} 
-                            target="_blank" 
-                            icon={<LinkOutlined />}
-                            size="small"
-                        >
-                            {item.action_text || 'Learn More'}
-                        </Button>
-                       </Col>
-                    )}
-                </Row>
-            </Card>
-        </List.Item>
-    );
+
+    const handleWheelPress = () => {
+        if (animatingWheel) return;
+        setAnimatingWheel(true);
+        setIsWheelActive(false);
+        setTimeout(() => {
+            setShowMainBottomSheet(true);
+            setAnimatingWheel(false);
+        }, 1500); // Should match CSS animation duration for lines retracting
+    };
+
+    const handleCloseMainBottomSheet = (playCoinflip = false) => {
+        setShowMainBottomSheet(false);
+        if (!playCoinflip) {
+            setAnimatingWheel(true);
+            setIsWheelActive(true); // Trigger animation to show lines
+            setTimeout(() => {
+                setAnimatingWheel(false);
+            }, 1500); // Should match CSS animation duration for lines appearing
+        }
+    };
+
+    const handlePlayCoinflipFromSheet = () => {
+        handleCloseMainBottomSheet(true);
+        navigate('/game');
+    };
+
+    const copyToClipboard = (textToCopy) => {
+        if (!textToCopy || textToCopy === "YOUR_PROJECT_ARIX_DEPOSIT_WALLET_ADDRESS_HERE") {
+            message.error('Deposit address not configured.');
+            return;
+        }
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => message.success('Address copied to clipboard!'))
+            .catch(err => message.error('Failed to copy address.'));
+    };
+
+    const numberOfLines = 60; // For the wheel ridges
 
     return (
-        <div style={{ padding: isMobile ? '0px' : '0px' }}> {/* Reduced padding */}
-            <Title level={2} className="page-title">
-                <BellOutlined style={{marginRight: 10}} /> Updates & News
-            </Title>
-
-            <div style={{textAlign:'right', marginBottom: 16, paddingRight: isMobile? 16:0 }}>
-                <Button icon={<RedoOutlined/>} onClick={fetchAnnouncementsData} loading={loading}>Refresh</Button>
+        <div className="push-page-container">
+            <div className="push-page-top-bar">
+                <div className="push-balance-display">
+                    <ArixPushIcon />
+                    <Text className="push-balance-amount">
+                        {loadingBalance ? <Spin size="small" style={{marginRight: '5px'}}/> : claimableArix}
+                    </Text>
+                    <Text className="push-balance-currency">ARIX</Text>
+                </div>
+                <div className="push-top-buttons">
+                    <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
+                        <ArrowDownOutlined /> Top up
+                    </Button>
+                    <Button className="push-top-button cashout" onClick={() => setShowCashoutModal(true)}>
+                        <ArrowUpOutlined /> Cashout
+                    </Button>
+                </div>
             </div>
 
-            {loading ? (
-                 <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" tip="Loading Announcements..." /></div>
-            ) : announcements.length > 0 ? (
-                <List
-                    grid={{ gutter: 16, xs: 1, sm: 1, md: 1, lg: 2 }} 
-                    dataSource={announcements}
-                    renderItem={renderAnnouncementItem}
-                    className="announcements-list"
-                    style={{padding: isMobile? '0 16px' : '0'}}
-                />
-            ) : (
-                <Card className="dark-theme-card" style={{textAlign:'center', padding: '30px', margin: isMobile ? '0 16px' : '0'}}>
-                     <Empty 
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                           <Title level={4} style={{color: '#a0a0a5'}}>So much empty, engage!</Title>
+            <Alert
+                message={<Text strong className="push-banner-message-text">x2 or maybe x256?</Text>}
+                description={<Text className="push-banner-description-text">Play Coinflip and try your luck!</Text>}
+                type="info"
+                showIcon
+                icon={<RiseOutlined className="push-banner-icon"/>}
+                className="push-page-banner dark-theme-alert"
+                action={
+                    <Button
+                        type="primary"
+                        size="small"
+                        onClick={() => navigate('/game')}
+                        className="push-banner-play-button"
+                    >
+                        Play Coinflip <RightCircleOutlined />
+                    </Button>
+                }
+            />
+
+            <div className="push-wheel-area">
+                <div
+                    className={`push-wheel-clickable-center ${animatingWheel ? 'disabled' : ''}`}
+                    onClick={handleWheelPress}
+                    role="button"
+                    aria-label="Activate Push Wheel"
+                    tabIndex={0}
+                    onKeyPress={(e) => { if(e.key === 'Enter' || e.key === ' ') handleWheelPress();}}
+                >
+                    <div className="push-wheel-icon-container">
+                        <div className="pixel-icon">
+                            <div className="pixel-row"><div className="pixel empty"></div><div className="pixel filled"></div><div className="pixel filled"></div><div className="pixel empty"></div></div>
+                            <div className="pixel-row"><div className="pixel filled"></div><div className="pixel empty"></div><div className="pixel empty"></div><div className="pixel filled"></div></div>
+                            <div className="pixel-row"><div className="pixel filled"></div><div className="pixel empty"></div><div className="pixel empty"></div><div className="pixel filled"></div></div>
+                            <div className="pixel-row"><div className="pixel empty"></div><div className="pixel filled"></div><div className="pixel filled"></div><div className="pixel empty"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div className="push-wheel-ridges">
+                    {Array.from({ length: numberOfLines }).map((_, index) => (
+                        <div
+                            key={index}
+                            className={`ridge-line ${isWheelActive ? 'active' : 'inactive'}`}
+                            style={{ transform: `rotate(${index * (360 / numberOfLines)}deg)` }}
+                        >
+                            <div className="ridge-line-inner"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <Modal
+                open={showMainBottomSheet}
+                onCancel={() => handleCloseMainBottomSheet(false)}
+                footer={null}
+                className="push-bottom-sheet-modal"
+                closable={false}
+                maskClosable={true}
+                centered
+                destroyOnClose
+                wrapClassName="push-bottom-sheet-modal-wrapper"
+            >
+                <div className="push-bottom-sheet-content">
+                    <Button
+                        shape="circle"
+                        icon={<CloseOutlined />}
+                        className="close-bottom-sheet-button"
+                        onClick={() => handleCloseMainBottomSheet(false)}
+                        aria-label="Close"
+                    />
+                    <Title level={3} className="bottom-sheet-title">Pushing season is over!</Title>
+                    <Paragraph className="bottom-sheet-text">
+                        Terminal Station continues to follow its roadmap.
+                    </Paragraph>
+                    <div className="bottom-sheet-next-steps">
+                        <Text strong className="next-steps-title"><RiseOutlined style={{marginRight: 8}}/>Next steps</Text>
+                        <ol className="next-steps-list">
+                            <li>New phase</li>
+                            <li>Developing existing games and adding new ones to the Game Center</li>
+                            <li>Expanding into new markets</li>
+                        </ol>
+                    </div>
+                    <Paragraph className="bottom-sheet-text coinflip-prompt">
+                        In the meantime, try your luck in Coinflip! Can you turn your ARIX bet into x256?
+                    </Paragraph>
+                    <Button type="primary" size="large" block className="play-coinflip-button-sheet" onClick={handlePlayCoinflipFromSheet}>
+                        Play Coinflip!
+                    </Button>
+                </div>
+            </Modal>
+
+            <Modal
+                open={showTopUpModal}
+                onCancel={() => setShowTopUpModal(false)}
+                footer={null}
+                className="push-topup-modal"
+                closable={false}
+                maskClosable={true}
+                centered
+                destroyOnClose
+                wrapClassName="push-topup-modal-wrapper"
+                width={400} // Set a width for better appearance
+            >
+                <div className="push-topup-content">
+                    <Button
+                        shape="circle"
+                        icon={<CloseOutlined />}
+                        className="close-topup-button"
+                        onClick={() => setShowTopUpModal(false)}
+                        aria-label="Close Top up"
+                    />
+                    <div className="topup-modal-header">
+                        <ArixPushIcon />
+                        <Title level={4} className="topup-modal-title">Balance</Title>
+                    </div>
+                    <div className="topup-modal-actions">
+                        <Button className="push-top-button top-up active">
+                            <ArrowDownOutlined /> Top up
+                        </Button>
+                        <Button className="push-top-button cashout" onClick={() => { setShowTopUpModal(false); setShowCashoutModal(true); }}>
+                            <ArrowUpOutlined /> Cashout
+                        </Button>
+                    </div>
+                    <Alert
+                        message="Send only ARIX assets to this address"
+                        description="Other assets will be irrevocably lost."
+                        type="warning"
+                        showIcon
+                        icon={<InfoCircleOutlined />}
+                        className="topup-warning-alert"
+                    />
+                    <div className="topup-instructions">
+                        <Text className="instruction-link" onClick={()=> message.info("How it works: Coming soon!")}>How it works <RightCircleOutlined /></Text>
+                        <Text className="instruction-link" onClick={()=> message.info("Instructions: Coming soon!")}>Instruction</Text>
+                    </div>
+                    <Paragraph className="address-label">ADDRESS</Paragraph>
+                    <div className="address-display-box">
+                        <Text className="deposit-address-text">{PROJECT_ARIX_DEPOSIT_ADDRESS}</Text>
+                    </div>
+                    <Paragraph className="fee-info-text">
+                        A fee of <Text strong>0.05 ARIX</Text> is applied to all deposits. <Text strong>MEMO is not required</Text>
+                    </Paragraph>
+                    <Paragraph className="min-deposit-info">
+                        <InfoCircleOutlined /> Deposit minimum <Text strong>1 ARIX</Text>
+                    </Paragraph>
+                    <Button
+                        type="primary"
+                        block
+                        icon={<CopyOutlined />}
+                        className="copy-address-button"
+                        onClick={() => copyToClipboard(PROJECT_ARIX_DEPOSIT_ADDRESS)}
+                    >
+                        Copy address
+                    </Button>
+                </div>
+            </Modal>
+
+            <Modal
+                open={showCashoutModal}
+                onCancel={() => setShowCashoutModal(false)}
+                footer={null}
+                className="push-cashout-modal"
+                closable={false}
+                maskClosable={true}
+                centered
+                destroyOnClose
+                wrapClassName="push-cashout-modal-wrapper"
+                width={400}
+            >
+                <div className="push-cashout-content">
+                    <Button
+                        shape="circle"
+                        icon={<CloseOutlined />}
+                        className="close-cashout-button"
+                        onClick={() => setShowCashoutModal(false)}
+                        aria-label="Close Cashout"
+                    />
+                    <div className="cashout-modal-header">
+                        <ArixPushIcon />
+                        <Title level={4} className="cashout-modal-title">Balance</Title>
+                    </div>
+                    <div className="cashout-modal-actions">
+                        <Button className="push-top-button top-up" onClick={() => { setShowCashoutModal(false); setShowTopUpModal(true); }}>
+                            <ArrowDownOutlined /> Top up
+                        </Button>
+                        <Button className="push-top-button cashout active">
+                            <ArrowUpOutlined /> Cashout
+                        </Button>
+                    </div>
+                    <Alert
+                        message="ARIX withdrawal is only possible after playing at least one Coinflip game."
+                        type="error"
+                        icon={<DollarCircleOutlined />}
+                        className="cashout-condition-alert"
+                        action={
+                            <Button type="primary" size="small" className="cashout-play-button" onClick={() => {setShowCashoutModal(false); navigate('/game');}}>
+                                Play
+                            </Button>
                         }
                     />
-                    <Paragraph style={{color: '#8e8e93'}}>No new announcements. Check back soon for updates or explore other sections!</Paragraph>
-                </Card>
-            )}
+                </div>
+            </Modal>
         </div>
     );
 };

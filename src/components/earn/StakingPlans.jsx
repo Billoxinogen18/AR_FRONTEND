@@ -1,89 +1,125 @@
 // File: AR_FRONTEND/src/components/earn/StakingPlans.jsx
 import React from 'react';
-import { Card, Row, Col, Button, Statistic, Tooltip, Typography } from 'antd';
-import { InfoCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { ARIX_DECIMALS } from '../../utils/tonUtils';
+import { Card, Row, Col, Button, Statistic, Tooltip, Typography, Tag } from 'antd';
+import { InfoCircleOutlined, CheckCircleOutlined, PercentageOutlined, CalendarOutlined, DollarOutlined, SendOutlined } from '@ant-design/icons';
+import { ARIX_DECIMALS, USDT_DECIMALS } from '../../utils/constants';
 
-const { Title: AntTitle, Text } = Typography;
+const { Title: AntTitle, Text, Paragraph } = Typography;
 
-const StakingPlans = ({ plans, onSelectPlan, currentArxPrice }) => {
-  if (!plans || plans.length === 0) {
-    // If no plans, we don't show this component at all based on EarnPage logic.
-    // However, if it were to be shown directly, this would be the message.
-    // return <Card className="dark-theme-card" style={{textAlign: 'center', padding: 30}}><Text style={{color: '#a0a0a5'}}>No staking plans available at the moment.</Text></Card>;
-    return null; 
-  }
-  return (
-    <div>
-      <AntTitle level={3} className="section-title" style={{ textAlign: 'center', marginBottom: '24px'}}>
-        Choose Your Staking Plan
-      </AntTitle>
-      <Row gutter={[16, 16]} justify="center"> {/* Reduced gutter for tighter look */}
-        {plans.map((plan) => {
-          const minStakeUsdNum = parseFloat(plan.minStakeUsd || 0);
-          const minStakeArixApprox = currentArxPrice && minStakeUsdNum > 0 ? (minStakeUsdNum / currentArxPrice).toFixed(ARIX_DECIMALS) : null;
-          const displayUsdApr = parseFloat(plan.usdRewardApr || 0).toFixed(2);
-          const displayArixPenalty = parseFloat(plan.arixEarlyUnstakePenaltyPercent || 0).toFixed(2);
+const StakingPlans = ({ plans, onSelectPlan, currentArxPrice, userFriendlyAddress }) => {
+    if (!userFriendlyAddress) {
+        // If wallet not connected, we might show a general message or rely on EarnPage to handle this.
+        // For now, StakingPlans will render if plans are available, EarnPage handles connect prompt.
+    }
 
-          return (
-            <Col xs={24} sm={18} md={12} lg={8} key={plan.key || plan.id}>
-              <Card
-                className="dark-theme-card" // Using the new base card style
-                hoverable
-                actions={[
-                  <Button
-                    type="primary"
-                    key={`select-${plan.key || plan.id}`}
-                    onClick={() => onSelectPlan(plan)}
-                    style={{ margin: '0 auto', display: 'block', width: 'calc(100% - 32px)'}} // Adjusted width
-                    icon={<CheckCircleOutlined />}
-                  >
-                    Select Plan
-                  </Button>,
-                ]}
-              >
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                    <Text style={{ color: '#7e73ff', fontWeight: 'bold', fontSize: '1.3em' }}>{plan.title}</Text>
-                </div>
-                <Statistic // Duration
-                  title={<Text style={{color: '#8e8e93'}}>ARIX Lock Duration</Text>}
-                  value={`${plan.duration} Days`}
-                  valueStyle={{ color: '#ffffff', fontWeight: '500', fontSize: '1.5em' }}
-                />
-                <Statistic // USD Reward APR
-                  title={<Text style={{color: '#8e8e93'}}>USD Value Reward APR</Text>} 
-                  value={`${displayUsdApr}%`}
-                  suffix={<Text style={{color: '#4CAF50', fontSize: '0.75em', marginLeft: 4}}>(Paid in ARIX)</Text>}
-                  valueStyle={{ color: '#4CAF50', fontWeight: '500', fontSize: '1.5em' }}
-                  style={{marginTop: 10}}
-                />
-                <Statistic // Min USD Stake
-                  title={<Text style={{color: '#8e8e93'}}>Min. USD Stake Value</Text>} 
-                  value={`$${minStakeUsdNum.toFixed(2)} USD`}
-                  valueStyle={{ color: '#e0e0e5', fontSize: '1rem' }}
-                  suffix={minStakeArixApprox ? <Text style={{color: '#6a6a6e', fontSize: '0.75em', marginLeft: 4}}>(~{minStakeArixApprox} ARIX)</Text> : ""}
-                  style={{marginTop: 10}}
-                />
-                <Statistic // ARIX Penalty
-                  title={
-                    <Text style={{color: '#8e8e93'}}>
-                        ARIX Early Unstake Penalty{" "}
-                        <Tooltip title={`Penalty on ARIX principal if unstaked before ${plan.duration} days. Off-chain rewards are separate.`}>
-                            <InfoCircleOutlined style={{marginLeft: '4px', color: '#6a6a6e', cursor: 'help'}}/>
-                        </Tooltip>
-                    </Text>
-                  } 
-                  value={`${displayArixPenalty}%`}
-                  valueStyle={{ color: '#F44336', fontSize: '1rem' }}
-                  style={{marginTop: 10}}
-                />
-              </Card>
-            </Col>
-          );
-        })}
-      </Row>
-    </div>
-  );
+    if (!plans || plans.length === 0) {
+        return (
+            <Card className="dark-theme-card centered-message-card" style={{marginTop: 20}}>
+                <InfoCircleOutlined style={{ fontSize: '48px', color: '#7065F0', marginBottom: 20 }} />
+                <AntTitle level={4} style={{color: '#E0E0E5'}}>No Staking Plans Available</AntTitle>
+                <Paragraph style={{color: '#A0A0A5'}}>
+                    There are currently no active staking plans. Please check back later for new opportunities to earn with ARIX.
+                </Paragraph>
+            </Card>
+        );
+    }
+
+    return (
+        <div className="staking-plans-container">
+            <AntTitle level={3} className="section-title staking-plans-title">
+                Choose Your Staking Plan
+            </AntTitle>
+            <Paragraph className="staking-plans-subtitle">
+                Stake your ARIX tokens based on a USDT value commitment and earn rewards in USDT, credited to your account monthly.
+            </Paragraph>
+            <Row gutter={[16, 24]} justify="center">
+                {plans.map((plan) => {
+                    const minStakeUsdtNum = parseFloat(plan.minStakeUsdt || 0);
+                    const maxStakeUsdtNum = parseFloat(plan.maxStakeUsdt || Infinity);
+
+                    // Calculate approximate ARIX based on current price for display
+                    const minStakeArixApprox = currentArxPrice && minStakeUsdtNum > 0 && currentArxPrice > 0
+                        ? (minStakeUsdtNum / currentArxPrice)
+                        : null;
+                    const maxStakeArixApprox = currentArxPrice && maxStakeUsdtNum !== Infinity && currentArxPrice > 0
+                        ? (maxStakeUsdtNum / currentArxPrice)
+                        : null;
+
+                    const displayUsdtApr = parseFloat(plan.fixedUsdtAprPercent || 0).toFixed(USDT_DECIMALS);
+                    const displayArixPenalty = parseFloat(plan.arixEarlyUnstakePenaltyPercent || 0).toFixed(2);
+
+                    return (
+                        <Col xs={24} sm={12} md={8} key={plan.key || plan.id} className="staking-plan-col">
+                            <Card
+                                className="dark-theme-card staking-plan-card"
+                                hoverable
+                                actions={[
+                                    <Button
+                                        type="primary"
+                                        key={`select-${plan.key || plan.id}`}
+                                        onClick={() => onSelectPlan(plan)}
+                                        icon={<SendOutlined />}
+                                        className="select-plan-button"
+                                        disabled={!userFriendlyAddress}
+                                    >
+                                        Select Plan & Stake ARIX
+                                    </Button>,
+                                ]}
+                            >
+                                <Tag className="plan-key-tag">{plan.key}</Tag>
+                                <AntTitle level={4} className="plan-card-title">{plan.title}</AntTitle>
+
+                                <div className="plan-stat-item">
+                                    <Text className="plan-stat-label"><CalendarOutlined /> Lock Duration:</Text>
+                                    <Text className="plan-stat-value">{plan.durationDays} Days</Text>
+                                </div>
+
+                                <div className="plan-stat-item">
+                                    <Text className="plan-stat-label"><DollarOutlined /> Stake Range (USDT Value):</Text>
+                                    <Text className="plan-stat-value">
+                                        ${minStakeUsdtNum.toFixed(USDT_DECIMALS)}
+                                        {maxStakeUsdtNum !== Infinity ? ` - $${maxStakeUsdtNum.toFixed(USDT_DECIMALS)}` : '+'}
+                                    </Text>
+                                    {minStakeArixApprox !== null && (
+                                        <Text className="plan-stat-sub-value">
+                                            (Approx. {minStakeArixApprox.toFixed(2)}
+                                            {maxStakeArixApprox !== null ? ` - ${maxStakeArixApprox.toFixed(2)}` : '+'} ARIX)
+                                        </Text>
+                                    )}
+                                </div>
+
+                                <div className="plan-stat-item">
+                                    <Text className="plan-stat-label"><PercentageOutlined /> USDT Reward APR:</Text>
+                                    <Text className="plan-stat-value success-text">{displayUsdtApr}%</Text>
+                                    <Text className="plan-stat-sub-value">(Calculated on initial USDT value, paid monthly)</Text>
+                                </div>
+
+                                <div className="plan-stat-item">
+                                    <Text className="plan-stat-label">
+                                        <Tooltip title="Penalty on ARIX principal if unstaked before term ends. USDT rewards are not affected by this.">
+                                            ARIX Early Unstake Penalty <InfoCircleOutlined className="info-icon"/>
+                                        </Tooltip>:
+                                    </Text>
+                                    <Text className="plan-stat-value error-text">{displayArixPenalty}%</Text>
+                                </div>
+
+                                <div className="plan-referral-info">
+                                    <Text strong className="referral-info-title">Referral Bonuses:</Text>
+                                    <Text className="referral-detail">L1: {plan.referralL1InvestPercent}% of investment</Text>
+                                    {plan.referralL2InvestPercent > 0 &&
+                                        <Text className="referral-detail">L2: {plan.referralL2InvestPercent}% of L2's investment</Text>
+                                    }
+                                    {plan.referralL2CommissionOnL1BonusPercent > 0 &&
+                                        <Text className="referral-detail">L2: {plan.referralL2CommissionOnL1BonusPercent}% of L1's bonus from L2's investment</Text>
+                                    }
+                                </div>
+                            </Card>
+                        </Col>
+                    );
+                })}
+            </Row>
+        </div>
+    );
 };
 
 export default StakingPlans;

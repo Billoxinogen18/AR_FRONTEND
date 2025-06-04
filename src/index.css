@@ -1,126 +1,135 @@
+/* File: AR_FRONTEND/src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5; /* Standard line height */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  line-height: 1.6;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 
   color-scheme: dark;
-  color: #e0e0e5; 
-  background-color: #000000; /* Pure black base, as per screenshots */
+  color: #E0E0E5; /* Default text color from AntD theme */
+  background-color: #0D0D0D; /* Default background from AntD theme */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #0D0D0D;
+  color: #E0E0E5;
 }
 
 body {
-  margin: 0;
-  background-color: #000000; 
-  color: #e0e0e5;
-  min-height: 100vh;
-  overscroll-behavior: none; 
+  overscroll-behavior-y: contain;
 }
 
 #root {
   min-height: 100vh;
-  background: #000000;
+  display: flex;
+  flex-direction: column;
+  background-color: #0D0D0D;
 }
 
 a {
   font-weight: 500;
-  color: #7e73ff; /* A purple-ish blue from screenshot buttons */
+  color: #7065F0; /* Primary accent from AntD theme */
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-in-out;
 }
 a:hover {
-  color: #9a91ff; 
+  color: #8c80f3; /* Lighter shade of primary for hover */
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #ffffff; /* Pure white for main headings */
-  font-weight: 600; 
+  color: #FFFFFF;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.5em;
 }
 
-/* Custom scrollbar - subtle for dark theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1a1a1a; /* Dark track */
+  background: #1A1A1A; /* Card background color */
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333333; /* Grey thumb */
+  background: #38383A; /* Border color */
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: #505052;
 }
 
-/* Base card style resembling screenshots */
-.dark-theme-card {
-  background-color: #1c1c1e !important; /* Dark grey card background */
-  border-radius: 16px !important;
-  border: 1px solid #38383a !important; /* Subtle border */
-  color: #e0e0e5 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* Softer shadow */
-  margin-bottom: 20px; /* Consistent spacing */
-}
-
-.dark-theme-card .ant-card-head {
-  background: transparent !important;
-  border-bottom: 1px solid #38383a !important;
-  padding: 12px 16px !important;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-}
-.dark-theme-card .ant-card-head-title {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  font-size: 1.1rem !important;
-}
-.dark-theme-card .ant-card-body {
-  padding: 16px !important;
-}
-
-/* Custom focus outline - more subtle for this design */
+/* Custom focus outline for accessibility */
 *:focus-visible {
-  outline: 1px solid #7e73ff; 
-  outline-offset: 1px;
+  outline: 2px solid #7065F0;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
-.ant-input-number-focused,
-.ant-input-focused {
-    outline: none !important; /* Remove default AntD outline if any persists */
-    border-color: #7e73ff !important;
-    box-shadow: 0 0 0 1px #7e73ff !important;
+.ant-input-number:focus-within,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused,
+.ant-btn:focus-visible {
+  outline: none !important;
 }
 
-/* Global title styles based on screenshot hierarchy */
+/* General Page Title Style */
 .page-title {
-  color: #fff;
+  color: #FFFFFF !important;
   text-align: center;
-  font-weight: 700 !important;
-  font-size: 24px !important;
-  margin-bottom: 24px !important;
-}
-@media (min-width: 768px) {
-  .page-title {
-    font-size: 28px !important;
-    margin-bottom: 32px !important;
-  }
-}
-
-.section-title {
-  color: #f5f5f7;
   font-weight: 600 !important;
-  font-size: 18px !important;
-  margin-bottom: 16px !important;
+  font-size: 1.75rem !important; /* Approx 28px */
+  margin-bottom: 24px !important;
+  line-height: 1.3 !important;
 }
-@media (min-width: 768px) {
-  .section-title {
-    font-size: 20px !important;
+@media (max-width: 767px) {
+  .page-title {
+    font-size: 1.5rem !important; /* Approx 24px */
     margin-bottom: 20px !important;
   }
+}
+
+/* General Section Title Style */
+.section-title {
+  color: #F5F5F7 !important;
+  font-weight: 600 !important;
+  font-size: 1.25rem !important; /* Approx 20px */
+  margin-bottom: 16px !important;
+  line-height: 1.4 !important;
+}
+@media (max-width: 767px) {
+  .section-title {
+    font-size: 1.15rem !important; /* Approx 18px */
+    margin-bottom: 12px !important;
+  }
+}
+
+.centered-message-card {
+  text-align: center;
+  padding: 30px 20px !important;
+}
+.centered-message-card .ant-empty-description {
+  color: #A0A0A5;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }

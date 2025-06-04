@@ -1,207 +1,145 @@
-// File: AR_Proj/AR_FRONTEND/src/components/ResponsiveMobileNav.jsx
+// File: AR_FRONTEND/src/components/ResponsiveMobileNav.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Dropdown } from 'antd';
+import { Menu, Dropdown, Grid } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
 
+// menuConfig will be passed as a prop from App.jsx
 const ResponsiveMobileNav = ({ menuConfig }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const containerRef = useRef(null);
-  const [visibleItems, setVisibleItems] = useState(menuConfig);
-  const [hiddenItems, setHiddenItems] = useState([]);
-  const [containerWidth, setContainerWidth] = useState(0);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const containerRef = useRef(null);
 
-  let currentPath = location.pathname;
-  if (currentPath === '/' || currentPath === '') { 
-    currentPath = '/earn'; 
-  }
+    const [visibleItems, setVisibleItems] = useState(menuConfig);
+    const [hiddenItems, setHiddenItems] = useState([]);
+    const [containerWidth, setContainerWidth] = useState(0);
 
-  // Calculate optimal tab distribution based on screen width
-  useEffect(() => {
-    const calculateVisibleItems = () => {
-      if (!containerRef.current) return;
-      
-      const containerWidth = containerRef.current.offsetWidth;
-      setContainerWidth(containerWidth);
-      
-      // Base calculations for tab sizing
-      const minTabWidth = 60; // Minimum width for icon + label
-      const moreButtonWidth = 60; // Width needed for "More" button
-      const availableWidth = containerWidth;
-      
-      // Calculate how many items can fit comfortably
-      let maxVisibleItems = Math.floor(availableWidth / minTabWidth);
-      
-      // If we can't fit all items, reserve space for "More" button
-      if (maxVisibleItems < menuConfig.length) {
-        maxVisibleItems = Math.max(2, Math.floor((availableWidth - moreButtonWidth) / minTabWidth));
-      }
-      
-      // Ensure we don't exceed the total number of items
-      maxVisibleItems = Math.min(maxVisibleItems, menuConfig.length);
-      
-      // Split items into visible and hidden
-      const visible = menuConfig.slice(0, maxVisibleItems);
-      const hidden = menuConfig.slice(maxVisibleItems);
-      
-      setVisibleItems(visible);
-      setHiddenItems(hidden);
+    let currentPath = location.pathname;
+    // Default to '/earn' if at root or path not in menu
+    if (!menuConfig.some(item => item.key === currentPath)) {
+        currentPath = '/earn';
+    }
+
+    useEffect(() => {
+        const calculateVisibleItems = () => {
+            if (!containerRef.current) return;
+
+            const currentContainerWidth = containerRef.current.offsetWidth;
+            setContainerWidth(currentContainerWidth);
+
+            // Estimate tab width: icon (24px) + label (variable, avg ~30-50px) + padding (8px*2)
+            // Min width per item to look decent.
+            const minTabWidth = 65; // Increased slightly for better spacing
+            const maxPossibleTabs = menuConfig.length;
+            const moreButtonWidth = 60; // Approx width for "More" button
+
+            let numVisible = maxPossibleTabs;
+            let totalWidthNeeded = maxPossibleTabs * minTabWidth;
+
+            // If all items don't fit, start reducing and add "More" button
+            if (totalWidthNeeded > currentContainerWidth) {
+                totalWidthNeeded += moreButtonWidth; // Account for "More" button
+                numVisible = Math.floor((currentContainerWidth - moreButtonWidth) / minTabWidth);
+                numVisible = Math.max(1, Math.min(numVisible, maxPossibleTabs -1)); // Ensure at least 1 item + More, or all but one
+            } else {
+                numVisible = maxPossibleTabs; // All items fit
+            }
+
+            const visible = menuConfig.slice(0, numVisible);
+            const hidden = menuConfig.slice(numVisible);
+
+            setVisibleItems(visible);
+            setHiddenItems(hidden);
+        };
+
+        calculateVisibleItems();
+        const debouncedCalculate = setTimeout(calculateVisibleItems, 50); // Recalculate shortly after mount for accurate width
+
+        window.addEventListener('resize', calculateVisibleItems);
+        return () => {
+            clearTimeout(debouncedCalculate);
+            window.removeEventListener('resize', calculateVisibleItems);
+        };
+    }, [menuConfig]); // Rerun if menuConfig changes
+
+    const handleNavigation = (path) => {
+        navigate(path);
     };
 
-    // Initial calculation
-    calculateVisibleItems();
-
-    // Recalculate on window resize
-    const handleResize = () => {
-      setTimeout(calculateVisibleItems, 100); // Debounce
+    const dropdownMenu = {
+        items: hiddenItems.map(item => ({
+            key: item.key,
+            icon: React.cloneElement(item.icon, { style: { fontSize: '16px', marginRight: '8px', color: item.key === currentPath ? '#7065F0' : '#A0A0A5' } }),
+            label: <span style={{color: item.key === currentPath ? '#7065F0' : '#E0E0E5'}}>{item.labelText}</span>,
+            onClick: () => handleNavigation(item.key),
+        })),
+        style: {
+            backgroundColor: '#252525', // Match theme.components.Dropdown.colorBgElevated
+            borderRadius: '10px', // Match theme.components.Dropdown.borderRadiusLG
+            border: '1px solid #303030', // Match theme.components.Dropdown.colorBorderSecondary
+        }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [menuConfig]);
+    // Calculate flex basis for visible items to distribute them evenly
+    const numItemsToShow = visibleItems.length + (hiddenItems.length > 0 ? 1 : 0);
+    const itemFlexBasis = numItemsToShow > 0 ? `${100 / numItemsToShow}%` : 'auto';
 
-  // Handle navigation
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
-  // Create dropdown menu for hidden items
-  const dropdownMenu = {
-    items: hiddenItems.map(item => ({
-      key: item.key,
-      icon: React.cloneElement(item.icon, { style: { fontSize: '16px', marginRight: '8px' } }),
-      label: item.labelText,
-      onClick: () => handleNavigation(item.key),
-    })),
-  };
-
-  // Calculate flex basis for visible items
-  const flexBasis = hiddenItems.length > 0 
-    ? `${100 / (visibleItems.length + 1)}%` 
-    : `${100 / visibleItems.length}%`;
-
-  return (
-    <div 
-      ref={containerRef}
-      className="responsive-mobile-nav"
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'stretch',
-        background: '#1c1c1e',
-        borderTop: '1px solid #38383a',
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.2)',
-        height: '60px',
-        width: '100%',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Visible Navigation Items */}
-      {visibleItems.map((item) => {
-        const isSelected = currentPath === item.key;
-        return (
-          <div
-            key={item.key}
-            className={`nav-item ${isSelected ? 'selected' : ''}`}
-            style={{
-              flex: `0 0 ${flexBasis}`,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              backgroundColor: isSelected ? 'rgba(126, 115, 255, 0.1)' : 'transparent',
-              color: isSelected ? '#7e73ff' : '#8e8e93',
-              padding: '8px 4px',
-              minWidth: 0, // Allow shrinking
-            }}
-            onClick={() => handleNavigation(item.key)}
-          >
-            <div style={{ 
-              fontSize: '20px', 
-              lineHeight: 1, 
-              marginBottom: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              {React.cloneElement(item.icon, { 
-                style: { 
-                  fontSize: containerWidth < 350 ? '18px' : '20px' 
-                } 
-              })}
-            </div>
-            <div style={{
-              fontSize: containerWidth < 350 ? '9px' : '10px',
-              fontWeight: '500',
-              lineHeight: 1,
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxWidth: '100%',
-            }}>
-              {item.labelText}
-            </div>
-          </div>
-        );
-      })}
-
-      {/* More Button for Hidden Items */}
-      {hiddenItems.length > 0 && (
-        <Dropdown
-          menu={dropdownMenu}
-          placement="topRight"
-          trigger={['click']}
+    return (
+        <div
+            ref={containerRef}
+            className="responsive-mobile-nav-container"
         >
-          <div
-            className="nav-item more-button"
-            style={{
-              flex: `0 0 ${flexBasis}`,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              backgroundColor: hiddenItems.some(item => item.key === currentPath) 
-                ? 'rgba(126, 115, 255, 0.1)' 
-                : 'transparent',
-              color: hiddenItems.some(item => item.key === currentPath) 
-                ? '#7e73ff' 
-                : '#8e8e93',
-              padding: '8px 4px',
-            }}
-          >
-            <div style={{ 
-              fontSize: containerWidth < 350 ? '18px' : '20px', 
-              lineHeight: 1, 
-              marginBottom: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <MoreOutlined />
-            </div>
-            <div style={{
-              fontSize: containerWidth < 350 ? '9px' : '10px',
-              fontWeight: '500',
-              lineHeight: 1,
-              textAlign: 'center',
-            }}>
-              MORE
-            </div>
-          </div>
-        </Dropdown>
-      )}
-    </div>
-  );
+            {visibleItems.map((item) => {
+                const isSelected = currentPath === item.key;
+                return (
+                    <div
+                        key={item.key}
+                        className={`responsive-nav-item ${isSelected ? 'selected' : ''}`}
+                        style={{ flexBasis: itemFlexBasis }}
+                        onClick={() => handleNavigation(item.key)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyPress={(e) => e.key === 'Enter' && handleNavigation(item.key)}
+                    >
+                        <div className="nav-item-icon">
+                            {React.cloneElement(item.icon, {
+                                style: {
+                                    fontSize: containerWidth < 350 ? '18px' : '20px',
+                                    color: isSelected ? '#7065F0' : '#8E8E93'
+                                }
+                            })}
+                        </div>
+                        <div className="nav-item-label" style={{color: isSelected ? '#7065F0' : '#8E8E93' }}>
+                            {item.labelText}
+                        </div>
+                    </div>
+                );
+            })}
+
+            {hiddenItems.length > 0 && (
+                <Dropdown
+                    menu={dropdownMenu}
+                    placement="topRight"
+                    trigger={['click']}
+                    overlayClassName="responsive-nav-dropdown-overlay"
+                >
+                    <div
+                        className={`responsive-nav-item more-button ${hiddenItems.some(item => item.key === currentPath) ? 'selected' : ''}`}
+                        style={{ flexBasis: itemFlexBasis }}
+                        role="button"
+                        tabIndex={0}
+                    >
+                        <div className="nav-item-icon">
+                            <MoreOutlined style={{ fontSize: containerWidth < 350 ? '18px' : '20px', color: hiddenItems.some(item => item.key === currentPath) ? '#7065F0' : '#8E8E93' }}/>
+                        </div>
+                        <div className="nav-item-label" style={{color: hiddenItems.some(item => item.key === currentPath) ? '#7065F0' : '#8E8E93' }}>
+                            MORE
+                        </div>
+                    </div>
+                </Dropdown>
+            )}
+        </div>
+    );
 };
 
 export default ResponsiveMobileNav;
