@@ -29,7 +29,7 @@ const { useBreakpoint } = Grid;
 const ARIX_JETTON_MASTER_ADDRESS_FOR_GAME = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 
 const ArixGameIcon = () => (
-    <img src="/img/your-arix-icon.png" alt="ARIX" className="arix-game-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
+    <img src="/img/coin_spinning.gif" alt="ARIX" className="arix-game-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
 );
 
 const CoinflipGame = ({ onBack }) => {
