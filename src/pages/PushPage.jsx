@@ -120,7 +120,7 @@ const PushPage = () => {
                         </Text>
                     </div>
                 </div>
-                <Text className="push-balance-currency">TON</Text> {}
+                <Text className="push-balance-currency">Arix</Text> {}
             </div>
 
             {}
