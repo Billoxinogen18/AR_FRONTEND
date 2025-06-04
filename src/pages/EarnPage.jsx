@@ -1,6 +1,6 @@
 // File: AR_FRONTEND/src/pages/EarnPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty } from 'antd';
+import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid } from 'antd'; // Added Grid
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import {
     CheckCircleOutlined,
@@ -34,18 +34,21 @@ import {
     fromArixSmallestUnits,
     ARIX_DECIMALS,
     USDT_DECIMALS,
-    MIN_USDT_WITHDRAWAL_USD_VALUE, // Used for reward withdrawal logic elsewhere, not directly here
     waitForTransactionConfirmation,
     REFERRAL_LINK_BASE
-} from '../utils/tonUtils';
+} from '../utils/tonUtils'; // Ensure this path and exports are correct
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 
 import './EarnPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
+const { useBreakpoint } = Grid; // Import useBreakpoint
 
 const EarnPage = () => {
+    const screens = useBreakpoint(); // Define screens here
+    const isMobile = !screens.md;    // Define isMobile using a suitable breakpoint like md
+
     const [stakingConfigData, setStakingConfigData] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [inputUsdtAmount, setInputUsdtAmount] = useState(null);
@@ -58,7 +61,7 @@ const EarnPage = () => {
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [loadingBalances, setLoadingBalances] = useState(false);
     const [loadingUserStakes, setLoadingUserStakes] = useState(false);
-
+    
     const [stakeSubmitLoading, setStakeSubmitLoading] = useState(false);
     const [isStakeModalVisible, setIsStakeModalVisible] = useState(false);
 
@@ -86,9 +89,9 @@ const EarnPage = () => {
             const configResponse = await getStakingConfig();
             const config = configResponse.data;
             setStakingConfigData(config);
-
+            
             let price = config?.currentArxUsdtPrice;
-            if (price === null || price === undefined) { // Check for null or undefined specifically
+            if (price === null || price === undefined) {
                 price = await getArxUsdtPriceFromBackend();
             }
             setCurrentArxPrice(price);
@@ -110,7 +113,7 @@ const EarnPage = () => {
                         setArixWalletBalance(0);
                     }
                 } else {
-                    setArixWalletBalance(0);
+                     setArixWalletBalance(0);
                 }
             } else {
                 setArixWalletBalance(0);
@@ -129,12 +132,11 @@ const EarnPage = () => {
             setLoadingBalances(false);
             setLoadingUserStakes(false);
         }
-    }, [rawAddress, ARIX_MASTER_FROM_CONFIG, currentArxPrice]); // Added currentArxPrice to dependencies
+    }, [rawAddress, ARIX_MASTER_FROM_CONFIG, currentArxPrice]);
 
     useEffect(() => {
         fetchInitialData();
     }, [fetchInitialData]);
-
 
     useEffect(() => {
         if (inputUsdtAmount && currentArxPrice && currentArxPrice > 0) {
@@ -162,7 +164,7 @@ const EarnPage = () => {
             return;
         }
         setSelectedPlan(fullPlanDetails);
-        setInputUsdtAmount(parseFloat(fullPlanDetails.minStakeUsdt));
+        setInputUsdtAmount(parseFloat(fullPlanDetails.minStakeUsdt)); 
         setIsStakeModalVisible(true);
     };
 
@@ -198,64 +200,64 @@ const EarnPage = () => {
         setStakeSubmitLoading(true);
         const loadingMessageKey = 'stakeActionModalEarnPage';
         message.loading({ content: 'Preparing ARIX stake transaction...', key: loadingMessageKey, duration: 0 });
-
-        const dbStakeUUID = uuidv4();
+        
+        const dbStakeUUID = uuidv4(); 
         const scStakeIdentifier = BigInt('0x' + dbStakeUUID.replace(/-/g, '').substring(0, 16));
 
         try {
             const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_MASTER_FROM_CONFIG);
             if (!userArixJettonWallet) throw new Error("Your ARIX Jetton Wallet could not be found. Ensure you have ARIX.");
-
+            
             const amountInSmallestArixUnits = convertToArixSmallestUnits(calculatedArixAmount);
             const scPayloadParams = {
-                queryId: BigInt(Date.now()),
+                queryId: BigInt(Date.now()), 
                 stakeIdentifier: scStakeIdentifier,
                 durationSeconds: parseInt(selectedPlan.durationDays, 10) * 24 * 60 * 60,
-                arix_lock_apr_bps: 0,
+                arix_lock_apr_bps: 0, 
                 arix_lock_penalty_bps: parseInt(parseFloat(selectedPlan.arixEarlyUnstakePenaltyPercent) * 100 || 0),
             };
             const forwardPayloadCell = createStakeForwardPayload(scPayloadParams);
             const jettonTransferBody = createJettonTransferMessage(
-                amountInSmallestArixUnits, STAKING_CONTRACT_JW_FROM_CONFIG, rawAddress,
-                toNano("0.1"), forwardPayloadCell
+                amountInSmallestArixUnits, STAKING_CONTRACT_JW_FROM_CONFIG, rawAddress,    
+                toNano("0.1"), forwardPayloadCell      
             );
             const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 360,
-                messages: [{
-                    address: userArixJettonWallet,
-                    amount: toNano("0.15").toString(),
-                    payload: jettonTransferBody.toBoc().toString("base64")
+                validUntil: Math.floor(Date.now() / 1000) + 360, 
+                messages: [{ 
+                    address: userArixJettonWallet, 
+                    amount: toNano("0.15").toString(), 
+                    payload: jettonTransferBody.toBoc().toString("base64") 
                 }],
             };
-
+            
             message.loading({ content: 'Please confirm transaction in your wallet...', key: loadingMessageKey, duration: 0 });
             const result = await tonConnectUI.sendTransaction(transaction);
-
+            
             message.loading({ content: 'Transaction sent, awaiting blockchain confirmation...', key: loadingMessageKey, duration: 0 });
             const externalMessageCell = Cell.fromBase64(result.boc);
-            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell, 180000, 5000);
+            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); // Pass BoC string
 
             if (!txHash) {
                 throw new Error('Failed to confirm stake transaction on blockchain. Please check your wallet activity. If ARIX was deducted without stake appearing, contact support.');
             }
-
+            
             message.loading({ content: 'Transaction confirmed! Recording ARIX stake with backend...', key: loadingMessageKey, duration: 0 });
             const referrerCode = localStorage.getItem('arixReferralCode');
             await recordUserStake({
-                planKey: selectedPlan.key || selectedPlan.id.toString(),
+                planKey: selectedPlan.key || selectedPlan.id.toString(), 
                 arixAmount: calculatedArixAmount,
-                userWalletAddress: rawAddress,
-                transactionBoc: result.boc,
-                transactionHash: txHash,
-                stakeUUID: dbStakeUUID,
+                userWalletAddress: rawAddress, 
+                transactionBoc: result.boc, 
+                transactionHash: txHash, 
+                stakeUUID: dbStakeUUID, 
                 referenceUsdtValue: inputUsdtAmount,
-                referrerCodeOrAddress: referrerCode
+                referrerCodeOrAddress: referrerCode 
             });
             message.success({ content: `Successfully staked ${calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX! USDT rewards will now accrue.`, key: loadingMessageKey, duration: 6 });
-
+            
             setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);
-            if (referrerCode) localStorage.removeItem('arixReferralCode');
-            setTimeout(() => { fetchInitialData(false); }, 8000);
+            if (referrerCode) localStorage.removeItem('arixReferralCode'); 
+            setTimeout(() => { fetchInitialData(false); }, 8000); 
             setTimeout(() => { fetchInitialData(false); }, 40000);
         } catch (error) {
             message.error({ content: error?.response?.data?.message || error?.message || 'ARIX Staking failed. Please try again.', key: loadingMessageKey, duration: 6 });
@@ -265,7 +267,7 @@ const EarnPage = () => {
         }
     };
 
-    const handleUnstakeActionClick = (stake) => {
+    const handleUnstakeActionClick = (stake) => { 
         if (!rawAddress) return;
         setSelectedStakeForUnstake(stake);
         setIsUnstakeActionLoading(true);
@@ -282,10 +284,10 @@ const EarnPage = () => {
             })
             .finally(() => setIsUnstakeActionLoading(false));
     };
-
+    
     const handleConfirmUnstakeInModal = async () => {
         if (!rawAddress || !selectedStakeForUnstake || !unstakePrepDetails || !tonConnectUI || !STAKING_CONTRACT_ADDRESS_FROM_CONFIG) {
-            message.error("Missing critical information for unstake operation.");
+            message.error("Missing critical information for unstake.");
             return;
         }
         setIsUnstakeActionLoading(true);
@@ -295,41 +297,41 @@ const EarnPage = () => {
         try {
             const scStakeIdentifierToWithdraw = selectedStakeForUnstake.id.replace(/-/g, '').substring(0, 16);
             const unstakePayloadBuilder = new Cell().asBuilder();
-            unstakePayloadBuilder.storeUint(BigInt(Date.now()), 64);
-            unstakePayloadBuilder.storeUint(BigInt('0x' + scStakeIdentifierToWithdraw), 64);
+            unstakePayloadBuilder.storeUint(BigInt(Date.now()), 64); 
+            unstakePayloadBuilder.storeUint(BigInt('0x' + scStakeIdentifierToWithdraw), 64); 
 
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 360,
                 messages: [{
                     address: STAKING_CONTRACT_ADDRESS_FROM_CONFIG,
-                    amount: toNano("0.05").toString(),
+                    amount: toNano("0.05").toString(), 
                     payload: unstakePayloadBuilder.asCell().toBoc().toString("base64")
                 }],
             };
-
+            
             const result = await tonConnectUI.sendTransaction(transaction);
-
+            
             message.loading({ content: 'Unstake transaction sent, awaiting confirmation...', key: loadingMessageKey, duration: 0 });
             const externalMessageCell = Cell.fromBase64(result.boc);
-            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell, 180000, 5000);
+            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); // Pass BoC string
 
             if (!txHash) {
                 throw new Error('Failed to confirm unstake transaction on blockchain.');
             }
-
+            
             message.loading({ content: 'Transaction confirmed! Finalizing ARIX unstake...', key: loadingMessageKey, duration: 0 });
-            await confirmArixUnstake({
-                userWalletAddress: rawAddress,
-                stakeId: selectedStakeForUnstake.id,
+            await confirmArixUnstake({ 
+                userWalletAddress: rawAddress, 
+                stakeId: selectedStakeForUnstake.id, 
                 unstakeTransactionBoc: result.boc,
-                unstakeTransactionHash: txHash
+                unstakeTransactionHash: txHash 
             });
             message.success({ content: "ARIX unstake request submitted! Backend will verify.", key: loadingMessageKey, duration: 7 });
-
+            
             setIsUnstakeModalVisible(false);
             setSelectedStakeForUnstake(null);
             setUnstakePrepDetails(null);
-            fetchInitialData(false);
+            fetchInitialData(false); 
         } catch (txError) {
             message.error({ content: txError?.response?.data?.message || txError?.message || 'ARIX unstake failed.', key: loadingMessageKey, duration: 6 });
             console.error("On-chain ARIX Unstake Tx Error on EarnPage:", txError);
@@ -337,11 +339,15 @@ const EarnPage = () => {
             setIsUnstakeActionLoading(false);
         }
     };
-
+    
     const isLoadingInitial = loadingConfig && !stakingConfigData;
 
-    if (!userFriendlyAddress && !loadingConfig) {
-        return (
+    // Line 480, where the original error occurred. Now `isMobile` is defined.
+    const modalWidth = isMobile ? '95%' : 520;
+
+
+    if (!userFriendlyAddress && !loadingConfig) { 
+        return ( 
             <div className="earn-page-container">
                 <Title level={2} className="page-title"><DollarCircleOutlined style={{marginRight:10}}/>ARIX Staking</Title>
                 <Card className="dark-theme-card centered-message-card">
@@ -358,7 +364,7 @@ const EarnPage = () => {
         );
     }
 
-    const isStakingAvailable = stakingConfigData?.stakingPlans && stakingConfigData.stakingPlans.length > 0;
+    const isStakingCurrentlyAvailable = stakingConfigData?.stakingPlans && stakingConfigData.stakingPlans.length > 0;
 
     return (
         <Spin spinning={isLoadingInitial} tip="Loading ARIX Staking Hub..." size="large" wrapperClassName="earn-page-spinner-wrapper">
@@ -370,16 +376,16 @@ const EarnPage = () => {
                     </Text>
                     <Button icon={<RedoOutlined/>} onClick={() => fetchInitialData(true)} loading={loadingConfig || loadingBalances || loadingUserStakes} size="middle" disabled={!userFriendlyAddress}>
                         Refresh Data
-                    </Button>
+                    </Button> 
                 </Row>
-
+            
                 <Card className="dark-theme-card earn-summary-card">
                     <Row gutter={[16, 16]} align="middle" justify="center">
                         <Col xs={24} sm={12} className="summary-stat-col">
-                            <AntdStatistic
+                            <AntdStatistic 
                                 title="Your ARIX Wallet Balance"
-                                value={loadingBalances ? '-' : arixWalletBalance.toFixed(ARIX_DECIMALS)}
-                                suffix="ARIX"
+                                value={loadingBalances ? '-' : arixWalletBalance.toFixed(ARIX_DECIMALS)} 
+                                suffix="ARIX" 
                                 valueStyle={{color: '#7065F0'}}
                             />
                             {currentArxPrice != null && !loadingBalances && (
@@ -389,12 +395,12 @@ const EarnPage = () => {
                             )}
                         </Col>
                         <Col xs={24} sm={12} className="summary-stat-col">
-                            <AntdStatistic
-                                title="Total Claimable USDT Rewards"
+                            <AntdStatistic 
+                                title="Total Claimable USDT Rewards" 
                                 value={loadingUserStakes ? '-' : `$${parseFloat(userStakesData.totalClaimableUsdt).toFixed(USDT_DECIMALS)}`}
-                                valueStyle={{color: '#4CAF50'}}
+                                valueStyle={{color: '#4CAF50'}} 
                             />
-                            <Text className="summary-value-equivalent">From staking & referrals</Text>
+                             <Text className="summary-value-equivalent">From staking & referrals</Text>
                         </Col>
                     </Row>
                 </Card>
@@ -403,7 +409,7 @@ const EarnPage = () => {
                     <div style={{textAlign: 'center', padding: '50px 0'}}>
                         <Spin tip="Loading Staking Plans..." size="large"/>
                     </div>
-                ) : isStakingAvailable ? (
+                ) : isStakingCurrentlyAvailable ? (
                     <StakingPlans
                         plans={stakingConfigData?.stakingPlans || []}
                         onSelectPlan={handlePlanSelect}
@@ -422,7 +428,7 @@ const EarnPage = () => {
                         </Paragraph>
                     </Card>
                 )}
-
+                
 
                 {userFriendlyAddress && userStakesData.stakes.length > 0 && !loadingUserStakes && (
                     <div className="active-stakes-section">
@@ -432,44 +438,44 @@ const EarnPage = () => {
                             isLoading={loadingUserStakes}
                             renderItemDetails={renderStakeHistoryItem}
                             itemType="staking activity"
-                            listTitle={null}
+                            listTitle={null} 
                             onUnstakeItemClick={handleUnstakeActionClick}
                         />
                     </div>
                 )}
                 {userFriendlyAddress && !loadingUserStakes && userStakesData.stakes.length === 0 && isStakingAvailable && (
                     <Card className="dark-theme-card centered-message-card" style={{marginTop: 20}}>
-                        <Empty
+                        <Empty 
                             image={<RocketOutlined style={{fontSize: '48px', color: '#7065F0'}}/>}
                             description={
                                 <Paragraph style={{color: '#A0A0A5', fontSize: '1rem'}}>
                                     You have no active ARIX stakes yet. Choose a plan above to start earning USDT rewards!
                                 </Paragraph>
-                            }
+                            } 
                         />
                     </Card>
                 )}
-
+                
                 <Modal
                     title={<Text className="modal-title-text">{`Stake ARIX in "${selectedPlan?.title || ''}"`}</Text>}
                     open={isStakeModalVisible}
                     onCancel={() => {setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}}
                     className="dark-theme-modal stake-modal"
-                    destroyOnClose
-                    footer={[
+                    destroyOnClose 
+                    footer={[ 
                         <Button key="back" onClick={() => {setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}} className="modal-cancel-button">
                             Cancel
                         </Button>,
-                        <Button
-                            key="submit"
-                            type="primary"
-                            loading={stakeSubmitLoading}
+                        <Button 
+                            key="submit" 
+                            type="primary" 
+                            loading={stakeSubmitLoading} 
                             onClick={handleConfirmStake}
                             className="modal-confirm-button"
                             disabled={
-                                !calculatedArixAmount ||
-                                calculatedArixAmount <= 0 ||
-                                calculatedArixAmount > arixWalletBalance ||
+                                !calculatedArixAmount || 
+                                calculatedArixAmount <= 0 || 
+                                calculatedArixAmount > arixWalletBalance || 
                                 (selectedPlan && inputUsdtAmount < parseFloat(selectedPlan.minStakeUsdt)) ||
                                 (selectedPlan && selectedPlan.maxStakeUsdt && inputUsdtAmount > parseFloat(selectedPlan.maxStakeUsdt))
                             }
@@ -477,9 +483,9 @@ const EarnPage = () => {
                             Stake {calculatedArixAmount > 0 ? calculatedArixAmount.toFixed(ARIX_DECIMALS) : ''} ARIX
                         </Button>
                     ]}
-                    width={isMobile ? '95%' : 520}
+                    width={modalWidth} // Use the defined modalWidth
                 >
-                    {selectedPlan && (
+                    {selectedPlan && ( 
                         <div className="stake-modal-content">
                             <Descriptions column={1} bordered size="small" className="modal-descriptions">
                                 <Descriptions.Item label="Plan Duration">{selectedPlan.durationDays} days</Descriptions.Item>
@@ -490,52 +496,52 @@ const EarnPage = () => {
                                     <Text style={{color: '#F44336'}}>{selectedPlan.arixEarlyUnstakePenaltyPercent}%</Text>
                                 </Descriptions.Item>
                                 <Descriptions.Item label="Min. Stake (USDT Value)">${parseFloat(selectedPlan.minStakeUsdt).toFixed(USDT_DECIMALS)}</Descriptions.Item>
-                                {selectedPlan.maxStakeUsdt &&
+                                {selectedPlan.maxStakeUsdt && 
                                     <Descriptions.Item label="Max. Stake (USDT Value)">${parseFloat(selectedPlan.maxStakeUsdt).toFixed(USDT_DECIMALS)}</Descriptions.Item>
                                 }
                             </Descriptions>
-
+                            
                             <Divider className="modal-divider"/>
 
                             <Paragraph className="modal-text"><Text strong>Your ARIX Wallet Balance: </Text>
                                 <Text style={{color: '#7065F0', fontWeight: 'bold'}}>{arixWalletBalance.toFixed(ARIX_DECIMALS)} ARIX</Text>
-                            </Paragraph>
-
+                            </Paragraph> 
+                            
                             <div style={{ margin: '16px 0' }}>
                                 <Text strong className="modal-input-label">Enter USDT Value to Commit for Staking:</Text>
                                 <InputNumber
-                                    style={{ width: '100%'}}
+                                    style={{ width: '100%'}} 
                                     addonBefore={<Text style={{color: '#A0A0A5'}}>$</Text>}
-                                    value={inputUsdtAmount}
+                                    value={inputUsdtAmount} 
                                     onChange={handleUsdtAmountChange}
                                     placeholder={`Min $${parseFloat(selectedPlan.minStakeUsdt).toFixed(USDT_DECIMALS)}${selectedPlan.maxStakeUsdt ? `, Max $${parseFloat(selectedPlan.maxStakeUsdt).toFixed(USDT_DECIMALS)}` : ''}`}
                                     min={parseFloat(selectedPlan.minStakeUsdt)}
                                     max={selectedPlan.maxStakeUsdt ? parseFloat(selectedPlan.maxStakeUsdt) : undefined}
-                                    precision={USDT_DECIMALS}
-                                    step={10}
+                                    precision={USDT_DECIMALS} 
+                                    step={10} 
                                     className="themed-input-number large-input"
                                     size="large"
                                 />
                             </div>
 
-                            {currentArxPrice && inputUsdtAmount != null && inputUsdtAmount >= 0 && (
+                            {currentArxPrice && inputUsdtAmount != null && inputUsdtAmount >= 0 && ( 
                                 <Paragraph className={`modal-calculated-arix ${calculatedArixAmount > arixWalletBalance ? 'insufficient' : ''}`}>
                                     This equals approx: <Text strong>{calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX</Text>
                                     <Text className="price-reference"> (at ~${currentArxPrice.toFixed(4)}/ARIX)</Text>
-                                    {calculatedArixAmount > arixWalletBalance &&
+                                    {calculatedArixAmount > arixWalletBalance && 
                                         <Text className="insufficient-balance-warning"> (Insufficient ARIX Balance)</Text>
                                     }
                                     {inputUsdtAmount > 0 && inputUsdtAmount < parseFloat(selectedPlan.minStakeUsdt) &&
                                         <Text className="insufficient-balance-warning"> (Below plan minimum)</Text>
                                     }
-                                    {selectedPlan.maxStakeUsdt && inputUsdtAmount > parseFloat(selectedPlan.maxStakeUsdt) &&
+                                     {selectedPlan.maxStakeUsdt && inputUsdtAmount > parseFloat(selectedPlan.maxStakeUsdt) &&
                                         <Text className="insufficient-balance-warning"> (Above plan maximum)</Text>
                                     }
                                 </Paragraph>
                             )}
                             <Alert type="info" style={{marginTop: 16}} className="modal-alert"
-                                   message="Staking Process Note"
-                                   description="You are committing a specific USDT value. The system calculates the equivalent ARIX to be staked from your wallet. USDT rewards are based on this initial USDT value. Your ARIX principal is locked in the smart contract."
+                                message="Staking Process Note"
+                                description="You are committing a specific USDT value. The system calculates the equivalent ARIX to be staked from your wallet. USDT rewards are based on this initial USDT value. Your ARIX principal is locked in the smart contract."
                             />
                         </div>
                     )}
@@ -558,7 +564,7 @@ const EarnPage = () => {
                     destroyOnClose
                     centered
                     okButtonProps={{ danger: unstakePrepDetails?.isEarly }}
-                    width={isMobile ? '95%' : 520}
+                    width={modalWidth} // Use the defined modalWidth
                 >
                     {unstakePrepDetails && selectedStakeForUnstake ? (
                         <div className="unstake-details-modal-content">
@@ -566,13 +572,13 @@ const EarnPage = () => {
                             <Descriptions column={1} bordered size="small" className="modal-descriptions">
                                 <Descriptions.Item label="Plan">{selectedStakeForUnstake.planTitle}</Descriptions.Item>
                                 <Descriptions.Item label="ARIX Principal Staked">{unstakePrepDetails.principalArix} ARIX</Descriptions.Item>
-                                {unstakePrepDetails.isEarly &&
+                                {unstakePrepDetails.isEarly && 
                                     <Descriptions.Item label="Early Unstake Penalty">
                                         <Text style={{color: '#F44336'}}>{unstakePrepDetails.arixPenaltyPercentApplied}% of principal</Text>
                                     </Descriptions.Item>
                                 }
                             </Descriptions>
-                            <Alert
+                            <Alert 
                                 message="Important Note"
                                 description="This action only unstakes your ARIX principal from the smart contract. Your accrued USDT rewards are separate and can be withdrawn from your dashboard."
                                 type="info"
