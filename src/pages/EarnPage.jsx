@@ -34,10 +34,10 @@ import {
     fromArixSmallestUnits,
     ARIX_DECIMALS,
     USDT_DECIMALS,
-    USD_DECIMALS, // Added USD_DECIMALS
+    USD_DECIMALS,
     waitForTransactionConfirmation,
     REFERRAL_LINK_BASE
-} from '../../utils/tonUtils'; // Ensure this path and exports are correct
+} from '../utils/tonUtils.js'; // Corrected path
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 
 import './EarnPage.css';
