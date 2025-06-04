@@ -341,8 +341,7 @@ const EarnPage = () => {
     };
     
     const isLoadingInitial = loadingConfig && !stakingConfigData;
-
-    // Line 480, where the original error occurred. Now `isMobile` is defined.
+    const isStakingAvailable = stakingConfigData?.stakingPlans && stakingConfigData.stakingPlans.length > 0;
     const modalWidth = isMobile ? '95%' : 520;
 
 
@@ -363,8 +362,6 @@ const EarnPage = () => {
             </div>
         );
     }
-
-    const isStakingCurrentlyAvailable = stakingConfigData?.stakingPlans && stakingConfigData.stakingPlans.length > 0;
 
     return (
         <Spin spinning={isLoadingInitial} tip="Loading ARIX Staking Hub..." size="large" wrapperClassName="earn-page-spinner-wrapper">
@@ -409,7 +406,7 @@ const EarnPage = () => {
                     <div style={{textAlign: 'center', padding: '50px 0'}}>
                         <Spin tip="Loading Staking Plans..." size="large"/>
                     </div>
-                ) : isStakingCurrentlyAvailable ? (
+                ) : isStakingAvailable ? (
                     <StakingPlans
                         plans={stakingConfigData?.stakingPlans || []}
                         onSelectPlan={handlePlanSelect}
@@ -595,4 +592,4 @@ const EarnPage = () => {
     );
 };
 
-export default EarnPage;
+export default EarnPage;   
