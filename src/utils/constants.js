@@ -31,7 +31,7 @@ export const DEFAULT_ERROR_MESSAGE = 'An unexpected error occurred. Please try a
 export const DEFAULT_SUCCESS_MESSAGE = 'Operation successful!';
 
 // Image placeholders or fallback URLs
-export const FALLBACK_IMAGE_URL = '/img/placeholder-image.png'; // Create a generic placeholder in /public/img
+export const FALLBACK_IMAGE_URL = '/img/coin_spinning.gif'; // Create a generic placeholder in /public/img
 export const COINFLIP_HEADS_IMG = '/img/coin_heads.png'; // Provided in mockups
 export const COINFLIP_TAILS_IMG = '/img/coin_tails.png'; // Provided in mockups
 export const COINFLIP_SPINNING_GIF = '/img/coin_spinning.gif'; // Provided in mockups
