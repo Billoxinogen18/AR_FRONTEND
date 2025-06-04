@@ -1,0 +1,126 @@
+/* File: AR_FRONTEND/src/pages/GamePage.css */
+
+.game-page-container {
+    padding: 0px 0px 24px 0px;
+}
+
+.game-page-banner.ant-alert {
+    border-radius: 12px;
+    margin-bottom: 24px;
+    background-color: #252525 !important; /* Darker background for banner */
+    border: 1px solid #38383A !important;
+    padding: 16px 20px;
+}
+
+.game-page-banner .ant-alert-icon {
+    font-size: 20px;
+    margin-top: 2px;
+}
+.game-page-banner .ant-alert-message .ant-typography {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+.game-page-banner .ant-alert-description .ant-typography {
+    font-size: 0.9rem;
+}
+.game-page-banner .banner-play-button {
+    font-weight: 500;
+}
+
+.game-page-intro-text {
+    text-align: center;
+    color: #A0A0A5;
+    font-size: 1rem;
+    margin-bottom: 24px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.game-selection-card {
+    text-align: center;
+    border-width: 1px !important;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+}
+.game-selection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.coinflip-promo-card .ant-card-body {
+    padding: 0 !important; /* Remove padding to let rows handle it */
+}
+
+.game-promo-image-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #121212; /* Darker bg for image part */
+    padding: 20px;
+    border-radius: 12px 0 0 12px; /* Rounded on one side */
+}
+.game-promo-image {
+    max-width: 100%;
+    max-height: 150px; /* Control mascot size */
+    object-fit: contain;
+}
+
+.game-promo-content-col {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start; /* Align text to the left */
+    text-align: left;
+}
+
+.game-promo-title {
+    color: #7065F0 !important; /* Accent color for title */
+    font-weight: 700 !important;
+    font-size: 1.6rem !important;
+    margin-bottom: 8px !important;
+    letter-spacing: 0.5px;
+}
+
+.game-promo-description {
+    color: #A0A0A5;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px !important;
+}
+
+.game-promo-button {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    height: 42px !important;
+    padding: 0 24px !important;
+}
+.game-promo-button .anticon {
+    margin-left: 8px;
+}
+
+
+.coming-soon-card {
+    opacity: 0.7;
+}
+.coming-soon-card .ant-btn {
+    background-color: #38383A !important;
+    border-color: #38383A !important;
+    color: #8E8E93 !important;
+    cursor: not-allowed;
+}
+
+@media (max-width: 575px) { /* sm breakpoint */
+    .game-promo-image-col {
+        border-radius: 12px 12px 0 0; /* Top rounded for mobile stacked view */
+        min-height: 160px;
+    }
+    .game-promo-content-col {
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+    .game-page-banner .ant-alert-action {
+        margin-top: 10px;
+    }
+}
