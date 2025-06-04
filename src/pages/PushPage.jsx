@@ -10,7 +10,7 @@ import {
     CloseOutlined,
     CopyOutlined,
     InfoCircleOutlined,
-    DollarCircleOutlined // Added DollarCircleOutlined
+    DollarCircleOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getUserProfile } from '../services/api';
@@ -37,7 +37,7 @@ const PushPage = () => {
     const [showTopUpModal, setShowTopUpModal] = useState(false);
     const [showCashoutModal, setShowCashoutModal] = useState(false);
 
-    const [claimableArix, setClaimableArix] = useState('0.00');
+    const [claimableArix, setClaimableArix] = useState('0');
     const [loadingBalance, setLoadingBalance] = useState(false);
 
     const fetchUserArixBalance = useCallback(async () => {
@@ -45,22 +45,21 @@ const PushPage = () => {
             setLoadingBalance(true);
             try {
                 const profileRes = await getUserProfile(rawAddress);
-                setClaimableArix(parseFloat(profileRes.data?.claimableArixRewards || 0).toFixed(ARIX_DECIMALS));
+                setClaimableArix(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
             } catch (error) {
                 console.error("Error fetching ARIX balance for Push Page:", error);
-                setClaimableArix('0.00');
+                setClaimableArix('0');
             } finally {
                 setLoadingBalance(false);
             }
         } else {
-            setClaimableArix('0.00');
+            setClaimableArix('0');
         }
     }, [rawAddress]);
 
     useEffect(() => {
         fetchUserArixBalance();
     }, [fetchUserArixBalance]);
-
 
     const handleWheelPress = () => {
         if (animatingWheel) return;
@@ -102,71 +101,97 @@ const PushPage = () => {
 
     return (
         <div className="push-page-container">
-            <div className="push-page-top-bar">
+            {/* Top Balance Display - Centered */}
+            <div className="push-balance-section">
                 <div className="push-balance-display">
-                    <ArixPushIcon />
-                    <Text className="push-balance-amount">
-                        {loadingBalance ? <Spin size="small" style={{marginRight: '5px'}}/> : claimableArix}
-                    </Text>
-                    <Text className="push-balance-currency">ARIX</Text>
+                    <div className="balance-icon-container">
+                        <div className="balance-icon-circle">
+                            <span className="balance-icon-text">V</span>
+                        </div>
+                    </div>
+                    <div className="balance-amount-display">
+                        <Text className="push-balance-amount">
+                            {loadingBalance ? <Spin size="small" style={{marginRight: '5px'}}/> : claimableArix}
+                        </Text>
+                    </div>
                 </div>
-                <div className="push-top-buttons">
-                    <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
-                        <ArrowDownOutlined /> Top up
-                    </Button>
-                    <Button className="push-top-button cashout" onClick={() => setShowCashoutModal(true)}>
-                        <ArrowUpOutlined /> Cashout
-                    </Button>
+                <Text className="push-balance-currency">Arix</Text>
+            </div>
+
+            {/* Top Buttons */}
+            <div className="push-top-buttons">
+                <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
+                    <ArrowDownOutlined /> Top up
+                </Button>
+                <Button className="push-top-button cashout" onClick={() => setShowCashoutModal(true)}>
+                    <ArrowUpOutlined /> Cashout
+                </Button>
+            </div>
+
+            {/* Banner */}
+            <div className="push-banner-container">
+                <div className="push-banner-content">
+                    <div className="banner-icon">
+                        <RiseOutlined />
+                    </div>
+                    <div className="banner-text">
+                        <Text className="banner-title">X2 or maybe x256? Play Coinflip and try your luck!</Text>
+                        <Button className="banner-play-button" onClick={() => navigate('/game')}>
+                            <RightCircleOutlined />
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <Alert
-                message={<Text strong className="push-banner-message-text">x2 or maybe x256?</Text>}
-                description={<Text className="push-banner-description-text">Play Coinflip and try your luck!</Text>}
-                type="info"
-                showIcon
-                icon={<RiseOutlined className="push-banner-icon"/>}
-                className="push-page-banner dark-theme-alert"
-                action={
-                    <Button
-                        type="primary"
-                        size="small"
-                        onClick={() => navigate('/game')}
-                        className="push-banner-play-button"
-                    >
-                        Play Coinflip <RightCircleOutlined />
-                    </Button>
-                }
-            />
-
+            {/* Wheel Area */}
             <div className="push-wheel-area">
                 <div
-                    className={`push-wheel-clickable-center ${animatingWheel ? 'disabled' : ''}`}
+                    className={`push-wheel-container ${animatingWheel ? 'animating' : ''}`}
                     onClick={handleWheelPress}
                     role="button"
                     aria-label="Activate Push Wheel"
                     tabIndex={0}
                     onKeyPress={(e) => { if(e.key === 'Enter' || e.key === ' ') handleWheelPress();}}
                 >
-                    <div className="push-wheel-icon-container">
-                        <div className="pixel-icon">
-                            <div className="pixel-row"><div className="pixel empty"></div><div className="pixel filled"></div><div className="pixel filled"></div><div className="pixel empty"></div></div>
-                            <div className="pixel-row"><div className="pixel filled"></div><div className="pixel empty"></div><div className="pixel empty"></div><div className="pixel filled"></div></div>
-                            <div className="pixel-row"><div className="pixel filled"></div><div className="pixel empty"></div><div className="pixel empty"></div><div className="pixel filled"></div></div>
-                            <div className="pixel-row"><div className="pixel empty"></div><div className="pixel filled"></div><div className="pixel filled"></div><div className="pixel empty"></div></div>
+                    <div className="push-wheel-outer-ring">
+                        {Array.from({ length: numberOfLines }).map((_, index) => (
+                            <div
+                                key={index}
+                                className={`wheel-tick ${isWheelActive ? 'active' : 'inactive'}`}
+                                style={{ transform: `rotate(${index * (360 / numberOfLines)}deg)` }}
+                            />
+                        ))}
+                    </div>
+                    <div className="push-wheel-center">
+                        <div className="wheel-center-icon">
+                            <div className="pixel-icon">
+                                <div className="pixel-row">
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel empty"></div>
+                                </div>
+                                <div className="pixel-row">
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel filled"></div>
+                                </div>
+                                <div className="pixel-row">
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel filled"></div>
+                                </div>
+                                <div className="pixel-row">
+                                    <div className="pixel empty"></div>
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel filled"></div>
+                                    <div className="pixel empty"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="push-wheel-ridges">
-                    {Array.from({ length: numberOfLines }).map((_, index) => (
-                        <div
-                            key={index}
-                            className={`ridge-line ${isWheelActive ? 'active' : 'inactive'}`}
-                            style={{ transform: `rotate(${index * (360 / numberOfLines)}deg)` }}
-                        >
-                            <div className="ridge-line-inner"></div>
-                        </div>
-                    ))}
                 </div>
             </div>
 
@@ -324,6 +349,5 @@ const PushPage = () => {
         </div>
     );
 };
-
 
 export default PushPage;

@@ -1,575 +1,744 @@
-
 .push-page-container {
-    background-color: #000000; /* Pure black background from mockup */
-    min-height: calc(100vh - 56px - 60px); /* Header and mobile nav */
+    background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+    min-height: calc(100vh - 56px - 60px); /* Assuming 56px header, 60px footer */
     display: flex;
     flex-direction: column;
-    color: #E0E0E5;
-    padding: 12px;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-/* Top Bar: Balance and Buttons - Styled like mockup */
-.push-page-top-bar {
-    display: flex;
-    justify-content: space-between; /* Balance left, buttons right */
     align-items: center;
-    margin-bottom: 16px;
-    background-color: #161618; /* Very dark grey from mockup */
-    padding: 8px 10px; /* Adjusted padding */
-    border-radius: 10px; 
-    border: 1px solid #252527; 
+    color: #E0E0E5;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevents scrollbars if content overflows temporarily during animations */
 }
 
-/* Removed .push-balance-display-container as it's not needed for horizontal layout */
+/* Balance Section - Centered at Top (Matches Image 1) */
+.push-balance-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px; /* Reduced from image for tighter layout if TON text is directly under */
+    margin-top: 20px; /* Spacing from top */
+}
 
 .push-balance-display {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background-color: #0D0D0D; 
-    padding: 6px 12px;
-    border-radius: 20px; 
-    border: 1px solid #38383A;
-    /* min-width: 100px; */ /* Let it size naturally */
-}
-.push-page-arix-icon { 
-    width: 18px;
-    height: 18px;
-}
-.push-balance-amount {
-    color: #FFFFFF;
-    font-weight: 700;
-    font-size: 1rem; /* Adjusted for mobile */
-}
-.push-balance-currency { 
-    color: #8E8E93; 
-    font-size: 0.75rem; /* Adjusted for mobile */
-    font-weight: 500;
-    margin-left: 2px;
-    text-transform: uppercase;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px; /* Space before the currency text */
 }
 
+.balance-icon-container {
+    position: relative;
+}
+
+.balance-icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #333; /* Dark border for the circle */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.balance-icon-text { /* For the 'V' or similar icon if text-based */
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 18px;
+    font-family: 'Arial', sans-serif; /* Fallback font, ideally match with app's font */
+}
+
+.balance-amount-display {
+    display: flex;
+    align-items: center;
+}
+
+.push-balance-amount {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 2.5rem !important; /* Large, prominent balance */
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+.push-balance-currency {
+    color: #8E8E93 !important; /* Greyish text for "TON" or "Arix" */
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    margin-top: 4px; /* Small space below the numeric balance */
+}
+
+/* Top Buttons - Centered Below Balance (Matches Image 1) */
 .push-top-buttons {
     display: flex;
-    gap: 8px; 
+    gap: 16px;
+    margin-bottom: 24px;
 }
+
 .push-top-button {
-    background-color: #252527 !important; 
-    border-color: #38383A !important;
-    color: #A0A0A5 !important;
+    background-color: #2a2a2a !important; /* Dark grey button */
+    border: 1px solid #404040 !important; /* Slightly lighter border */
+    color: #FFFFFF !important;
     font-weight: 500 !important;
-    border-radius: 8px !important;
-    padding: 6px 10px !important; /* Adjusted padding for mobile */
-    height: 36px !important; /* Consistent height */
-    font-size: 0.8rem !important; /* Adjusted font size for mobile */
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    white-space: nowrap; /* Prevent text wrapping */
+    border-radius: 20px !important; /* Rounded corners */
+    padding: 8px 24px !important;
+    height: 44px !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
-.push-top-button:hover,
-.push-top-button.active { 
-    border-color: #7065F0 !important;
-    color: #7065F0 !important;
-    background-color: rgba(112, 101, 240, 0.1) !important;
+
+.push-top-button:hover {
+    background-color: #3a3a3a !important;
+    border-color: #505050 !important;
+    transform: translateY(-1px);
 }
+
 .push-top-button .anticon {
     font-size: 1em;
+    margin-right: 6px;
 }
 
-/* Banner Styling - Matches mockup */
-.push-page-banner.ant-alert {
-    border-radius: 10px;
-    margin-bottom: 20px; 
-    background: linear-gradient(to right, #3a3a3c, #2c2c2e) !important; 
-    border: 1px solid #4a4a4c !important; 
-    padding: 10px 14px; 
-}
-.push-page-banner .push-banner-icon {
-    font-size: 18px;
-    margin-top: 2px;
-    color: #EFFF82 !important; 
-}
-.push-page-banner .push-banner-message-text .ant-typography,
-.push-page-banner .push-banner-description-text .ant-typography {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #EFFF82 !important; 
-}
-.push-page-banner .push-banner-description-text .ant-typography {
-    opacity: 0.9;
-    font-size: 0.85rem;
-}
-.push-page-banner .push-banner-play-button.ant-btn-sm {
-    font-weight: 600;
-    border-radius: 6px;
-    padding: 0 10px;
-    height: 28px;
-    background-color: #EFFF82 !important; 
-    border-color: #EFFF82 !important;
-    color: #1A1A1A !important; 
-}
-.push-page-banner .push-banner-play-button.ant-btn-sm:hover {
-    background-color: #f5ffad !important;
-    border-color: #f5ffad !important;
+/* Banner - Yellow Alert Style (Matches Image 1) */
+.push-banner-container {
+    width: 100%;
+    max-width: 400px; /* Max width for the banner */
+    margin-bottom: 40px; /* Space below banner, before wheel */
 }
 
+.push-banner-content {
+    background: linear-gradient(135deg, #4a4a00 0%, #3a3a00 100%); /* Dark yellow gradient */
+    border: 1px solid #6a6a00; /* Darker yellow border */
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-/* Wheel Area */
+.banner-icon { /* For the RiseOutlined icon */
+    color: #FFFF00; /* Bright yellow */
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.banner-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.banner-title {
+    color: #FFFF00 !important; /* Bright yellow text */
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.3;
+    margin: 0 !important;
+}
+
+.banner-play-button { /* Circular yellow button with black arrow */
+    background-color: #FFFF00 !important;
+    border: none !important;
+    color: #000000 !important; /* Black icon color */
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important; /* Icon size */
+    padding: 0 !important;
+    flex-shrink: 0;
+}
+
+.banner-play-button:hover {
+    background-color: #FFFF33 !important; /* Slightly lighter yellow on hover */
+    transform: scale(1.05);
+}
+
+/* Wheel Area - Centered (Matches Image 1) */
 .push-wheel-area {
     flex-grow: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    min-height: 250px; /* Adjusted for mobile */
-    margin-bottom: 20px;
-    border-radius: 20px; 
+    min-height: 300px; /* Ensure enough vertical space for the wheel */
+    margin-bottom: 40px; /* Spacing from bottom or next element */
 }
 
-.push-wheel-clickable-center {
-    width: 130px; /* Adjusted for mobile */
-    height: 130px;
+.push-wheel-container {
+    position: relative;
+    width: 280px; /* Diameter of the wheel */
+    height: 280px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.push-wheel-container:hover {
+    transform: scale(1.02); /* Subtle zoom on hover */
+}
+
+.push-wheel-container.animating {
+    animation: wheelSpin 1.5s ease-in-out;
+}
+
+@keyframes wheelSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); } /* Slight grow mid-spin */
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.push-wheel-outer-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    background: #202124; 
+    border: 3px solid #333; /* Dark border for the main ring */
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); /* Dark gradient for ring bg */
+    box-shadow: 
+        0 0 20px rgba(0,0,0,0.5), /* Outer shadow */
+        inset 0 0 20px rgba(0,0,0,0.3); /* Inner shadow */
+}
+
+.wheel-tick {
+    position: absolute;
+    width: 2px;  /* Thickness of the tick */
+    height: 25px; /* Length of the tick */
+    background: linear-gradient(to top, 
+        rgba(128, 128, 128, 0.8) 0%,  /* Greyish gradient for ticks */
+        rgba(160, 160, 160, 0.6) 50%,
+        rgba(200, 200, 200, 0.3) 100%
+    );
+    top: 5px; /* Distance from the edge of the outer ring */
+    left: 50%;
+    transform-origin: 1px 135px; /* (width/2) (ring_radius - top_offset) */
+    margin-left: -1px; /* -(width/2) */
+    border-radius: 1px;
+    opacity: 0; /* Start inactive */
+    transition: opacity 0.6s ease; /* Animation for appearing/disappearing */
+}
+
+.wheel-tick.active {
+    opacity: 1; /* Fully visible when active */
+}
+/* Staggered animation for ticks appearing */
+.wheel-tick.active:nth-child(6n+1) { transition-delay: 0.05s; }
+.wheel-tick.active:nth-child(6n+2) { transition-delay: 0.1s; }
+.wheel-tick.active:nth-child(6n+3) { transition-delay: 0.15s; }
+.wheel-tick.active:nth-child(6n+4) { transition-delay: 0.2s; }
+.wheel-tick.active:nth-child(6n+5) { transition-delay: 0.25s; }
+.wheel-tick.active:nth-child(6n+0) { transition-delay: 0.3s; }
+
+/* For "volume turning down" effect (lines disappearing when modal is shown / isWheelActive is false)
+   The .inactive class is added in JSX. The transition on opacity takes care of fade-out.
+   If sequential fade-out is desired, add similar transition-delay for .wheel-tick.inactive */
+.wheel-tick.inactive {
+    opacity: 0;
+}
+
+
+.push-wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px; /* Diameter of the center button */
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%); /* Dark gradient for center */
+    border: 2px solid #444; /* Border for center */
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    position: relative; 
-    z-index: 10;
-    border: none; 
-    box-shadow: 0 0 15px rgba(0,0,0,0.2), inset 0 0 10px rgba(0,0,0,0.4);
-    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.push-wheel-clickable-center:hover:not(.disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(128, 128, 128, 0.15), inset 0 0 10px rgba(0,0,0,0.4); /* Greyish hover glow */
-}
-.push-wheel-clickable-center.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+    box-shadow: 
+        0 4px 15px rgba(0,0,0,0.4), /* Outer shadow for center */
+        inset 0 2px 10px rgba(255,255,255,0.05); /* Subtle inner highlight */
+    z-index: 10; /* Above the ticks */
 }
 
-/* CSS Pixel Icon - Matches mockup */
+.wheel-center-icon { /* Container for the pixel icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Pixel Icon in the Center of the Wheel (Matches Image 1) */
 .pixel-icon {
     display: flex;
     flex-direction: column;
-    gap: 2px; 
-    transform: scale(3); /* Adjusted scale */
-    filter: drop-shadow(0 0 2px rgba(128, 128, 128, 0.2)); /* Subtle grey glow */
+    gap: 3px; /* Gap between pixel rows */
+    transform: scale(4); /* Makes the 4x4 pixel icon larger */
 }
+
 .pixel-row {
     display: flex;
-    gap: 2px; 
+    gap: 3px; /* Gap between pixels in a row */
 }
+
 .pixel {
-    width: 5px; 
-    height: 5px;
-    background-color: transparent; 
-    border-radius: 0px; 
+    width: 4px;  /* Size of one "pixel" */
+    height: 4px;
+    background-color: transparent; /* For 'empty' pixels */
+    border-radius: 0px; /* Sharp edges for pixels */
 }
+
 .pixel.filled {
-    background-color: #404144; 
-}
-.push-wheel-clickable-center:hover:not(.disabled) .pixel.filled {
-    background-color: #A0A0A5; 
+    background-color: #666; /* Color of 'filled' pixels */
 }
 
-
-/* Ridges and Lines - Greyish color */
-.push-wheel-ridges {
-    position: absolute;
-    width: 230px; /* Adjusted for mobile */
-    height: 230px;
-    border-radius: 50%;
-    border: 3px solid #1C1D1F; 
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
-    z-index: 5;
-    pointer-events: none; 
+.push-wheel-container:hover .pixel.filled {
+    background-color: #999; /* Lighter color on hover for filled pixels */
 }
 
-.ridge-line {
-    position: absolute;
-    bottom: 50%; 
-    left: 50%;
-    width: 2px; 
-    height: 115px; /* Half the diameter of .push-wheel-ridges */
-    transform-origin: bottom center; 
-}
-
-.ridge-line-inner {
-    width: 100%;
-    height: 100%; 
-    /* Greyish gradient for lines */
-    background: linear-gradient(to top, 
-        rgba(150, 150, 150, 0.6) 0%,  /* Darker grey base */
-        rgba(180, 180, 180, 0.4) 40%, /* Mid grey */
-        rgba(210, 210, 210, 0.15) 75%, /* Lighter grey towards tip */
-        transparent 100% 
-    );
-    position: absolute;
-    bottom: 0;
-    border-radius: 1px; 
-    transform-origin: bottom center;
-    transition-property: transform, opacity;
-    transition-duration: 1.2s, 0.8s; 
-    transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1), ease-out;
-    opacity: 0; 
-    transform: scaleY(0.1) translateY(90%); 
-}
-
-.ridge-line.active .ridge-line-inner {
-    opacity: 0.4; /* More subtle active lines */
-    transform: scaleY(0.65) translateY(0%); 
-}
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 1) .ridge-line-inner { transition-delay: 0.05s, 0.05s; }
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 2) .ridge-line-inner { transition-delay: 0.1s, 0.1s; }
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 3) .ridge-line-inner { transition-delay: 0.15s, 0.15s; }
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 4) .ridge-line-inner { transition-delay: 0.2s, 0.2s; }
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 5) .ridge-line-inner { transition-delay: 0.25s, 0.25s; }
-.push-wheel-ridges .ridge-line.active:nth-child(6n + 0) .ridge-line-inner { transition-delay: 0.3s, 0.3s; }
-
-
-.ridge-line.inactive .ridge-line-inner {
-    transform: scaleY(0.05) translateY(95%); 
-    opacity: 0;
-    transition-delay: 0.1s, 0s; 
-}
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 1) .ridge-line-inner { transition-delay: calc(0.1s + 0.05s), 0.05s; }
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 2) .ridge-line-inner { transition-delay: calc(0.1s + 0.1s), 0.1s; }
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 3) .ridge-line-inner { transition-delay: calc(0.1s + 0.15s), 0.15s; }
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 4) .ridge-line-inner { transition-delay: calc(0.1s + 0.2s), 0.2s; }
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 5) .ridge-line-inner { transition-delay: calc(0.1s + 0.25s), 0.25s; }
-.push-wheel-ridges .ridge-line.inactive:nth-child(6n + 0) .ridge-line-inner { transition-delay: calc(0.1s + 0.3s), 0.3s; }
-
-
-/* Bottom Sheet Modal ("Pushing season is over") */
-.push-bottom-sheet-modal-wrapper .ant-modal-content {
-    background-color: #1A1A1A !important; 
-    border-radius: 20px 20px 0 0 !important; 
-    padding: 0 !important; 
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.3) !important;
+/* Bottom Sheet Modal (Matches slide-up animation and general dark theme) */
+.push-bottom-sheet-modal-wrapper { /* Wrapper for Ant Modal to make it a bottom sheet */
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important; 
-    margin: 0 !important;
-    top: auto !important; 
+    top: auto !important; /* Overrides Ant Modal's centering */
+    transform: none !important;
+    display: flex;
+    justify-content: center; /* Center the modal if it has a max-width */
 }
+
+.push-bottom-sheet-modal-wrapper .ant-modal {
+    position: absolute !important; /* Relative to its wrapper */
+    bottom: 0 !important;
+    left: 0 !important; /* Stretch to edges or use auto margins if max-width */
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important; /* Full width for mobile, can be restricted on larger screens */
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+}
+
+.push-bottom-sheet-modal-wrapper .ant-modal-content {
+    background-color: #1A1A1A !important; /* Dark background for modal content */
+    border-radius: 20px 20px 0 0 !important; /* Rounded top corners */
+    padding: 0 !important; /* Padding will be in .push-bottom-sheet-content */
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5) !important; /* Shadow for depth */
+    animation: slideUp 0.3s ease-out !important;
+    border: none !important;
+    margin: 0 !important;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .push-bottom-sheet-modal-wrapper .ant-modal-body {
-    padding: 0 !important; 
+    padding: 0 !important;
 }
 
 .push-bottom-sheet-content {
-    padding: 20px;
-    padding-top: 40px; 
+    padding: 24px 20px 32px; /* Inner padding for modal content */
     text-align: center;
-    position: relative;
+    position: relative; /* For absolute positioning of close button */
 }
-.close-bottom-sheet-button.ant-btn-circle {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background-color: #252525 !important;
-    border-color: #38383A !important;
-    color: #A0A0A5 !important;
-    z-index: 20; /* Ensure above other modal content */
-}
-.close-bottom-sheet-button.ant-btn-circle:hover {
-    background-color: #303030 !important;
+
+.close-bottom-sheet-button { /* Close button for the bottom sheet */
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    background-color: #333 !important;
+    border: 1px solid #444 !important;
     color: #FFFFFF !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important; /* Ensure consistent size for Ant Button */
+    padding: 0 !important; /* Reset padding for icon-only button */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important; /* Make it circular */
+    z-index: 20;
+}
+
+.close-bottom-sheet-button:hover {
+    background-color: #444 !important;
+    border-color: #555 !important;
 }
 
 .bottom-sheet-title {
     color: #FFFFFF !important;
     font-weight: 600 !important;
-    font-size: 1.2rem !important; /* Adjusted for mobile */
-    margin-bottom: 10px !important;
-}
-.bottom-sheet-text {
-    color: #A0A0A5 !important;
-    font-size: 0.9rem !important; /* Adjusted for mobile */
-    line-height: 1.5;
-    margin-bottom: 12px !important;
-}
-.bottom-sheet-next-steps {
-    background-color: #252525; 
-    padding: 10px 14px; /* Adjusted padding */
-    border-radius: 8px;
-    margin-bottom: 16px;
-    text-align: left;
-}
-.next-steps-title {
-    color: #E0E0E5 !important;
-    font-weight: 500 !important;
-    font-size: 0.95rem !important; /* Adjusted */
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-}
-.next-steps-title .anticon {
-    color: #FFD700; 
-}
-.next-steps-list {
-    list-style-type: decimal;
-    padding-left: 18px; /* Adjusted padding */
-    color: #A0A0A5;
-    font-size: 0.85rem; /* Adjusted */
-}
-.next-steps-list li {
-    margin-bottom: 3px;
-}
-.bottom-sheet-text.coinflip-prompt {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    font-weight: 500;
-    color: #E0E0E5 !important; 
-}
-.play-coinflip-button-sheet.ant-btn-primary {
-    height: 44px !important; /* Adjusted height */
-    font-size: 1rem !important; 
-    font-weight: 600 !important;
-    border-radius: 10px !important;
-    background: #7065F0 !important; 
-    border: none !important;
-}
-.play-coinflip-button-sheet.ant-btn-primary:hover {
-    background: #8c80f3 !important;
+    font-size: 1.4rem !important;
+    margin-bottom: 16px !important;
+    margin-top: 8px !important; /* Space from top if close button is not interfering */
 }
 
-/* Top Up & Cashout Modal Styling */
+.bottom-sheet-text {
+    color: #A0A0A5 !important;
+    font-size: 1rem !important;
+    line-height: 1.5;
+    margin-bottom: 20px !important;
+}
+
+.bottom-sheet-next-steps { /* Container for "Next steps" list */
+    background-color: #252525; /* Slightly lighter dark background */
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.next-steps-title {
+    color: #E0E0E5 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.next-steps-title .anticon { /* For the RiseOutlined icon in "Next steps" */
+    color: #FFD700; /* Gold/Yellow color for the icon */
+    margin-right: 8px; /* From JSX inline style */
+}
+
+.next-steps-list {
+    list-style-type: decimal;
+    padding-left: 20px; /* Indent for list numbers */
+    color: #A0A0A5;
+    font-size: 0.9rem;
+    margin: 0; /* Reset default list margin */
+}
+
+.next-steps-list li {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.bottom-sheet-text.coinflip-prompt {
+    margin-top: 20px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    color: #E0E0E5 !important;
+}
+
+.play-coinflip-button-sheet { /* "Play Coinflip!" button in bottom sheet */
+    height: 50px !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    background: #7065F0 !important; /* Purple button from your original CSS */
+    border: none !important;
+    width: 100% !important;
+}
+
+.play-coinflip-button-sheet:hover {
+    background: #8c80f3 !important; /* Lighter purple on hover */
+    transform: translateY(-1px);
+}
+
+/* TopUp & Cashout Modal Styles (General Dark Theme) */
 .push-topup-modal-wrapper .ant-modal-content,
 .push-cashout-modal-wrapper .ant-modal-content {
-    background-color: #0D0D0D !important; 
-    border-radius: 12px !important; /* Slightly less rounded for these modals */
-    padding: 0 !important;
-    border: 1px solid #252527 !important; 
-    box-shadow: 0 6px 25px rgba(0,0,0,0.35) !important;
+    background-color: #1A1A1A !important; /* Consistent dark background */
+    border-radius: 16px !important;
+    padding: 0 !important; /* Padding will be in content div */
+    border: 1px solid #333 !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
 }
+
 .push-topup-modal-wrapper .ant-modal-body,
 .push-cashout-modal-wrapper .ant-modal-body {
     padding: 0 !important;
 }
+
 .push-topup-content, .push-cashout-content {
-    padding: 16px; /* Consistent padding */
+    padding: 24px;
     text-align: center;
-    position: relative;
+    position: relative; /* For close button positioning */
 }
-.close-topup-button.ant-btn-circle,
-.close-cashout-button.ant-btn-circle { 
-    position: absolute;
-    top: 10px; /* Adjusted position */
-    right: 10px;
-    background-color: #1A1A1A !important;
-    border-color: #303030 !important;
-    color: #A0A0A5 !important;
-    z-index: 20; 
+
+.close-topup-button, .close-cashout-button { /* Close button for TopUp/Cashout modals */
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    background-color: #333 !important;
+    border: 1px solid #444 !important;
+    color: #FFFFFF !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    z-index: 20;
 }
-.topup-modal-header, .cashout-modal-header { 
+.close-topup-button:hover, .close-cashout-button:hover {
+    background-color: #444 !important;
+    border-color: #555 !important;
+}
+
+
+.topup-modal-header, .cashout-modal-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 12px; /* Reduced margin */
+    gap: 10px;
+    margin-bottom: 20px;
 }
+
+.push-page-arix-icon { /* Arix diamond icon used in modals */
+    width: 24px;
+    height: 24px;
+}
+/* This rule from Claude's CSS is more specific and thus preferred if icon only used here */
 .topup-modal-header .push-page-arix-icon,
 .cashout-modal-header .push-page-arix-icon {
-    width: 22px; height: 22px; /* Adjusted icon size */
+    width: 24px;
+    height: 24px;
 }
-.topup-modal-title, .cashout-modal-title {
-    color: #8E8E93 !important; 
+
+.topup-modal-title, .cashout-modal-title { /* "Balance" title in modals */
+    color: #8E8E93 !important;
     font-weight: 500 !important;
-    font-size: 0.85rem !important; /* Smaller title "Balance" */
+    font-size: 1rem !important; /* Adjust as needed */
     margin: 0 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-.topup-modal-actions, .cashout-modal-actions { 
+
+.topup-modal-actions, .cashout-modal-actions { /* Container for TopUp/Cashout buttons within modals */
     display: flex;
-    gap: 8px;
-    margin-top: 4px; /* Reduced margin */
-    margin-bottom: 16px;
+    gap: 12px; /* Spacing between the two buttons */
+    margin-bottom: 20px;
 }
+
 .topup-modal-actions .push-top-button,
 .cashout-modal-actions .push-top-button {
-    flex: 1; 
-    background-color: #1A1A1A !important; 
-    border-color: #303030 !important;
-    height: 36px !important;
-    font-size: 0.85rem !important;
+    flex: 1; /* Make buttons share space equally */
+    /* General .push-top-button styles apply, override if needed for modal context */
 }
+
 .topup-modal-actions .push-top-button.active,
 .cashout-modal-actions .push-top-button.active {
-     background-color: #252527 !important;
-     color: #FFFFFF !important;
-     border-color: #38383A !important;
+    /* Style for the active button in the modal, e.g., slightly different background or border */
+    background-color: #383838 !important; /* Example: darker active state */
+    border-color: #505050 !important;
 }
 
 
-.topup-warning-alert.ant-alert-warning {
-    background-color: #2A2015 !important; 
-    border-color: #5C4125 !important;
+/* Alert Styling in Modals */
+.topup-warning-alert.ant-alert {
+    background-color: rgba(255, 179, 0, 0.1) !important; /* Transparent yellow background */
+    border: 1px solid rgba(255, 179, 0, 0.4) !important;
     border-radius: 8px !important;
-    margin-bottom: 12px !important; /* Adjusted margin */
+    margin-bottom: 20px !important;
     text-align: left;
-    padding: 8px 10px !important; /* Adjusted padding */
-}
-.topup-warning-alert .ant-alert-message {
-    color: #FFB74D !important; 
-    font-weight: 500;
-    font-size: 0.85rem; /* Adjusted font size */
-}
-.topup-warning-alert .ant-alert-description {
-    color: #FFCC80 !important;
-    font-size: 0.8rem; /* Adjusted font size */
+    padding: 12px 16px !important;
 }
 .topup-warning-alert .ant-alert-icon {
-    color: #FFA726 !important; 
-    font-size: 1rem; 
+    color: #FFB300 !important; /* Warning icon color */
+    font-size: 18px;
+    margin-top: 2px;
 }
+.topup-warning-alert .ant-alert-message {
+    color: #FFD54F !important; /* Warning message color */
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.topup-warning-alert .ant-alert-description {
+    color: #FFE082 !important; /* Warning description color */
+    font-size: 0.85rem;
+}
+
+.cashout-condition-alert.ant-alert {
+    background-color: rgba(239, 83, 80, 0.1) !important; /* Transparent red background */
+    border: 1px solid rgba(239, 83, 80, 0.4) !important;
+    border-radius: 8px !important;
+    margin-top: 20px !important;
+    text-align: left;
+    padding: 12px 16px !important;
+}
+.cashout-condition-alert .ant-alert-icon {
+    color: #EF5350 !important; /* Error icon color */
+    font-size: 18px;
+    margin-top: 2px;
+}
+.cashout-condition-alert .ant-alert-message {
+    color: #FFCDD2 !important; /* Error message color */
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+.cashout-condition-alert .cashout-play-button.ant-btn { /* "Play" button inside cashout alert */
+    background-color: #EF5350 !important; /* Red to match error theme */
+    border-color: #EF5350 !important;
+    color: #FFFFFF !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    font-size: 0.85rem;
+    height: 30px;
+    padding: 0 12px;
+}
+.cashout-condition-alert .cashout-play-button.ant-btn:hover {
+    background-color: #E53935 !important;
+    border-color: #E53935 !important;
+}
+
 
 .topup-instructions {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px; /* Adjusted margin */
-    padding: 0 5px; 
+    margin-bottom: 20px;
+    padding: 0 5px;
 }
+
 .instruction-link {
     color: #8E8E93 !important;
-    font-size: 0.8rem; /* Adjusted font size */
+    font-size: 0.85rem;
     font-weight: 500;
+    cursor: pointer;
 }
 .instruction-link:hover {
-    color: #7065F0 !important;
+    color: #7065F0 !important; /* Purple hover from your original theme */
 }
+.instruction-link .anticon {
+    margin-left: 4px;
+}
+
 .address-label {
     color: #8E8E93;
-    font-size: 0.7rem; /* Adjusted font size */
+    font-size: 0.75rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px; /* Adjusted margin */
-    text-align: left; 
+    margin-bottom: 6px;
+    text-align: left;
     padding-left: 5px;
 }
+
 .address-display-box {
-    background-color: #1A1A1A; 
-    padding: 10px 14px; /* Adjusted padding */
+    background-color: #252525; /* Darker box for address */
+    padding: 12px 16px;
     border-radius: 8px;
-    border: 1px solid #303030;
-    margin-bottom: 6px; /* Adjusted margin */
+    border: 1px solid #333;
+    margin-bottom: 8px;
+    text-align: left;
 }
+
 .deposit-address-text {
     color: #E0E0E5 !important;
-    font-size: 0.9rem; 
+    font-size: 0.9rem;
     font-weight: 500;
-    word-break: break-all;
-    text-align: left;
+    word-break: break-all; /* Prevent overflow */
     line-height: 1.4;
 }
+
 .fee-info-text {
-    color: #8E8E93; 
-    font-size: 0.75rem;
-    margin-bottom: 10px; /* Adjusted margin */
+    color: #8E8E93;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
     text-align: center;
 }
 .fee-info-text strong {
-    color: #A0A0A5; 
+    color: #A0A0A5;
+    font-weight: 600;
 }
+
 .min-deposit-info {
-    color: #A0A0A5; 
-    font-size: 0.8rem; /* Adjusted font size */
-    margin-bottom: 16px; /* Adjusted margin */
+    color: #A0A0A5;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    background-color: #252525; 
-    padding: 6px 10px; /* Adjusted padding */
+    gap: 8px;
+    background-color: #252525;
+    padding: 8px 12px;
     border-radius: 8px;
 }
 .min-deposit-info .anticon {
-    color: #A0A0A5;
+    color: #A0A0A5; /* Icon color */
+    font-size: 1em;
 }
 .min-deposit-info strong {
     color: #E0E0E5;
+    font-weight: 600;
 }
-.copy-address-button.ant-btn-primary {
-    height: 44px !important; /* Adjusted height */
-    font-size: 0.95rem !important; 
+
+.copy-address-button.ant-btn { /* Main action button in TopUp modal */
+    height: 50px !important;
+    font-size: 1.1rem !important;
     font-weight: 600 !important;
-    background: #7065F0 !important;
+    border-radius: 12px !important;
+    background: #7065F0 !important; /* Purple button */
     border: none !important;
-    border-radius: 8px !important;
+    width: 100% !important;
+    color: #FFFFFF !important;
 }
-.copy-address-button.ant-btn-primary:hover {
-    background: #8c80f3 !important;
+.copy-address-button.ant-btn:hover {
+    background: #8c80f3 !important; /* Lighter purple on hover */
+    transform: translateY(-1px);
 }
-
-
-.cashout-condition-alert.ant-alert-error {
-    background-color: #321C1C !important; 
-    border: 1px solid #5D2A2A !important; 
-    border-radius: 8px !important;
-    margin-top: 16px !important; 
-    padding: 12px 16px !important; 
-    text-align: left; 
-}
-.cashout-condition-alert .ant-alert-message {
-    color: #FFCDD2 !important; 
-    font-weight: 500 !important;
-    font-size: 0.9rem !important; /* Adjusted font size */
-}
-.cashout-condition-alert .ant-alert-icon {
-    color: #EF9A9A !important; 
-    font-size: 18px !important; /* Adjusted icon size */
-}
-.cashout-play-button.ant-btn-primary {
-    background-color: #7065F0 !important; 
-    border-color: #7065F0 !important;
-    color: #FFFFFF !important; 
-    font-weight: 600 !important;
-    border-radius: 6px !important;
-    font-size: 0.8rem; /* Adjusted font size */
-    height: 28px; /* Adjusted height */
-    padding: 0 10px;
-}
-.cashout-play-button.ant-btn-primary:hover {
-    background-color: #8c80f3 !important;
-    border-color: #8c80f3 !important;
+.copy-address-button.ant-btn .anticon {
+    margin-right: 8px;
 }
 
-/* Further mobile refinements */
-@media (max-width: 360px) { /* For very small screens */
-    .push-page-top-bar {
-        padding: 8px;
-    }
-    .push-balance-display {
-        padding: 5px 10px;
-    }
+/* Responsive Adjustments if necessary */
+@media (max-width: 380px) {
     .push-balance-amount {
-        font-size: 0.9rem;
+        font-size: 2rem !important;
+    }
+    .push-balance-currency {
+        font-size: 0.9rem !important;
     }
     .push-top-button {
-        font-size: 0.75rem !important;
-        padding: 5px 8px !important;
-        height: 32px !important;
+        padding: 6px 16px !important;
+        font-size: 0.85rem !important;
+        height: 40px !important;
+        min-width: 100px;
     }
-    .push-wheel-clickable-center { width: 110px; height: 110px; }
-    .push-wheel-ridges { width: 190px; height: 190px; }
-    .ridge-line { height: 95px; width: 1.5px; }
-    .pixel-icon { transform: scale(2.5); }
-    .bottom-sheet-title { font-size: 1.1rem !important; }
-    .bottom-sheet-text { font-size: 0.85rem !important; }
-    .next-steps-title { font-size: 0.9rem !important; }
-    .next-steps-list { font-size: 0.8rem; }
-    .play-coinflip-button-sheet.ant-btn-primary { height: 42px !important; font-size: 0.95rem !important; }
-    .topup-modal-title, .cashout-modal-title { font-size: 1rem !important; }
-    .deposit-address-text { font-size: 0.8rem; }
-    .copy-address-button.ant-btn-primary { height: 40px !important; font-size: 0.85rem !important; }
+    .banner-title {
+        font-size: 0.85rem !important;
+    }
+    .push-wheel-container {
+        width: 240px;
+        height: 240px;
+    }
+    .wheel-tick {
+        transform-origin: 1px 115px; /* Adjusted for smaller wheel */
+    }
+    .push-wheel-center {
+        width: 100px;
+        height: 100px;
+    }
+    .pixel-icon {
+        transform: scale(3.5);
+    }
+    .bottom-sheet-title {
+        font-size: 1.2rem !important;
+    }
+    .bottom-sheet-text {
+        font-size: 0.9rem !important;
+    }
+    .play-coinflip-button-sheet, .copy-address-button.ant-btn {
+        height: 46px !important;
+        font-size: 1rem !important;
+    }
 }
-
