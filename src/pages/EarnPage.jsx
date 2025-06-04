@@ -1,6 +1,6 @@
 // File: AR_FRONTEND/src/pages/EarnPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid } from 'antd'; // Added Grid
+import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid, Descriptions } from 'antd'; // Added Descriptions
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import {
     CheckCircleOutlined,
@@ -37,18 +37,18 @@ import {
     USD_DECIMALS,
     waitForTransactionConfirmation,
     REFERRAL_LINK_BASE
-} from '../utils/tonUtils.js'; // Corrected path
+} from '../utils/tonUtils.js';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 
 import './EarnPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
-const { useBreakpoint } = Grid; // Import useBreakpoint
+const { useBreakpoint } = Grid;
 
 const EarnPage = () => {
-    const screens = useBreakpoint(); // Define screens here
-    const isMobile = !screens.md;    // Define isMobile using a suitable breakpoint like md
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
 
     const [stakingConfigData, setStakingConfigData] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(null);
@@ -236,7 +236,7 @@ const EarnPage = () => {
             
             message.loading({ content: 'Transaction sent, awaiting blockchain confirmation...', key: loadingMessageKey, duration: 0 });
             const externalMessageCell = Cell.fromBase64(result.boc);
-            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); // Pass BoC string
+            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); 
 
             if (!txHash) {
                 throw new Error('Failed to confirm stake transaction on blockchain. Please check your wallet activity. If ARIX was deducted without stake appearing, contact support.');
@@ -314,7 +314,7 @@ const EarnPage = () => {
             
             message.loading({ content: 'Unstake transaction sent, awaiting confirmation...', key: loadingMessageKey, duration: 0 });
             const externalMessageCell = Cell.fromBase64(result.boc);
-            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); // Pass BoC string
+            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell.toBoc().toString("base64"), 180000, 5000); 
 
             if (!txHash) {
                 throw new Error('Failed to confirm unstake transaction on blockchain.');
@@ -481,7 +481,7 @@ const EarnPage = () => {
                             Stake {calculatedArixAmount > 0 ? calculatedArixAmount.toFixed(ARIX_DECIMALS) : ''} ARIX
                         </Button>
                     ]}
-                    width={modalWidth} // Use the defined modalWidth
+                    width={modalWidth} 
                 >
                     {selectedPlan && ( 
                         <div className="stake-modal-content">
@@ -562,7 +562,7 @@ const EarnPage = () => {
                     destroyOnClose
                     centered
                     okButtonProps={{ danger: unstakePrepDetails?.isEarly }}
-                    width={modalWidth} // Use the defined modalWidth
+                    width={modalWidth} 
                 >
                     {unstakePrepDetails && selectedStakeForUnstake ? (
                         <div className="unstake-details-modal-content">

@@ -9,7 +9,8 @@ import {
     RiseOutlined,
     CloseOutlined,
     CopyOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    DollarCircleOutlined // Added DollarCircleOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getUserProfile } from '../services/api';
@@ -22,7 +23,6 @@ const ArixPushIcon = () => (
     <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; }} />
 );
 
-// Using the ARIX_TOKEN_MASTER_ADDRESS you provided as the static deposit address
 const PROJECT_ARIX_DEPOSIT_ADDRESS = "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWEK9wfDd";
 
 const PushPage = () => {
@@ -69,17 +69,17 @@ const PushPage = () => {
         setTimeout(() => {
             setShowMainBottomSheet(true);
             setAnimatingWheel(false);
-        }, 1500); // Should match CSS animation duration for lines retracting
+        }, 1500); 
     };
 
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
         setShowMainBottomSheet(false);
         if (!playCoinflip) {
             setAnimatingWheel(true);
-            setIsWheelActive(true); // Trigger animation to show lines
+            setIsWheelActive(true); 
             setTimeout(() => {
                 setAnimatingWheel(false);
-            }, 1500); // Should match CSS animation duration for lines appearing
+            }, 1500); 
         }
     };
 
@@ -98,7 +98,7 @@ const PushPage = () => {
             .catch(err => message.error('Failed to copy address.'));
     };
 
-    const numberOfLines = 60; // For the wheel ridges
+    const numberOfLines = 60; 
 
     return (
         <div className="push-page-container">
@@ -220,7 +220,7 @@ const PushPage = () => {
                 centered
                 destroyOnClose
                 wrapClassName="push-topup-modal-wrapper"
-                width={400} // Set a width for better appearance
+                width={400} 
             >
                 <div className="push-topup-content">
                     <Button
