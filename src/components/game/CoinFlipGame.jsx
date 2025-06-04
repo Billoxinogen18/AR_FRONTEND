@@ -11,16 +11,16 @@ import {
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { placeCoinflipBet } from '../../services/api';
 import {
-    ARIX_DECIMALS,
-    getJettonWalletAddress,
-    getJettonBalance,
-    fromArixSmallestUnits,
-    COINFLIP_HEADS_IMG,
-    COINFLIP_TAILS_IMG,
-    COINFLIP_SPINNING_GIF,
-    COINFLIP_DEFAULT_IMG,
-    FALLBACK_IMAGE_URL
-} from '../../utils/constants';
+    ARIX_DECIMALS, // Now from tonUtils.js
+    getJettonWalletAddress, // Now from tonUtils.js
+    getJettonBalance,       // Now from tonUtils.js
+    fromArixSmallestUnits,  // Now from tonUtils.js
+    COINFLIP_HEADS_IMG,     // Now from tonUtils.js
+    COINFLIP_TAILS_IMG,     // Now from tonUtils.js
+    COINFLIP_SPINNING_GIF,  // Now from tonUtils.js
+    COINFLIP_DEFAULT_IMG,   // Now from tonUtils.js
+    FALLBACK_IMAGE_URL      // Now from tonUtils.js
+} from '../../utils/tonUtils'; // Corrected: All imports from tonUtils.js
 import './CoinFlipGame.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -28,10 +28,10 @@ const { useBreakpoint } = Grid;
 
 const ARIX_JETTON_MASTER_ADDRESS_FOR_GAME = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 
-// ARIX Icon Component (as defined before, or your actual SVG/image component)
 const ArixGameIcon = () => (
-    <img src="/img/arix-diamond.png" alt="ARIX" className="arix-game-icon" onError={(e) => e.currentTarget.style.display='none'} />
+    <img src="/img/arix-diamond.png" alt="ARIX" className="arix-game-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
 );
+
 
 const CoinflipGame = ({ onBack }) => {
     const [betAmount, setBetAmount] = useState(1);
@@ -125,7 +125,6 @@ const CoinflipGame = ({ onBack }) => {
                 };
                 setGameResult(newResult);
 
-                // Update balance based on backend response if available, otherwise refetch
                 if (response.data.newClaimableArixRewards !== undefined) {
                     setArixGameBalance(parseFloat(response.data.newClaimableArixRewards));
                 } else {
@@ -161,7 +160,7 @@ const CoinflipGame = ({ onBack }) => {
     const handleBetAmountChange = (value) => {
         const newBet = parseFloat(value);
         if (isNaN(newBet)) {
-            setBetAmount(0); // Or keep previous valid if preferred
+            setBetAmount(0);
         } else if (newBet < 0.1 && newBet !== 0) {
             setBetAmount(0.1);
         } else {
@@ -246,7 +245,7 @@ const CoinflipGame = ({ onBack }) => {
                             onChange={handleBetAmountChange}
                             min={0.1}
                             step={0.1}
-                            precision={ARIX_DECIMALS}
+                            precision={ARIX_DECIMALS > 2 ? 2 : ARIX_DECIMALS}
                             disabled={isFlipping || !userFriendlyAddress}
                             controls={false}
                             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
@@ -293,4 +292,3 @@ const CoinflipGame = ({ onBack }) => {
 };
 
 export default CoinflipGame;
-
