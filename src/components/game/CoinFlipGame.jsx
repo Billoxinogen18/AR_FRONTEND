@@ -5,22 +5,22 @@ import {
     ArrowLeftOutlined,
     InfoCircleOutlined,
     SoundOutlined,
-    SoundMutedOutlined,
+    AudioMutedOutlined, // Corrected: Using AudioMutedOutlined instead of SoundMutedOutlined
     CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { placeCoinflipBet } from '../../services/api';
 import {
-    ARIX_DECIMALS, // Now from tonUtils.js
-    getJettonWalletAddress, // Now from tonUtils.js
-    getJettonBalance,       // Now from tonUtils.js
-    fromArixSmallestUnits,  // Now from tonUtils.js
-    COINFLIP_HEADS_IMG,     // Now from tonUtils.js
-    COINFLIP_TAILS_IMG,     // Now from tonUtils.js
-    COINFLIP_SPINNING_GIF,  // Now from tonUtils.js
-    COINFLIP_DEFAULT_IMG,   // Now from tonUtils.js
-    FALLBACK_IMAGE_URL      // Now from tonUtils.js
-} from '../../utils/tonUtils'; // Corrected: All imports from tonUtils.js
+    ARIX_DECIMALS,
+    getJettonWalletAddress,
+    getJettonBalance,
+    fromArixSmallestUnits,
+    COINFLIP_HEADS_IMG,
+    COINFLIP_TAILS_IMG,
+    COINFLIP_SPINNING_GIF,
+    COINFLIP_DEFAULT_IMG,
+    FALLBACK_IMAGE_URL
+} from '../../utils/tonUtils';
 import './CoinFlipGame.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -31,7 +31,6 @@ const ARIX_JETTON_MASTER_ADDRESS_FOR_GAME = import.meta.env.VITE_ARIX_TOKEN_MAST
 const ArixGameIcon = () => (
     <img src="/img/arix-diamond.png" alt="ARIX" className="arix-game-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
 );
-
 
 const CoinflipGame = ({ onBack }) => {
     const [betAmount, setBetAmount] = useState(1);
@@ -196,7 +195,7 @@ const CoinflipGame = ({ onBack }) => {
                     <Title level={4} className="cf-game-title">COINFLIP</Title>
                     <Button
                         type="text"
-                        icon={isSoundOn ? <SoundOutlined /> : <SoundMutedOutlined />}
+                        icon={isSoundOn ? <SoundOutlined /> : <AudioMutedOutlined />} {/* Corrected Icon */}
                         onClick={() => setIsSoundOn(!isSoundOn)}
                         className="cf-sound-button"
                         aria-label={isSoundOn ? "Mute Sound" : "Unmute Sound"}
