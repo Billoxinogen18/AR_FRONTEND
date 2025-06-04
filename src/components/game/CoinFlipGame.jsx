@@ -1,26 +1,25 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { InputNumber, Button, Typography, Radio, Spin, message, Alert, Tooltip, Grid } from 'antd';
 import {
     ArrowLeftOutlined,
     InfoCircleOutlined,
     SoundOutlined,
-    AudioMutedOutlined, 
+    AudioMutedOutlined,
     CheckCircleOutlined,
 } from '@ant-design/icons';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { placeCoinflipBet } from '../../services/api';
 import {
     ARIX_DECIMALS,
-    getJettonWalletAddress, 
-    getJettonBalance,       
-    fromArixSmallestUnits,  
-    COINFLIP_HEADS_IMG,     
-    COINFLIP_TAILS_IMG,     
-    COINFLIP_SPINNING_GIF,  
-    COINFLIP_DEFAULT_IMG,   
-    FALLBACK_IMAGE_URL      
-} from '../../utils/tonUtils'; 
+    getJettonWalletAddress,
+    getJettonBalance,
+    fromArixSmallestUnits,
+    COINFLIP_HEADS_IMG,
+    COINFLIP_TAILS_IMG,
+    COINFLIP_SPINNING_GIF,
+    COINFLIP_DEFAULT_IMG,
+    FALLBACK_IMAGE_URL
+} from '../../utils/tonUtils';
 import './CoinFlipGame.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -28,16 +27,16 @@ const { useBreakpoint } = Grid;
 
 const ARIX_JETTON_MASTER_ADDRESS_FOR_GAME = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 
-const ArixGameIcon = () => (
-    <img src="/img/coin_spinning.gif" alt="ARIX" className="arix-game-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
+const ArixGameIcon = ({ className }) => (
+    <img src="/img/coin_spinning.gif" alt="ARIX" className={`arx-icon ${className || ''}`} onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; e.currentTarget.alt="ARIX Icon";}} />
 );
 
 const CoinflipGame = ({ onBack }) => {
     const [betAmount, setBetAmount] = useState(1);
     const [choice, setChoice] = useState('heads');
     const [isFlipping, setIsFlipping] = useState(false);
-    const [gameResult, setGameResult] = useState(null); 
-    
+    const [gameResult, setGameResult] = useState(null);
+
     const userFriendlyAddress = useTonAddress();
     const rawAddress = useTonAddress(false);
     const [tonConnectUI] = useTonConnectUI();
@@ -74,60 +73,54 @@ const CoinflipGame = ({ onBack }) => {
 
     useEffect(() => {
         if (userFriendlyAddress) {
-            fetchArixGameBalance(false); 
+            fetchArixGameBalance(false);
         } else {
-            setArixGameBalance(0); 
+            setArixGameBalance(0);
         }
     }, [userFriendlyAddress, fetchArixGameBalance]);
 
-    useEffect(() => { 
-        [COINFLIP_HEADS_IMG, COINFLIP_TAILS_IMG, COINFLIP_SPINNING_GIF, COINFLIP_DEFAULT_IMG].forEach(src => {
-            if (src && src.startsWith('/')) { 
+    useEffect(() => {
+        [COINFLIP_HEADS_IMG, COINFLIP_TAILS_IMG, COINFLIP_SPINNING_GIF, COINFLIP_DEFAULT_IMG, FALLBACK_IMAGE_URL, "/img/arix-logo-header.png", "/img/coin_spinning.gif"].forEach(src => {
+            if (src && typeof src === 'string' && src.startsWith('/')) {
                 const img = new Image();
-                img.src = src;
+                img.src = window.location.origin + src;
             }
         });
     }, []);
 
     const handlePlaceBet = async () => {
         if (!rawAddress) {
-            message.warn({ content: "Please connect your wallet to play.", className: 'game-message-popup warning-popup' });
+            message.warn({ content: "Please connect your wallet to play.", className: 'cf-game-message-popup cf-warning-popup' });
             tonConnectUI.openModal(); return;
         }
         if (betAmount <= 0) {
-            message.error({ content: "Bet amount must be greater than 0 ARIX.", className: 'game-message-popup error-popup' }); return;
+            message.error({ content: "Bet amount must be greater than 0 ARIX.", className: 'cf-game-message-popup cf-error-popup' }); return;
         }
         if (betAmount > arixGameBalance) {
-            message.error({
-                content: `Incorrect bet: You don't have enough ARIX. Balance: ${arixGameBalance.toFixed(ARIX_DECIMALS)} ARIX.`,
-                className: 'game-message-popup error-popup',
-                icon: <InfoCircleOutlined style={{ color: '#F44336' }}/>,
-                duration: 4,
-            });
             return;
         }
 
-        setIsFlipping(true); 
-        setGameResult(null); 
-        
+        setIsFlipping(true);
+        setGameResult(null);
+
         setTimeout(async () => {
             try {
-                const response = await placeCoinflipBet({ 
-                    userWalletAddress: rawAddress, betAmountArix: betAmount, choice 
+                const response = await placeCoinflipBet({
+                    userWalletAddress: rawAddress, betAmountArix: betAmount, choice
                 });
-                
+
                 const newResult = {
-                    outcome: response.data.outcome, 
+                    outcome: response.data.outcome,
                     serverCoinSide: response.data.server_coin_side,
-                    amountDeltaArix: parseFloat(response.data.amount_delta_arix), 
+                    amountDeltaArix: parseFloat(response.data.amount_delta_arix),
                     yourChoice: choice,
                 };
                 setGameResult(newResult);
-                
+
                 if (response.data.newClaimableArixRewards !== undefined) {
                     setArixGameBalance(parseFloat(response.data.newClaimableArixRewards));
                 } else {
-                    fetchArixGameBalance(false); 
+                    fetchArixGameBalance(false);
                 }
 
             } catch (error) {
@@ -135,15 +128,14 @@ const CoinflipGame = ({ onBack }) => {
                 const errorMessage = error?.response?.data?.message || "Failed to place bet. Please try again.";
                 message.error({
                     content: errorMessage,
-                    className: 'game-message-popup error-popup',
-                    icon: <InfoCircleOutlined style={{ color: '#F44336' }} />,
+                    className: 'cf-game-message-popup cf-error-popup',
                     duration: 4,
                 });
                 setGameResult({ error: true, message: errorMessage, outcome: 'error', serverCoinSide: choice, amountDeltaArix: 0, yourChoice: choice });
-            } finally { 
-                setIsFlipping(false); 
+            } finally {
+                setIsFlipping(false);
             }
-        }, 1800); 
+        }, 1800);
     };
 
     const getCoinImageSrc = () => {
@@ -151,137 +143,165 @@ const CoinflipGame = ({ onBack }) => {
         if (gameResult && !gameResult.error && gameResult.serverCoinSide) {
             return gameResult.serverCoinSide === 'heads' ? COINFLIP_HEADS_IMG : COINFLIP_TAILS_IMG;
         }
-        return COINFLIP_DEFAULT_IMG; 
+        return COINFLIP_DEFAULT_IMG;
     };
 
-    const potentialWinAmount = betAmount * 2; 
+    const potentialWinAmount = betAmount * 2;
 
     const handleBetAmountChange = (value) => {
         const newBet = parseFloat(value);
-        if (isNaN(newBet)) {
+        if (value === null || isNaN(newBet)) {
             setBetAmount(0);
-        } else if (newBet < 0.1 && newBet !== 0) { 
-            setBetAmount(0.1);
+        } else if (newBet < 0.1 && newBet !== 0) {
+             setBetAmount(0.1);
         } else {
             setBetAmount(newBet);
         }
     };
-    
+
     const getResultBannerClass = () => {
         if (!gameResult || isFlipping) return 'cf-result-banner hidden';
         if (gameResult.error) return 'cf-result-banner error active';
         return `cf-result-banner ${gameResult.outcome} active`;
     };
+    
+    let flipButtonText = "FLIP COIN";
+    let isFlipButtonDisabled = isFlipping || !userFriendlyAddress || betAmount <= 0 || betAmount > arixGameBalance;
+
+    if (!userFriendlyAddress) {
+        flipButtonText = "Connect Wallet";
+    } else if (betAmount <= 0 && userFriendlyAddress) {
+        flipButtonText = "Enter Bet Amount";
+    }
+     else if (betAmount > arixGameBalance && userFriendlyAddress) {
+        flipButtonText = "INSUFFICIENT ARIX";
+    } else if (isFlipping) {
+        flipButtonText = "FLIPPING...";
+    }
+
+    const showInsufficientBalanceAlert = userFriendlyAddress && betAmount > 0 && betAmount > arixGameBalance;
 
     return (
-        <div className="coinflip-game-page">
-            <div className="coinflip-game-header">
-                <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} className="cf-back-button" aria-label="Go Back"/>
-                <div className="cf-game-logo-title">
-                    <img src="/img/arix-logo-header.png" alt="ARIX" className="cf-header-logo" onError={(e) => e.currentTarget.style.display='none'}/>
-                    <Text className="cf-header-terminal-text">TERMINAL</Text>
+        <div className="cf-page-wrapper">
+            <div className="cf-header">
+                <Button type="text" icon={<ArrowLeftOutlined />} onClick={onBack} className="cf-header-back-button" aria-label="Go Back"/>
+                <div className="cf-header-logo-title">
+                    <img src="/img/arix-logo-header.png" alt="ARIX" className="cf-header-app-logo" onError={(e) => e.currentTarget.style.display='none'}/>
+                    <Text className="cf-header-app-name">TERMINAL</Text>
                 </div>
-                <div className="cf-balance-display">
-                    <ArixGameIcon /> 
-                    <Text className="cf-balance-text">{balanceLoading ? <Spin size="small" className="cf-balance-spin"/> : arixGameBalance.toFixed(2)}</Text>
+                <div className="cf-header-balance">
+                    <ArixGameIcon className="cf-balance-icon" />
+                    <Text className="cf-balance-value">{balanceLoading ? <Spin size="small" /> : arixGameBalance.toFixed(2)}</Text>
+                    <Text className="cf-balance-currency">ARIX</Text>
                 </div>
             </div>
 
-            <div className="coinflip-main-content-area">
-                <div className="cf-top-bar">
-                    <Tooltip title="Game Info: Choose Heads or Tails. If your choice matches the coin flip, you win double your bet amount in ARIX.">
-                        <Button type="text" icon={<InfoCircleOutlined />} className="cf-info-button" aria-label="Game Info"/>
-                    </Tooltip>
-                    <Title level={4} className="cf-game-title">COINFLIP</Title>
-                    <Button 
-                        type="text" 
-                        icon={isSoundOn ? <SoundOutlined /> : <AudioMutedOutlined />}
-                        onClick={() => setIsSoundOn(!isSoundOn)} 
-                        className="cf-sound-button"
-                        aria-label={isSoundOn ? "Mute Sound" : "Unmute Sound"}
-                    />
-                </div>
-                <Paragraph className="cf-game-subtitle">Flip the coin and start the story</Paragraph>
-
-                <div className="cf-coin-animation-area">
-                    <div className="cf-stat-display left">
-                        <Text className="cf-stat-label">STREAK</Text>
-                        <Text className="cf-stat-value">0</Text>
+            <div className="cf-game-content">
+                <div className="cf-title-section">
+                    <Text className="cf-last-flips">LAST FLIPS</Text>
+                    <Title level={4} className="cf-game-title-main">COIN FLIP</Title>
+                    <div className="cf-game-actions">
+                        <Tooltip title="Game Info: Choose Heads or Tails. If your choice matches the coin flip, you win double your bet amount in ARIX.">
+                            <Button type="text" icon={<InfoCircleOutlined />} className="cf-action-icon" aria-label="Game Info"/>
+                        </Tooltip>
+                        <Button
+                            type="text"
+                            icon={isSoundOn ? <SoundOutlined /> : <AudioMutedOutlined />}
+                            onClick={() => setIsSoundOn(!isSoundOn)}
+                            className="cf-action-icon"
+                            aria-label={isSoundOn ? "Mute Sound" : "Unmute Sound"}
+                        />
                     </div>
-                    <div className={`cf-coin-visual-wrapper ${isFlipping ? 'flipping' : ''}`}>
-                        <img 
-                            src={getCoinImageSrc()} 
+                </div>
+                <Paragraph className="cf-subtitle">Flip the coin and start the story</Paragraph>
+
+                <div className="cf-stats-and-coin-area">
+                    <div className="cf-stat left">
+                        <Text className="cf-stat-value">0</Text>
+                        <Text className="cf-stat-label">STREAK</Text>
+                    </div>
+                    <div className={`cf-coin-display-wrapper ${isFlipping ? 'flipping' : ''}`}>
+                        <img
+                            src={getCoinImageSrc()}
                             alt={isFlipping ? "Coin Spinning" : (gameResult?.serverCoinSide || "ARIX Coin")}
-                            className="cf-coin-image" 
+                            className="cf-coin-image-main"
                             onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; }}
                         />
                     </div>
-                    <div className="cf-stat-display right">
+                    <div className="cf-stat right">
+                        <Text className="cf-stat-value">x2</Text>
                         <Text className="cf-stat-label">MULTIPLIER</Text>
-                        <Text className="cf-stat-value">x1</Text>
                     </div>
                 </div>
-                
+
                 <div className={getResultBannerClass()}>
                     <Text strong className="cf-result-banner-title">
                         {gameResult?.error ? "Error!" : (gameResult?.outcome === 'win' ? "YOU WON!" : "TRY AGAIN!")}
                     </Text>
                     <Text className="cf-result-banner-details">
                         {gameResult?.error ? gameResult.message :
-                        `Coin: ${gameResult?.serverCoinSide?.toUpperCase()}. You chose ${gameResult?.yourChoice?.toUpperCase()}. 
-                        ${gameResult?.outcome === 'win' ? `+${gameResult?.amountDeltaArix?.toFixed(ARIX_DECIMALS)}` : `-${Math.abs(gameResult?.amountDeltaArix || 0).toFixed(ARIX_DECIMALS)}`} ARIX.`}
+                        `Coin: ${(gameResult?.serverCoinSide || 'N/A').toUpperCase()}. You chose ${(gameResult?.yourChoice || 'N/A').toUpperCase()}.
+                        ${gameResult?.outcome === 'win' ? `+${(gameResult?.amountDeltaArix || 0).toFixed(ARIX_DECIMALS)}` : `-${Math.abs(gameResult?.amountDeltaArix || 0).toFixed(ARIX_DECIMALS)}`} ARIX.`}
                     </Text>
                 </div>
 
-
-                <div className="cf-bet-controls">
-                    <Text className="cf-bet-label">BET AMOUNT (ARIX)</Text>
-                    <div className="cf-bet-input-wrapper">
-                        <ArixGameIcon />
+                <div className="cf-bet-area">
+                    <Text className="cf-bet-area-label">BET AMOUNT</Text>
+                    <div className="cf-bet-input-container">
+                        <ArixGameIcon className="cf-bet-input-icon"/>
                         <InputNumber
-                            className="cf-bet-input"
+                            className="cf-bet-input-field"
                             value={betAmount}
                             onChange={handleBetAmountChange}
-                            min={0.1} 
+                            min={0}
                             step={0.1}
                             precision={ARIX_DECIMALS > 2 ? 2 : ARIX_DECIMALS}
                             disabled={isFlipping || !userFriendlyAddress}
                             controls={false}
                             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value ? value.toString().replace(/[^0-9.]/g, '') : "0"}
+                            parser={(value) => value ? value.replace(/[^0-9.]/g, '') : "0"}
                             aria-label="Bet amount in ARIX"
                         />
+                        <Text className="cf-bet-input-currency">ARIX</Text>
                     </div>
-                     <Button 
-                        type="primary" 
-                        className="cf-flip-button" 
+                     <Button
+                        type="primary"
+                        className="cf-flip-action-button"
                         onClick={handlePlaceBet}
                         loading={isFlipping}
-                        disabled={isFlipping || !userFriendlyAddress || betAmount <= 0 || betAmount > arixGameBalance}
+                        disabled={isFlipButtonDisabled}
                     >
-                        {isFlipping ? "FLIPPING..." : (userFriendlyAddress ? "FLIP COIN" : "Connect Wallet")}
+                        {flipButtonText}
                     </Button>
+                    {showInsufficientBalanceAlert &&
+                        <Alert
+                            message="You don't have enough ARIX"
+                            type="error"
+                            showIcon
+                            className="cf-insufficient-balance-alert"
+                        />
+                    }
                 </div>
-                
-                <div className="cf-choice-selection">
-                    <Paragraph className="cf-choose-side-text">
-                        <CheckCircleOutlined style={{marginRight: 6}} /> Choose a side to win {potentialWinAmount.toFixed(ARIX_DECIMALS)} ARIX
+
+                <div className="cf-choice-area">
+                    <Paragraph className="cf-choose-side-prompt">
+                        <CheckCircleOutlined /> Choose a side to win {potentialWinAmount.toFixed(ARIX_DECIMALS)} ARIX
                     </Paragraph>
-                    <Radio.Group 
-                        onChange={(e) => setChoice(e.target.value)} 
-                        value={choice} 
+                    <Radio.Group
+                        onChange={(e) => setChoice(e.target.value)}
+                        value={choice}
                         buttonStyle="solid"
                         disabled={isFlipping || !userFriendlyAddress}
-                        className="cf-choice-radio-group"
+                        className="cf-choice-buttons-group"
                         aria-label="Choose Heads or Tails"
                     >
-                        <Radio.Button value="heads" className="cf-choice-button heads" aria-label="Select Heads">
-                            <img src={COINFLIP_HEADS_IMG} alt="Heads" className="cf-choice-button-icon" onError={(e) => e.currentTarget.style.display='none'}/>
-                            HEADS
+                        <Radio.Button value="heads" className="cf-choice-button-styled heads" aria-label="Select Heads">
+                            <img src={COINFLIP_HEADS_IMG} alt="Heads" className="cf-choice-img-icon" onError={(e) => e.currentTarget.style.display='none'}/>
+                            <Text>Heads</Text>
                         </Radio.Button>
-                        <Radio.Button value="tails" className="cf-choice-button tails" aria-label="Select Tails">
-                             <img src={COINFLIP_TAILS_IMG} alt="Tails" className="cf-choice-button-icon" onError={(e) => e.currentTarget.style.display='none'}/>
-                            TAILS
+                        <Radio.Button value="tails" className="cf-choice-button-styled tails" aria-label="Select Tails">
+                             <img src={COINFLIP_TAILS_IMG} alt="Tails" className="cf-choice-img-icon" onError={(e) => e.currentTarget.style.display='none'}/>
+                            <Text>Tails</Text>
                         </Radio.Button>
                     </Radio.Group>
                 </div>
