@@ -27,11 +27,9 @@ const PushPage = () => {
     const navigate = useNavigate();
     const rawAddress = useTonAddress(false);
 
-    const [isWheelIdleScanning, setIsWheelIdleScanning] = useState(true); // For initial scanning
-    const [isWheelFilling, setIsWheelFilling] = useState(false); // For the fill animation on click
-    const [areAllTicksLit, setAreAllTicksLit] = useState(false); // After fill or direct from screenshot state
+    const [wheelState, setWheelState] = useState('IDLE_LIT');
     const [showMainBottomSheet, setShowMainBottomSheet] = useState(false);
-    const [animatingWheelCenter, setAnimatingWheelCenter] = useState(false); // For center disc pulse
+    const [animatingWheelCenter, setAnimatingWheelCenter] = useState(false);
 
     const [showTopUpModal, setShowTopUpModal] = useState(false);
     const [showCashoutModal, setShowCashoutModal] = useState(false);
@@ -39,8 +37,8 @@ const PushPage = () => {
     const [claimableArix, setClaimableArix] = useState('0');
     const [loadingBalance, setLoadingBalance] = useState(false);
 
-    const numberOfLines = 72; // Increased density, matches CSS variable
-    const fillAnimationDuration = 1200; // ms, matches CSS
+    const numberOfLines = 72;
+    const transitionAnimationDuration = 1200;
 
     const fetchUserArixBalance = useCallback(async () => {
         if (rawAddress) {
@@ -64,36 +62,34 @@ const PushPage = () => {
     }, [fetchUserArixBalance]);
 
     const handleWheelPress = () => {
-        if (isWheelFilling || animatingWheelCenter) return;
+        if (wheelState === 'IDLE_LIT') {
+            setWheelState('UNFILLING');
+            setAnimatingWheelCenter(true);
 
-        setIsWheelIdleScanning(false); // Stop idle scan
-        setIsWheelFilling(true);       // Start fill animation
-        setAnimatingWheelCenter(true); // Pulse center
-
-        // After the fill animation duration, all ticks should be lit
-        setTimeout(() => {
-            setIsWheelFilling(false);
-            setAreAllTicksLit(true);
-            setAnimatingWheelCenter(false); // End pulse
-            setShowMainBottomSheet(true);
-        }, fillAnimationDuration);
+            setTimeout(() => {
+                setWheelState('IDLE_DIM');
+                setAnimatingWheelCenter(false);
+                setShowMainBottomSheet(true);
+            }, transitionAnimationDuration);
+        }
     };
 
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
         setShowMainBottomSheet(false);
-        // When modal closes, keep all ticks lit (matching screenshot behavior after interaction)
-        setIsWheelIdleScanning(false);
-        setIsWheelFilling(false);
-        setAreAllTicksLit(true);
+        if (wheelState === 'IDLE_DIM') {
+            setWheelState('REFILLING');
+            setAnimatingWheelCenter(true);
 
-        if (playCoinflip) {
-            // Reset to idle if navigating away and component might unmount/remount
+            setTimeout(() => {
+                setWheelState('IDLE_LIT');
+                setAnimatingWheelCenter(false);
+                if (playCoinflip) {
+                    navigate('/game');
+                }
+            }, transitionAnimationDuration);
+        } else if (playCoinflip) {
+             navigate('/game');
         }
-    };
-
-    const handlePlayCoinflipFromSheet = () => {
-        handleCloseMainBottomSheet(true);
-        navigate('/game');
     };
 
     const copyToClipboard = (textToCopy) => {
@@ -111,15 +107,14 @@ const PushPage = () => {
 
     let wheelContainerClasses = "push-wheel-container";
     if (animatingWheelCenter) wheelContainerClasses += " animating-center-pulse";
-    if (isWheelIdleScanning) wheelContainerClasses += " idle-scanning";
-    if (isWheelFilling) wheelContainerClasses += " filling-active";
-    if (areAllTicksLit) wheelContainerClasses += " all-ticks-lit-final";
+    
+    wheelContainerClasses += ` state-${wheelState.toLowerCase()}`;
 
 
     return (
         <div className="push-page-container" style={{
             '--number-of-lines': numberOfLines,
-            '--fill-animation-duration': `${fillAnimationDuration}ms`
+            '--transition-animation-duration': `${transitionAnimationDuration}ms`
          }}>
             <div className="push-balance-section">
                 <div className="balance-info-box">
@@ -228,7 +223,7 @@ const PushPage = () => {
                     <Paragraph className="bottom-sheet-text coinflip-prompt">
                         In the meantime, try your luck in Coinflip! Can you turn your ARIX bet into x256?
                     </Paragraph>
-                    <Button type="primary" size="large" block className="play-coinflip-button-sheet" onClick={handlePlayCoinflipFromSheet}>
+                    <Button type="primary" size="large" block className="play-coinflip-button-sheet" onClick={() => handleCloseMainBottomSheet(true)}>
                         Play Coinflip!
                     </Button>
                 </div>
