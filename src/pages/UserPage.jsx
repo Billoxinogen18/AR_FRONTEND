@@ -1,39 +1,26 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Tabs, message, Spin, Button, Grid, Card, Modal, Alert, Empty, Select, Divider } from 'antd';
+import { Typography, Tabs, message, Spin, Button, Grid, Card, Modal, Alert, Empty, Select, Divider, Row, Col, Descriptions, List, Tooltip, Radio, Statistic as AntdStatistic } from 'antd';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { useNavigate } from 'react-router-dom';
 import {
-    UserOutlined,
-    WalletOutlined,
-    LinkOutlined,
-    HistoryOutlined,
-    ExperimentOutlined,
-    
-    
-    
-    InteractionOutlined 
+    UserOutlined, WalletOutlined, LinkOutlined, HistoryOutlined, ExperimentOutlined, RedoOutlined,
+    ArrowDownOutlined, ArrowUpOutlined, CopyOutlined, ShareAltOutlined, UsergroupAddOutlined,
+    DollarCircleOutlined, RiseOutlined, SettingOutlined, GlobalOutlined, SoundOutlined,
+    TeamOutlined, InfoCircleOutlined, LogoutOutlined, PaperClipOutlined, SendOutlined as InviteIcon, UserSwitchOutlined
 } from '@ant-design/icons';
 
 import UserProfileCard from '../components/user/UserProfileCard';
 import TransactionList, { renderStakeHistoryItem, renderCoinflipHistoryItem } from '../components/user/TransactionList';
 import {
-    getUserProfile,
-    getUserStakesAndRewards,
-    getCoinflipHistoryForUser,
-    getUserReferralData,
-    initiateArixUnstake,
-    confirmArixUnstake
+    getUserProfile, getUserStakesAndRewards, getCoinflipHistoryForUser, getUserReferralData,
+    getReferralProgramDetails, initiateArixUnstake, confirmArixUnstake
 } from '../services/api';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
-
 import { toNano, Cell } from '@ton/core';
-import { waitForTransactionConfirmation } from '../utils/tonUtils';
-
-import './UserPage.css';
+import { waitForTransactionConfirmation, REFERRAL_LINK_BASE, USDT_DECIMALS, ARIX_DECIMALS } from '../utils/tonUtils';
+import './UserPage.css'; // Ensure this is imported
 
 const { Title, Text, Paragraph } = Typography;
-
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 
@@ -44,17 +31,21 @@ const UserPage = () => {
     const navigate = useNavigate();
 
     const [userProfile, setUserProfile] = useState(null);
-    const [referralDashboardData, setReferralDashboardData] = useState(null);
+    const [referralData, setReferralData] = useState(null); // Merged from ReferralPage
+    const [programDetails, setProgramDetails] = useState({ message: '', plans: [] }); // Merged
     const [stakesAndRewards, setStakesAndRewards] = useState({ stakes: [], totalClaimableUsdt: '0.00', totalClaimableArix: '0.00' });
     const [coinflipHistory, setCoinflipHistory] = useState([]);
 
     const [loadingProfile, setLoadingProfile] = useState(true);
-    const [loadingReferral, setLoadingReferral] = useState(true);
+    const [loadingReferral, setLoadingReferral] = useState(true); // Was loadingData
+    const [loadingProgramDetails, setLoadingProgramDetails] = useState(true); // Was loadingDetails
     const [loadingStakes, setLoadingStakes] = useState(true);
     const [loadingGames, setLoadingGames] = useState(true);
 
-    const [activeTabKey, setActiveTabKey] = useState('stakes');
+    const [activeTabKey, setActiveTabKey] = useState('referral_stats');
     const [currentArxPrice, setCurrentArxPrice] = useState(null);
+    const [claimableArixPageBalance, setClaimableArixPageBalance] = useState('0'); // For page header
+    const [loadingArixPageBalance, setLoadingArixPageBalance] = useState(false); // For page header
 
     const [isUnstakeModalVisible, setIsUnstakeModalVisible] = useState(false);
     const [selectedStakeForUnstake, setSelectedStakeForUnstake] = useState(null);
@@ -62,24 +53,43 @@ const UserPage = () => {
     const [isUnstakeActionLoading, setIsUnstakeActionLoading] = useState(false);
     const [stakeToSelectForUnstakeId, setStakeToSelectForUnstakeId] = useState(undefined);
 
+    const [language, setLanguage] = useState('en');
+    const [colorTheme, setColorTheme] = useState('terminal');
+    const [sound, setSound] = useState('on');
 
     const screens = useBreakpoint();
     const isMobile = !screens.md;
 
+    const fetchPageArixBalance = useCallback(async () => {
+         if (rawAddress) {
+            setLoadingArixPageBalance(true);
+            try {
+                const profileRes = await getUserProfile(rawAddress);
+                setClaimableArixPageBalance(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
+            } catch (error) {
+                // console.error("Error fetching ARIX balance for User Page header:", error);
+            } finally {
+                setLoadingArixPageBalance(false);
+            }
+        } else {
+            setClaimableArixPageBalance('0');
+        }
+    },[rawAddress]);
+
     const fetchAllUserData = useCallback(async (showMessages = false) => {
         if (!rawAddress) {
-            setUserProfile(null);
-            setReferralDashboardData(null);
+            setUserProfile(null); setReferralData(null); setProgramDetails({ message: '', plans: [] });
             setStakesAndRewards({ stakes: [], totalClaimableUsdt: '0.00', totalClaimableArix: '0.00' });
-            setCoinflipHistory([]);
-            setCurrentArxPrice(null);
-            setLoadingProfile(false); setLoadingReferral(false); setLoadingStakes(false); setLoadingGames(false);
+            setCoinflipHistory([]); setCurrentArxPrice(null);
+            setLoadingProfile(false); setLoadingReferral(false); setLoadingProgramDetails(false);
+            setLoadingStakes(false); setLoadingGames(false);
             return;
         }
 
-        setLoadingProfile(true); setLoadingReferral(true); setLoadingStakes(true); setLoadingGames(true);
+        setLoadingProfile(true); setLoadingReferral(true); setLoadingProgramDetails(true);
+        setLoadingStakes(true); setLoadingGames(true);
         const loadingKey = 'fetchAllUserDataUserPage';
-        if (showMessages) message.loading({ content: 'Refreshing dashboard data...', key: loadingKey, duration: 0 });
+        if (showMessages) message.loading({ content: 'Refreshing all data...', key: loadingKey, duration: 0 });
 
         try {
             const tgLaunchParams = new URLSearchParams(window.location.search);
@@ -90,17 +100,19 @@ const UserPage = () => {
                 username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username,
                 referrer: refCodeFromUrl
             });
-            const referralPromise = getUserReferralData(rawAddress);
+            const referralPromise = getUserReferralData(rawAddress); // from ReferralPage
+            const programDetailsPromise = getReferralProgramDetails(); // from ReferralPage
             const stakesPromise = getUserStakesAndRewards(rawAddress);
             const gamesPromise = getCoinflipHistoryForUser(rawAddress);
             const pricePromise = getArxUsdtPriceFromBackend();
 
-            const [profileRes, referralRes, stakesRes, gamesRes, priceRes] = await Promise.all([
-                profilePromise, referralPromise, stakesPromise, gamesPromise, pricePromise
+            const [profileRes, referralRes, programRes, stakesRes, gamesRes, priceRes] = await Promise.all([
+                profilePromise, referralPromise, programDetailsPromise, stakesPromise, gamesPromise, pricePromise
             ]);
 
             setUserProfile(profileRes.data);
-            setReferralDashboardData(referralRes.data);
+            setReferralData(referralRes.data);
+            setProgramDetails(programRes.data || { message: 'Details unavailable.', plans: [] });
             setStakesAndRewards({
                 stakes: stakesRes.data?.stakes || [],
                 totalClaimableUsdt: stakesRes.data?.totalClaimableUsdt || '0.00',
@@ -109,31 +121,59 @@ const UserPage = () => {
             setCoinflipHistory(gamesRes.data || []);
             setCurrentArxPrice(priceRes);
 
-            if (showMessages) message.success({ content: "Dashboard data refreshed!", key: loadingKey, duration: 2 });
+            if (showMessages) message.success({ content: "All data refreshed!", key: loadingKey, duration: 2 });
             else message.destroy(loadingKey);
 
         } catch (error) {
-            console.error("Error fetching user dashboard data:", error);
-            if (showMessages) message.error({ content: error?.response?.data?.message || "Failed to refresh some dashboard data.", key: loadingKey, duration: 3 });
+            if (showMessages) message.error({ content: error?.response?.data?.message || "Failed to refresh some data.", key: loadingKey, duration: 3 });
             else message.destroy(loadingKey);
-            if (!userProfile) setUserProfile(null);
-            if (!referralDashboardData) setReferralDashboardData(null);
-            if (!stakesAndRewards.stakes.length) setStakesAndRewards({ stakes: [], totalClaimableUsdt: '0.00', totalClaimableArix: '0.00' });
-            if (!coinflipHistory.length) setCoinflipHistory([]);
-            if (!currentArxPrice) setCurrentArxPrice(null);
         } finally {
-            setLoadingProfile(false); setLoadingReferral(false); setLoadingStakes(false); setLoadingGames(false);
+            setLoadingProfile(false); setLoadingReferral(false); setLoadingProgramDetails(false);
+            setLoadingStakes(false); setLoadingGames(false);
         }
     }, [rawAddress]);
 
     useEffect(() => {
         fetchAllUserData();
-    }, [fetchAllUserData]);
+        fetchPageArixBalance();
+    }, [fetchAllUserData, fetchPageArixBalance]);
 
-    const handleTabChange = (key) => {
-        setActiveTabKey(key);
+    const handleRefreshAllData = () => {
+        fetchAllUserData(true);
+        fetchPageArixBalance();
     };
 
+    const copyReferralLinkToClipboard = (textToCopy, successMessage = 'Referral link copied!') => {
+        if (!textToCopy) {
+            message.error('Nothing to copy.');
+            return;
+        }
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => message.success(successMessage))
+            .catch(err => message.error('Failed to copy.'));
+    };
+
+    const shareUserReferralLink = () => {
+        const linkToShare = referralData?.referralLink || `${REFERRAL_LINK_BASE}?ref=${referralData?.referralCode || rawAddress}`;
+        if (!linkToShare) {
+            message.warn('Referral link not available yet.');
+            return;
+        }
+        if (navigator.share) {
+            navigator.share({
+                title: 'Join ARIX Terminal!',
+                text: `Join me on ARIX Terminal to stake ARIX, earn USDT rewards, and play games! Use my referral link: ${linkToShare}`,
+                url: linkToShare,
+            }).catch(() => copyReferralLinkToClipboard(linkToShare, 'Link copied for manual sharing.'));
+        } else {
+            copyReferralLinkToClipboard(linkToShare, 'Referral link copied! Share it with your friends.');
+        }
+    };
+
+    const referralLinkToDisplay = referralData?.referralLink || (referralData?.referralCode ? `${REFERRAL_LINK_BASE}?ref=${referralData.referralCode}` : (rawAddress ? `${REFERRAL_LINK_BASE}?ref=${rawAddress}` : ''));
+    const referralCodeForBoxes = (referralData?.referralCode || rawAddress || "--------").slice(-8).toUpperCase();
+
+    const handleTabChange = (key) => setActiveTabKey(key);
     const activeUserStakes = stakesAndRewards.stakes.filter(s => s.status === 'active');
 
     const initiateUnstakeProcessFromCardOrList = (stakeToUnstake = null) => {
@@ -141,37 +181,24 @@ const UserPage = () => {
             message.info("You have no active stakes to unstake.");
             return;
         }
-        if (stakeToUnstake) {
-            prepareForUnstakeModal(stakeToUnstake);
-        } else {
-            if (activeUserStakes.length === 1) {
-                prepareForUnstakeModal(activeUserStakes[0]);
-            } else {
-                setSelectedStakeForUnstake(null);
-                setStakeToSelectForUnstakeId(undefined);
-                setUnstakePrepDetails(null);
-                setIsUnstakeModalVisible(true);
-            }
+        if (stakeToUnstake) prepareForUnstakeModal(stakeToUnstake);
+        else if (activeUserStakes.length === 1) prepareForUnstakeModal(activeUserStakes[0]);
+        else {
+            setSelectedStakeForUnstake(null); setStakeToSelectForUnstakeId(undefined);
+            setUnstakePrepDetails(null); setIsUnstakeModalVisible(true);
         }
     };
 
     const prepareForUnstakeModal = async (stake) => {
-        if (!rawAddress || !stake) {
-            message.error("User or stake information is missing for unstake preparation.");
-            return;
-        }
-        setSelectedStakeForUnstake(stake);
-        setIsUnstakeActionLoading(true);
-        const prepKey = 'unstakePrepUserPage';
-        message.loading({ content: 'Preparing unstake information...', key: prepKey, duration: 0 });
+        if (!rawAddress || !stake) return;
+        setSelectedStakeForUnstake(stake); setIsUnstakeActionLoading(true);
+        message.loading({ content: 'Preparing unstake...', key: 'prepUnstakeUser', duration: 0 });
         try {
             const response = await initiateArixUnstake({ userWalletAddress: rawAddress, stakeId: stake.id });
-            setUnstakePrepDetails(response.data);
-            setIsUnstakeModalVisible(true);
-            message.destroy(prepKey);
+            setUnstakePrepDetails(response.data); setIsUnstakeModalVisible(true);
+            message.destroy('prepUnstakeUser');
         } catch (error) {
-            message.error({ content: error?.response?.data?.message || "Failed to prepare unstake.", key: prepKey, duration: 3 });
-            console.error("Prepare unstake error:", error);
+            message.error({ content: error?.response?.data?.message || "Failed to prepare unstake.", key: 'prepUnstakeUser', duration: 3 });
             setSelectedStakeForUnstake(null);
         } finally {
             setIsUnstakeActionLoading(false);
@@ -180,204 +207,282 @@ const UserPage = () => {
 
     const handleModalUnstakeSelectionChange = (stakeId) => {
         const stake = activeUserStakes.find(s => s.id === stakeId);
-        if (stake) {
-            setStakeToSelectForUnstakeId(stakeId);
-            prepareForUnstakeModal(stake);
-        }
+        if (stake) { setStakeToSelectForUnstakeId(stakeId); prepareForUnstakeModal(stake); }
     };
 
     const handleConfirmUnstakeInModal = async () => {
-        if (!rawAddress || !selectedStakeForUnstake || !unstakePrepDetails || !tonConnectUI) {
-            message.error("Missing critical information for unstake operation. Please select a stake if prompted.");
-            return;
-        }
+        if (!rawAddress || !selectedStakeForUnstake || !unstakePrepDetails || !tonConnectUI) return;
         setIsUnstakeActionLoading(true);
-        const loadingMessageKey = 'unstakeConfirmActionUserPage';
-        message.loading({ content: 'Please confirm ARIX unstake in your wallet...', key: loadingMessageKey, duration: 0 });
-
+        message.loading({ content: 'Confirming unstake in wallet...', key: 'confirmUnstakeUser', duration: 0 });
         try {
-            const scStakeIdentifierToWithdraw = selectedStakeForUnstake.id
-                .replace(/-/g, '').substring(0, 16);
-
-            const unstakePayloadBuilder = new Cell().asBuilder();
-            unstakePayloadBuilder.storeUint(BigInt(Date.now()), 64);
-            unstakePayloadBuilder.storeUint(BigInt('0x' + scStakeIdentifierToWithdraw), 64);
-
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 360,
-                messages: [{
-                    address: import.meta.env.VITE_STAKING_CONTRACT_ADDRESS,
-                    amount: toNano("0.05").toString(),
-                    payload: unstakePayloadBuilder.asCell().toBoc().toString("base64")
-                }],
-            };
-
-            const result = await tonConnectUI.sendTransaction(transaction);
-
-            message.loading({ content: 'Unstake transaction sent, awaiting confirmation...', key: loadingMessageKey, duration: 0 });
-            const externalMessageCell = Cell.fromBase64(result.boc);
-            const txHash = await waitForTransactionConfirmation(rawAddress, externalMessageCell, 180000, 5000);
-
-            if (!txHash) {
-                throw new Error('Failed to confirm unstake transaction on blockchain. Please check your wallet activity.');
-            }
-
-            message.loading({ content: 'Transaction confirmed! Finalizing ARIX unstake with backend...', key: loadingMessageKey, duration: 0 });
-            await confirmArixUnstake({
-                userWalletAddress: rawAddress,
-                stakeId: selectedStakeForUnstake.id,
-                unstakeTransactionBoc: result.boc,
-                unstakeTransactionHash: txHash
-            });
-            message.success({ content: "ARIX unstake request submitted! Backend will verify the outcome.", key: loadingMessageKey, duration: 7 });
-
-            setIsUnstakeModalVisible(false);
-            setSelectedStakeForUnstake(null);
-            setUnstakePrepDetails(null);
-            setStakeToSelectForUnstakeId(undefined);
-            fetchAllUserData(false);
-        } catch (txError) {
-            message.error({ content: txError?.response?.data?.message || txError?.message || 'ARIX unstake failed.', key: loadingMessageKey, duration: 6 });
-            console.error("On-chain ARIX Unstake Tx Error:", txError);
+            const scStakeId = selectedStakeForUnstake.id.replace(/-/g, '').substring(0, 16);
+            const payload = new Cell().asBuilder().storeUint(BigInt(Date.now()), 64).storeUint(BigInt('0x' + scStakeId), 64).asCell();
+            const tx = { validUntil: Math.floor(Date.now()/1000)+360, messages: [{ address: import.meta.env.VITE_STAKING_CONTRACT_ADDRESS, amount: toNano("0.05").toString(), payload: payload.toBoc().toString("base64") }] };
+            const result = await tonConnectUI.sendTransaction(tx);
+            message.loading({ content: 'Awaiting confirmation...', key: 'confirmUnstakeUser', duration: 0 });
+            const txHash = await waitForTransactionConfirmation(rawAddress, Cell.fromBase64(result.boc), 180000, 5000);
+            if (!txHash) throw new Error('Blockchain confirmation failed.');
+            message.loading({ content: 'Finalizing unstake...', key: 'confirmUnstakeUser', duration: 0 });
+            await confirmArixUnstake({ userWalletAddress: rawAddress, stakeId: selectedStakeForUnstake.id, unstakeTransactionBoc: result.boc, unstakeTransactionHash: txHash });
+            message.success({ content: "ARIX unstake submitted!", key: 'confirmUnstakeUser', duration: 7 });
+            setIsUnstakeModalVisible(false); setSelectedStakeForUnstake(null); setUnstakePrepDetails(null); setStakeToSelectForUnstakeId(undefined);
+            fetchAllUserData(false); fetchPageArixBalance();
+        } catch (err) {
+            message.error({ content: err?.response?.data?.message || err?.message || 'ARIX unstake failed.', key: 'confirmUnstakeUser', duration: 6 });
         } finally {
             setIsUnstakeActionLoading(false);
         }
     };
 
-    const combinedLoading = loadingProfile || loadingReferral || loadingStakes || loadingGames;
+    const combinedLoadingOverall = loadingProfile || loadingReferral || loadingProgramDetails || loadingStakes || loadingGames || loadingArixPageBalance;
+
+    if (!userFriendlyAddress && !combinedLoadingOverall) {
+        return (
+            <div className="user-page-container">
+                <div className="page-header-section">
+                    <div className="balance-display-box">
+                        <div className="balance-amount-line">
+                            <div className="balance-icon-wrapper"><span className="balance-icon-representation">♢</span></div>
+                            <Text className="balance-amount-value"><Spin size="small" wrapperClassName="balance-spin"/></Text>
+                        </div>
+                        <Text className="balance-currency-label">ARIX</Text>
+                    </div>
+                     <div className="topup-cashout-buttons">
+                        <Button icon={<ArrowDownOutlined />} disabled>Top up</Button>
+                        <Button icon={<ArrowUpOutlined />} disabled>Cashout</Button>
+                    </div>
+                    <div className="page-banner">
+                        <Text className="page-banner-text">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
+                    </div>
+                </div>
+                <Card className="connect-wallet-prompt">
+                    <WalletOutlined className="connect-wallet-icon" />
+                    <Title level={4} className="connect-wallet-title">Connect Your Wallet</Title>
+                    <Paragraph className="connect-wallet-text">
+                        Connect your TON wallet for dashboard, settings, referrals, and activity.
+                    </Paragraph>
+                    <Button type="primary" size="large" onClick={() => tonConnectUI.openModal()} icon={<LinkOutlined />}>
+                        Connect Wallet
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
 
     const tabItems = [
         {
-            key: 'stakes',
-            label: <span className="user-tab-label"><HistoryOutlined /> Staking History</span>,
+            key: 'referral_stats',
+            label: <span className="user-tab-label"><TeamOutlined /> Referral Stats</span>,
             children: (
-                <TransactionList
-                    items={stakesAndRewards.stakes}
-                    isLoading={loadingStakes}
-                    renderItemDetails={renderStakeHistoryItem}
-                    itemType="staking activity"
-                    listTitle={null}
-                    onUnstakeItemClick={prepareForUnstakeModal}
-                />
+                <Spin spinning={loadingReferral || loadingProgramDetails} tip="Loading referral data...">
+                    <Row gutter={isMobile ? [16,16] : [24, 24]}>
+                        <Col xs={24} md={12}>
+                            <Card className="dark-theme-card referral-stats-card" title={<><UsergroupAddOutlined style={{marginRight: 8}} /> Your Network</>}>
+                                <AntdStatistic title="Direct Referrals (Level 1)" value={referralData?.l1ReferralCount ?? 0} />
+                                <AntdStatistic title="Indirect Referrals (Level 2)" value={referralData?.l2ReferralCount ?? 0} style={{marginTop: 12}}/>
+                                <AntdStatistic title="Total Users Invited" value={referralData?.totalUsersInvited ?? 0} valueStyle={{color: '#A3AECF', fontWeight: 'bold'}} style={{marginTop: 12}}/>
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Card className="dark-theme-card referral-stats-card" title={<><DollarCircleOutlined style={{marginRight: 8}}/> Your Earnings (USDT)</>}>
+                                <AntdStatistic title="Level 1 Earnings" value={`$${parseFloat(referralData?.l1EarningsUsdt ?? 0).toFixed(USDT_DECIMALS)}`} valueStyle={{color: '#4CAF50'}} />
+                                <AntdStatistic title="Level 2 Earnings" value={`$${parseFloat(referralData?.l2EarningsUsdt ?? 0).toFixed(USDT_DECIMALS)}`} valueStyle={{color: '#4CAF50'}} style={{marginTop: 12}}/>
+                                <AntdStatistic title="Total Referral Earnings" value={`$${parseFloat(referralData?.totalReferralEarningsUsdt ?? 0).toFixed(USDT_DECIMALS)}`} valueStyle={{color: '#A3AECF', fontWeight: 'bold'}} style={{marginTop: 12}}/>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Spin>
             ),
         },
         {
-            key: 'games',
-            label: <span className="user-tab-label"><ExperimentOutlined /> Game History</span>,
+            key: 'referral_structure',
+            label: <span className="user-tab-label"><RiseOutlined /> Reward Structure</span>,
             children: (
-                <TransactionList
-                    items={coinflipHistory}
-                    isLoading={loadingGames}
-                    renderItemDetails={renderCoinflipHistoryItem}
-                    itemType="Coinflip game"
-                    listTitle={null}
-                />
-            ),
+                 <Spin spinning={loadingProgramDetails} tip="Loading program details...">
+                    <Paragraph className="text-secondary-light" style={{textAlign: 'center', marginBottom: 20, padding: '0 16px'}}>
+                        {programDetails.message || 'Earn rewards by inviting new users who stake ARIX. Rewards are based on their chosen plan.'}
+                    </Paragraph>
+                    {programDetails.plans && programDetails.plans.length > 0 ? (
+                        <List
+                            grid={{ gutter: isMobile ? 16 : 24, xs: 1, sm: 1, md: 2 }}
+                            dataSource={programDetails.plans}
+                            renderItem={plan => (
+                                <List.Item>
+                                    <Card className="dark-theme-card referral-reward-plan-card">
+                                        <Title level={5} className="plan-title">{plan.planTitle}</Title>
+                                        <Paragraph className="plan-detail"><Text strong>Level 1 Reward: </Text>{plan.l1RewardPercentage}</Paragraph>
+                                        <Paragraph className="plan-detail"><Text strong>Level 2 Reward: </Text>{plan.l2RewardDescription}</Paragraph>
+                                    </Card>
+                                </List.Item>
+                            )}
+                        />
+                    ) : !loadingProgramDetails && (
+                        <Card className="dark-theme-card"><Empty description={<Text className="text-secondary-light">Referral program details are currently unavailable.</Text>} /></Card>
+                    )}
+                </Spin>
+            )
+        },
+        {
+            key: 'stakes_history',
+            label: <span className="user-tab-label"><HistoryOutlined /> Staking History</span>,
+            children: <TransactionList items={stakesAndRewards.stakes} isLoading={loadingStakes} renderItemDetails={renderStakeHistoryItem} itemType="staking activity" listTitle={null} onUnstakeItemClick={prepareForUnstakeModal}/>,
+        },
+        {
+            key: 'games_history',
+            label: <span className="user-tab-label"><ExperimentOutlined /> Game History</span>,
+            children: <TransactionList items={coinflipHistory} isLoading={loadingGames} renderItemDetails={renderCoinflipHistoryItem} itemType="Coinflip game" listTitle={null}/>,
         },
     ];
 
     return (
-        <div className="user-page-container">
-            <Title level={2} className="page-title">
-                <UserOutlined style={{ marginRight: 10 }} /> User Dashboard
-            </Title>
+        <Spin spinning={combinedLoadingOverall && !userFriendlyAddress} tip="Loading user data...">
+            <div className="user-page-container">
+                <div className="page-header-section">
+                    <div className="balance-display-box">
+                        <div className="balance-amount-line">
+                            <div className="balance-icon-wrapper"><span className="balance-icon-representation">♢</span></div>
+                            <Text className="balance-amount-value">
+                                {loadingArixPageBalance ? <Spin size="small" wrapperClassName="balance-spin"/> : claimableArixPageBalance}
+                            </Text>
+                        </div>
+                        <Text className="balance-currency-label">ARIX</Text>
+                    </div>
+                    <div className="topup-cashout-buttons">
+                        <Button icon={<ArrowDownOutlined />} onClick={() => message.info("Top up ARIX (Coming Soon)")}>Top up</Button>
+                        <Button icon={<ArrowUpOutlined />} onClick={() => message.info("Cash out ARIX (Coming Soon)")}>Cashout</Button>
+                    </div>
+                    <div className="page-banner" onClick={() => navigate('/game')}>
+                        <Text className="page-banner-text">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
+                    </div>
+                </div>
 
-            <UserProfileCard
-                userProfileData={userProfile}
-                referralData={referralDashboardData}
-                activeStakes={activeUserStakes}
-                currentArxPrice={currentArxPrice}
-                onRefreshAllData={fetchAllUserData}
-                isDataLoading={combinedLoading}
-                onInitiateUnstakeProcess={initiateUnstakeProcessFromCardOrList}
-            />
-
-            <Divider className="user-page-divider"><Text className="divider-text">ACTIVITY LOGS</Text></Divider>
-
-            <Tabs
-                activeKey={activeTabKey}
-                items={tabItems}
-                onChange={handleTabChange}
-                centered
-                className="dark-theme-tabs user-history-tabs"
-                size={isMobile ? 'small' : 'middle'}
-            />
-
-            <Modal
-                title={
-                    <Text className="modal-title-text">
-                        {selectedStakeForUnstake && unstakePrepDetails ? 'Confirm ARIX Principal Unstake' : 'Select Active Stake to Unstake'}
-                    </Text>
-                }
-                open={isUnstakeModalVisible}
-                onOk={selectedStakeForUnstake && unstakePrepDetails ? handleConfirmUnstakeInModal : () => message.info("Please select a stake from the list if shown.")}
-                onCancel={() => {
-                    setIsUnstakeModalVisible(false);
-                    setSelectedStakeForUnstake(null);
-                    setUnstakePrepDetails(null);
-                    setStakeToSelectForUnstakeId(undefined);
-                    setIsUnstakeActionLoading(false);
-                }}
-                confirmLoading={isUnstakeActionLoading}
-                okText={selectedStakeForUnstake && unstakePrepDetails ? "Proceed with Unstake" : "Confirm Selection"}
-                cancelText="Cancel"
-                className="dark-theme-modal unstake-confirm-modal"
-                destroyOnClose
-                centered
-                okButtonProps={{
-                    danger: selectedStakeForUnstake && unstakePrepDetails?.isEarly,
-                    disabled: (!selectedStakeForUnstake || !unstakePrepDetails) && activeUserStakes.length > 1
-                }}
-                width={isMobile ? '90%' : 520}
-            >
-                {activeUserStakes.length > 1 && !selectedStakeForUnstake && !unstakePrepDetails && (
-                    <div className="stake-selection-modal-content">
-                        <Paragraph className="modal-text">You have multiple active stakes. Please select which one you'd like to unstake:</Paragraph>
-                        <Select
-                            placeholder="Select an active stake to view unstake details"
-                            style={{ width: '100%', marginBottom: 20 }}
-                            onChange={handleModalUnstakeSelectionChange}
-                            value={stakeToSelectForUnstakeId}
-                            size="large"
-                            className="themed-select"
-                            showSearch
-                            optionFilterProp="children"
+                <div className="referral-link-section">
+                    <Title level={5} className="referral-section-title">Your Unique Referral Link</Title>
+                    <div className="referral-code-boxes">
+                        {referralCodeForBoxes.split('').map((char, index) => (
+                            <div key={index} className="referral-code-box">{char}</div>
+                        ))}
+                    </div>
+                     <Paragraph className="referral-link-display" style={{ textAlign: 'center', width: '100%', maxWidth: 'calc(100% - 32px)', wordBreak: 'break-all', marginBottom: 12}}>
+                        <Text
+                            className="referral-link-text"
+                            style={{
+                                background: 'var(--app-bg-dark-container)',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--app-border-color)',
+                                display: 'inline-block',
+                                color: 'var(--app-primary-text-light)',
+                                opacity: referralLinkToDisplay ? 1 : 0.5
+                            }}
+                            copyable={referralLinkToDisplay ? { text: referralLinkToDisplay, tooltips: ['Copy Link', 'Copied!'], icon: <CopyOutlined style={{ marginLeft: 8 }} /> } : false}
                         >
-                            {activeUserStakes.map(stake => (
-                                <Option key={stake.id} value={stake.id}>
-                                    {stake.planTitle} - {parseFloat(stake.arixAmountStaked).toFixed(4)} ARIX (Unlocks: {new Date(stake.unlockTimestamp).toLocaleDateString()})
-                                </Option>
-                            ))}
-                        </Select>
-                        <Paragraph className="modal-text small-note">Once selected, unstake details and confirmation will appear below if preparation is successful.</Paragraph>
+                            {referralLinkToDisplay || 'Connect wallet for link'}
+                        </Text>
+                    </Paragraph>
+                    <div className="referral-actions-row">
+                        <Tooltip title="Copy Full Referral Code">
+                            <Button
+                                icon={<PaperClipOutlined />}
+                                onClick={() => copyReferralLinkToClipboard(referralData?.referralCode || rawAddress, "Referral code copied!")}
+                                className="referral-copy-button"
+                                disabled={!(referralData?.referralCode || rawAddress)}
+                            />
+                        </Tooltip>
+                        <Button
+                            icon={<InviteIcon />}
+                            onClick={shareUserReferralLink}
+                            className="invite-friends-button"
+                            disabled={!referralLinkToDisplay}
+                        >
+                            Invite friends
+                        </Button>
+                        <Button
+                            icon={<UserSwitchOutlined />}
+                            onClick={() => setActiveTabKey('referral_stats')}
+                            className="referral-count-button"
+                        >
+                            {referralData?.totalUsersInvited ?? 0} →
+                        </Button>
                     </div>
-                )}
-                {selectedStakeForUnstake && unstakePrepDetails ? (
-                    <div className="unstake-details-modal-content">
-                        <Paragraph className="modal-text">{unstakePrepDetails.message}</Paragraph>
-                        <Descriptions column={1} bordered size="small" className="modal-descriptions">
-                            <Descriptions.Item label="Plan">{selectedStakeForUnstake.planTitle}</Descriptions.Item>
-                            <Descriptions.Item label="ARIX Principal Staked">{unstakePrepDetails.principalArix} ARIX</Descriptions.Item>
-                            {unstakePrepDetails.isEarly &&
-                                <Descriptions.Item label="Early Unstake Penalty">
-                                    <Text style={{color: '#F44336'}}>{unstakePrepDetails.arixPenaltyPercentApplied}% of principal</Text>
-                                </Descriptions.Item>
-                            }
-                        </Descriptions>
-                        <Alert
-                            message="Important Note"
-                            description="This action only unstakes your ARIX principal from the smart contract. Your accrued USDT rewards are separate and can be withdrawn from your dashboard once they meet the minimum threshold."
-                            type="info"
-                            showIcon
-                            style={{marginTop: 16}}
-                            className="modal-alert"
-                        />
+                </div>
+
+                <div className="settings-section-wrapper">
+                    <div className="settings-section">
+                        <Title level={5} className="settings-section-title">Language</Title>
+                        <Radio.Group value={language} onChange={(e) => setLanguage(e.target.value)} buttonStyle="solid" className="settings-segmented-control">
+                            <Radio.Button value="en">English</Radio.Button>
+                            <Radio.Button value="ru">Русский</Radio.Button>
+                            <Radio.Button value="ua">Українська</Radio.Button>
+                        </Radio.Group>
                     </div>
-                ) : (activeUserStakes.length === 1 && !unstakePrepDetails && isUnstakeActionLoading) || (selectedStakeForUnstake && !unstakePrepDetails && isUnstakeActionLoading) ? (
-                    <div style={{textAlign: 'center', padding: '20px'}}><Spin tip="Loading unstake details..."/></div>
-                ) : null}
-            </Modal>
-        </div>
+                    <div className="settings-section">
+                        <Title level={5} className="settings-section-title">Color Theme</Title>
+                        <Radio.Group value={colorTheme} onChange={(e) => setColorTheme(e.target.value)} buttonStyle="solid" className="settings-segmented-control">
+                            <Radio.Button value="terminal">Terminal</Radio.Button>
+                            <Radio.Button value="telegram">Telegram</Radio.Button>
+                        </Radio.Group>
+                    </div>
+                    <div className="settings-section">
+                        <Title level={5} className="settings-section-title">Sound</Title>
+                        <Radio.Group value={sound} onChange={(e) => setSound(e.target.value)} buttonStyle="solid" className="settings-segmented-control">
+                            <Radio.Button value="on">On</Radio.Button>
+                            <Radio.Button value="off">Off</Radio.Button>
+                        </Radio.Group>
+                    </div>
+                </div>
+
+                <Button icon={<RedoOutlined />} onClick={handleRefreshAllData} loading={combinedLoadingOverall} block style={{marginTop: 0}}>Refresh All Data</Button>
+
+                <UserProfileCard
+                    userProfileData={userProfile}
+                    activeStakes={activeUserStakes}
+                    currentArxPrice={currentArxPrice}
+                    onRefreshAllData={fetchAllUserData} // Pass the main refresh
+                    isDataLoading={loadingProfile || loadingStakes} // Pass relevant loading states
+                    onInitiateUnstakeProcess={initiateUnstakeProcessFromCardOrList}
+                />
+
+                <Divider className="user-page-divider"><Text className="divider-text">ACTIVITY & REFERRAL DETAILS</Text></Divider>
+                <Tabs activeKey={activeTabKey} items={tabItems} onChange={handleTabChange} centered className="dark-theme-tabs user-history-tabs" size={isMobile ? 'small' : 'middle'}/>
+
+                <Modal
+                    title={<Text className="modal-title-text">{selectedStakeForUnstake && unstakePrepDetails ? 'Confirm ARIX Unstake' : 'Select Stake to Unstake'}</Text>}
+                    open={isUnstakeModalVisible}
+                    onOk={selectedStakeForUnstake && unstakePrepDetails ? handleConfirmUnstakeInModal : () => message.info("Select a stake.")}
+                    onCancel={() => { setIsUnstakeModalVisible(false); setSelectedStakeForUnstake(null); setUnstakePrepDetails(null); setStakeToSelectForUnstakeId(undefined); setIsUnstakeActionLoading(false); }}
+                    confirmLoading={isUnstakeActionLoading}
+                    okText={selectedStakeForUnstake && unstakePrepDetails ? "Proceed with Unstake" : "Confirm Selection"}
+                    cancelText="Cancel"
+                    destroyOnClose centered
+                    okButtonProps={{ danger: selectedStakeForUnstake && unstakePrepDetails?.isEarly, disabled: (!selectedStakeForUnstake || !unstakePrepDetails) && activeUserStakes.length > 1 }}
+                    width={isMobile ? '90%' : 520}
+                >
+                    {activeUserStakes.length > 1 && !selectedStakeForUnstake && !unstakePrepDetails && (
+                        <div className="stake-selection-modal-content">
+                            <Paragraph className="modal-text">Select active stake:</Paragraph>
+                            <Select placeholder="Select stake" style={{ width: '100%', marginBottom: 20 }} onChange={handleModalUnstakeSelectionChange} value={stakeToSelectForUnstakeId} size="large" showSearch optionFilterProp="children">
+                                {activeUserStakes.map(s => (<Option key={s.id} value={s.id}>{s.planTitle} - {parseFloat(s.arixAmountStaked).toFixed(ARIX_DECIMALS)} ARIX (Unlocks: {new Date(s.unlockTimestamp).toLocaleDateString()})</Option>))}
+                            </Select>
+                            <Paragraph className="modal-text small-note">Unstake details will appear below.</Paragraph>
+                        </div>
+                    )}
+                    {selectedStakeForUnstake && unstakePrepDetails ? (
+                        <div className="unstake-details-modal-content">
+                            <Paragraph className="modal-text">{unstakePrepDetails.message}</Paragraph>
+                            <Descriptions column={1} bordered size="small" className="modal-descriptions">
+                                <Descriptions.Item label="Plan">{selectedStakeForUnstake.planTitle}</Descriptions.Item>
+                                <Descriptions.Item label="ARIX Staked">{unstakePrepDetails.principalArix} ARIX</Descriptions.Item>
+                                {unstakePrepDetails.isEarly && <Descriptions.Item label="Early Penalty"><Text style={{color: '#F44336'}}>{unstakePrepDetails.arixPenaltyPercentApplied}% of principal</Text></Descriptions.Item>}
+                            </Descriptions>
+                            <Alert message="Important Note" description="This unstakes ARIX principal. Accrued USDT rewards are separate." type="info" showIcon style={{marginTop: 16}} className="modal-alert"/>
+                        </div>
+                    ) : ((activeUserStakes.length === 1 && !unstakePrepDetails && isUnstakeActionLoading) || (selectedStakeForUnstake && !unstakePrepDetails && isUnstakeActionLoading)) ? (
+                        <div style={{textAlign: 'center', padding: '20px'}}><Spin tip="Loading unstake details..."/></div>
+                    ) : null}
+                </Modal>
+            </div>
+        </Spin>
     );
 };
 

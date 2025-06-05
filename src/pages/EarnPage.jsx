@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid, Descriptions } from 'antd'; 
+import { Row, Col, Card, InputNumber, Button, Typography, Spin, message, Modal, Alert, Divider, Statistic as AntdStatistic, Select, Empty, Grid, Descriptions } from 'antd';
 import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
 import {
     CheckCircleOutlined,
@@ -15,7 +14,6 @@ import {
 } from '@ant-design/icons';
 import { Cell, Builder, toNano } from '@ton/core';
 import { v4 as uuidv4 } from 'uuid';
-
 import StakingPlans from '../components/earn/StakingPlans';
 import TransactionList, { renderStakeHistoryItem } from '../components/user/TransactionList';
 import {
@@ -39,7 +37,6 @@ import {
     REFERRAL_LINK_BASE
 } from '../utils/tonUtils.js';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
-
 import './EarnPage.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -49,7 +46,6 @@ const { useBreakpoint } = Grid;
 const EarnPage = () => {
     const screens = useBreakpoint();
     const isMobile = !screens.md;
-
     const [stakingConfigData, setStakingConfigData] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [inputUsdtAmount, setInputUsdtAmount] = useState(null);
@@ -62,7 +58,7 @@ const EarnPage = () => {
     const [loadingConfig, setLoadingConfig] = useState(true);
     const [loadingBalances, setLoadingBalances] = useState(false);
     const [loadingUserStakes, setLoadingUserStakes] = useState(false);
-    
+
     const [stakeSubmitLoading, setStakeSubmitLoading] = useState(false);
     const [isStakeModalVisible, setIsStakeModalVisible] = useState(false);
 
@@ -285,7 +281,7 @@ const EarnPage = () => {
             })
             .finally(() => setIsUnstakeActionLoading(false));
     };
-    
+
     const handleConfirmUnstakeInModal = async () => {
         if (!rawAddress || !selectedStakeForUnstake || !unstakePrepDetails || !tonConnectUI || !STAKING_CONTRACT_ADDRESS_FROM_CONFIG) {
             message.error("Missing critical information for unstake.");
@@ -340,20 +336,19 @@ const EarnPage = () => {
             setIsUnstakeActionLoading(false);
         }
     };
-    
+
     const isLoadingInitial = loadingConfig && !stakingConfigData;
     const isStakingAvailable = stakingConfigData?.stakingPlans && stakingConfigData.stakingPlans.length > 0;
     const modalWidth = isMobile ? '95%' : 520;
-
 
     if (!userFriendlyAddress && !loadingConfig) { 
         return ( 
             <div className="earn-page-container">
                 <Title level={2} className="page-title"><DollarCircleOutlined style={{marginRight:10}}/>ARIX Staking</Title>
-                <Card className="dark-theme-card centered-message-card">
-                    <WalletOutlined style={{ fontSize: '48px', color: '#7065F0', marginBottom: 20 }} />
-                    <Title level={4} style={{color: '#E0E0E5'}}>Connect Your Wallet</Title>
-                    <Paragraph style={{color: '#A0A0A5', marginBottom: 24, fontSize: '1rem'}}>
+                <Card className="centered-message-card">
+                    <WalletOutlined />
+                    <Title level={4} className="text-primary-light">Connect Your Wallet</Title>
+                    <Paragraph className="text-secondary-light" style={{marginBottom: 24, fontSize: '1rem'}}>
                         To access ARIX staking plans, view your earnings, and manage your stakes, please connect your TON wallet.
                     </Paragraph>
                     <Button type="primary" size="large" onClick={() => tonConnectUI.openModal()} icon={<LinkOutlined />}>
@@ -365,7 +360,7 @@ const EarnPage = () => {
     }
 
     return (
-        <Spin spinning={isLoadingInitial} tip="Loading ARIX Staking Hub..." size="large" wrapperClassName="earn-page-spinner-wrapper">
+        <Spin spinning={isLoadingInitial} tip="Loading ARIX Staking Hub..." size="large">
             <div className="earn-page-container">
                 <Title level={2} className="page-title"><DollarCircleOutlined style={{marginRight:10}}/>ARIX Staking</Title>
                 <Row justify="space-between" align="middle" className="earn-page-header-actions">
@@ -377,31 +372,34 @@ const EarnPage = () => {
                     </Button> 
                 </Row>
             
-                <Card className="dark-theme-card earn-summary-card">
-                    <Row gutter={[16, 16]} align="middle" justify="center">
+                <div className="earn-summary-card-wrapper">
+                    <Row gutter={[16, 16]} align="stretch" justify="center">
                         <Col xs={24} sm={12} className="summary-stat-col">
-                            <AntdStatistic 
-                                title="Your ARIX Wallet Balance"
-                                value={loadingBalances ? '-' : arixWalletBalance.toFixed(ARIX_DECIMALS)} 
-                                suffix="ARIX" 
-                                valueStyle={{color: '#7065F0'}}
-                            />
-                            {currentArxPrice != null && !loadingBalances && (
-                                <Text className="summary-value-equivalent">
-                                    ~${(arixWalletBalance * currentArxPrice).toFixed(USD_DECIMALS)} USD
-                                </Text>
-                            )}
+                             <Card className="earn-summary-card">
+                                <AntdStatistic 
+                                    title="Your ARIX Wallet Balance"
+                                    value={loadingBalances ? '-' : arixWalletBalance.toFixed(ARIX_DECIMALS)} 
+                                    suffix="ARIX" 
+                                />
+                                {currentArxPrice != null && !loadingBalances && (
+                                    <Text className="summary-value-equivalent">
+                                        ~${(arixWalletBalance * currentArxPrice).toFixed(USD_DECIMALS)} USD
+                                    </Text>
+                                )}
+                            </Card>
                         </Col>
                         <Col xs={24} sm={12} className="summary-stat-col">
-                            <AntdStatistic 
-                                title="Total Claimable USDT Rewards" 
-                                value={loadingUserStakes ? '-' : `$${parseFloat(userStakesData.totalClaimableUsdt).toFixed(USDT_DECIMALS)}`}
-                                valueStyle={{color: '#4CAF50'}} 
-                            />
-                             <Text className="summary-value-equivalent">From staking & referrals</Text>
+                            <Card className="earn-summary-card">
+                                <AntdStatistic 
+                                    title="Total Claimable USDT Rewards" 
+                                    value={loadingUserStakes ? '-' : `$${parseFloat(userStakesData.totalClaimableUsdt).toFixed(USDT_DECIMALS)}`}
+                                    valueStyle={{color: '#4CAF50'}} // Keep green for positive rewards
+                                />
+                                <Text className="summary-value-equivalent">From staking & referrals</Text>
+                            </Card>
                         </Col>
                     </Row>
-                </Card>
+                </div>
 
                 {loadingConfig && !stakingConfigData ? (
                     <div style={{textAlign: 'center', padding: '50px 0'}}>
@@ -415,19 +413,18 @@ const EarnPage = () => {
                         userFriendlyAddress={userFriendlyAddress}
                     />
                 ) : (
-                    <Card className="dark-theme-card centered-message-card" style={{marginTop: 20}}>
+                    <Card className="centered-message-card" style={{marginTop: 20}}>
                         <img src="/img/earn-farming-over.png" alt="Farming phase over" style={{maxHeight: '180px', marginBottom: 20}} onError={(e) => e.currentTarget.style.display='none'} />
-                        <Title level={3} style={{ color: '#FFFFFF', marginBottom: 8}}>Staking Temporarily Paused</Title>
-                        <Paragraph style={{ color: '#A0A0A5', fontSize: '1rem'}}>
+                        <Title level={3} className="text-primary-light" style={{ marginBottom: 8}}>Staking Temporarily Paused</Title>
+                        <Paragraph className="text-secondary-light" style={{fontSize: '1rem'}}>
                             The current staking phase has concluded. New opportunities and plans will be announced soon!
                         </Paragraph>
-                        <Paragraph style={{ color: '#8E8E93', fontSize: '0.9rem'}}>
+                        <Paragraph className="text-tertiary-light" style={{fontSize: '0.9rem'}}>
                             Follow our announcements in the PUSH section for the latest updates.
                         </Paragraph>
                     </Card>
                 )}
                 
-
                 {userFriendlyAddress && userStakesData.stakes.length > 0 && !loadingUserStakes && (
                     <div className="active-stakes-section">
                         <Title level={3} className="section-title">Your Active & Past Stakes</Title>
@@ -442,11 +439,11 @@ const EarnPage = () => {
                     </div>
                 )}
                 {userFriendlyAddress && !loadingUserStakes && userStakesData.stakes.length === 0 && isStakingAvailable && (
-                    <Card className="dark-theme-card centered-message-card" style={{marginTop: 20}}>
+                    <Card className="centered-message-card" style={{marginTop: 20}}>
                         <Empty 
-                            image={<RocketOutlined style={{fontSize: '48px', color: '#7065F0'}}/>}
+                            image={<RocketOutlined/>}
                             description={
-                                <Paragraph style={{color: '#A0A0A5', fontSize: '1rem'}}>
+                                <Paragraph className="text-secondary-light" style={{fontSize: '1rem'}}>
                                     You have no active ARIX stakes yet. Choose a plan above to start earning USDT rewards!
                                 </Paragraph>
                             } 
@@ -458,10 +455,9 @@ const EarnPage = () => {
                     title={<Text className="modal-title-text">{`Stake ARIX in "${selectedPlan?.title || ''}"`}</Text>}
                     open={isStakeModalVisible}
                     onCancel={() => {setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}}
-                    className="dark-theme-modal stake-modal"
                     destroyOnClose 
                     footer={[ 
-                        <Button key="back" onClick={() => {setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}} className="modal-cancel-button">
+                        <Button key="back" onClick={() => {setIsStakeModalVisible(false); setSelectedPlan(null); setInputUsdtAmount(null);}}>
                             Cancel
                         </Button>,
                         <Button 
@@ -469,7 +465,6 @@ const EarnPage = () => {
                             type="primary" 
                             loading={stakeSubmitLoading} 
                             onClick={handleConfirmStake}
-                            className="modal-confirm-button"
                             disabled={
                                 !calculatedArixAmount || 
                                 calculatedArixAmount <= 0 || 
@@ -501,15 +496,15 @@ const EarnPage = () => {
                             
                             <Divider className="modal-divider"/>
 
-                            <Paragraph className="modal-text"><Text strong>Your ARIX Wallet Balance: </Text>
-                                <Text style={{color: '#7065F0', fontWeight: 'bold'}}>{arixWalletBalance.toFixed(ARIX_DECIMALS)} ARIX</Text>
+                            <Paragraph className="modal-text"><Text strong className="text-primary-light">Your ARIX Wallet Balance: </Text>
+                                <Text style={{fontWeight: 'bold'}} className="text-primary-light">{arixWalletBalance.toFixed(ARIX_DECIMALS)} ARIX</Text>
                             </Paragraph> 
                             
                             <div style={{ margin: '16px 0' }}>
                                 <Text strong className="modal-input-label">Enter USDT Value to Commit for Staking:</Text>
                                 <InputNumber
                                     style={{ width: '100%'}} 
-                                    addonBefore={<Text style={{color: '#A0A0A5'}}>$</Text>}
+                                    addonBefore={<Text className="text-secondary-light">$</Text>}
                                     value={inputUsdtAmount} 
                                     onChange={handleUsdtAmountChange}
                                     placeholder={`Min $${parseFloat(selectedPlan.minStakeUsdt).toFixed(USDT_DECIMALS)}${selectedPlan.maxStakeUsdt ? `, Max $${parseFloat(selectedPlan.maxStakeUsdt).toFixed(USDT_DECIMALS)}` : ''}`}
@@ -524,7 +519,7 @@ const EarnPage = () => {
 
                             {currentArxPrice && inputUsdtAmount != null && inputUsdtAmount >= 0 && ( 
                                 <Paragraph className={`modal-calculated-arix ${calculatedArixAmount > arixWalletBalance ? 'insufficient' : ''}`}>
-                                    This equals approx: <Text strong>{calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX</Text>
+                                    This equals approx: <Text strong className="text-primary-light">{calculatedArixAmount.toFixed(ARIX_DECIMALS)} ARIX</Text>
                                     <Text className="price-reference"> (at ~${currentArxPrice.toFixed(4)}/ARIX)</Text>
                                     {calculatedArixAmount > arixWalletBalance && 
                                         <Text className="insufficient-balance-warning"> (Insufficient ARIX Balance)</Text>
@@ -538,8 +533,8 @@ const EarnPage = () => {
                                 </Paragraph>
                             )}
                             <Alert type="info" style={{marginTop: 16}} className="modal-alert"
-                                message="Staking Process Note"
-                                description="You are committing a specific USDT value. The system calculates the equivalent ARIX to be staked from your wallet. USDT rewards are based on this initial USDT value. Your ARIX principal is locked in the smart contract."
+                                message={<Text className="text-primary-light">Staking Process Note</Text>}
+                                description={<Text className="text-secondary-light">You are committing a specific USDT value. The system calculates the equivalent ARIX to be staked from your wallet. USDT rewards are based on this initial USDT value. Your ARIX principal is locked in the smart contract.</Text>}
                             />
                         </div>
                     )}
@@ -558,7 +553,6 @@ const EarnPage = () => {
                     confirmLoading={isUnstakeActionLoading}
                     okText="Proceed with Unstake"
                     cancelText="Cancel"
-                    className="dark-theme-modal unstake-confirm-modal"
                     destroyOnClose
                     centered
                     okButtonProps={{ danger: unstakePrepDetails?.isEarly }}
@@ -577,8 +571,8 @@ const EarnPage = () => {
                                 }
                             </Descriptions>
                             <Alert 
-                                message="Important Note"
-                                description="This action only unstakes your ARIX principal from the smart contract. Your accrued USDT rewards are separate and can be withdrawn from your dashboard."
+                                message={<Text className="text-primary-light">Important Note</Text>}
+                                description={<Text className="text-secondary-light">This action only unstakes your ARIX principal from the smart contract. Your accrued USDT rewards are separate and can be withdrawn from your dashboard.</Text>}
                                 type="info"
                                 showIcon
                                 style={{marginTop: 16}}
@@ -587,10 +581,8 @@ const EarnPage = () => {
                         </div>
                     ) : <div style={{textAlign: 'center', padding: '20px'}}><Spin tip="Loading unstake details..."/></div>}
                 </Modal>
-
             </div>
         </Spin>
     );
 };
-
 export default EarnPage;

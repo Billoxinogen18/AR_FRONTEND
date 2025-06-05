@@ -1,31 +1,238 @@
-
+/* :root variables in App.css and theme object in App.jsx */
 
 .user-page-container {
     padding: 0px 0px 24px 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
+/* Common Header Styles (from TaskPage.css, ensure consistency) */
+/* .page-header-section, .balance-display-box, etc. will be inherited if class names are the same */
+/* If specific overrides for UserPage header, add them here */
+
+/* Referral Link Section Specifics */
+.referral-link-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    padding: 16px; /* Add some padding to this section */
+    background-color: var(--app-bg-dark-element, #08090A); /* Match card background */
+    border-radius: 12px; /* Match card radius */
+}
+
+.referral-section-title {
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    opacity: 0.6;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px !important;
+    text-align: center;
+}
+
+.referral-code-boxes {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.referral-code-box {
+    background-color: var(--app-bg-dark-container, #1C1C1E);
+    color: var(--app-primary-text-light, #A3AECF);
+    width: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 1px solid var(--app-border-color, #2D3142);
+}
+@media (max-width: 380px) {
+    .referral-code-box {
+        width: 28px;
+        height: 34px;
+        font-size: 1rem;
+    }
+}
+
+
+.referral-actions-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px; /* Limit width of this row */
+    justify-content: center;
+}
+
+.referral-copy-button.ant-btn {
+    background-color: var(--app-bg-dark-container, #1C1C1E) !important;
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    border: 1px solid var(--app-border-color, #2D3142) !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+}
+.referral-copy-button.ant-btn .anticon {
+    font-size: 1.2rem;
+}
+.referral-copy-button.ant-btn:hover {
+    border-color: var(--app-primary-text-light, #A3AECF) !important;
+}
+
+
+.invite-friends-button.ant-btn {
+    flex-grow: 1;
+    background-color: var(--app-bg-dark-element, #08090A) !important;
+    color: #CAD62A !important; /* Yellowish text from banner */
+    border: 1px solid #CAD62A !important; /* Matching border */
+    height: 44px !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+}
+.invite-friends-button.ant-btn:hover {
+    background-color: rgba(202, 214, 42, 0.1) !important;
+}
+.invite-friends-button.ant-btn .anticon {
+    font-size: 1.1rem;
+    margin-right: 8px;
+}
+
+
+.referral-count-button.ant-btn {
+    background-color: var(--app-bg-dark-container, #1C1C1E) !important;
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    border: 1px solid var(--app-border-color, #2D3142) !important;
+    height: 44px !important;
+    padding: 0 16px !important;
+    border-radius: 10px !important;
+    font-weight: 500 !important;
+}
+.referral-count-button.ant-btn:hover {
+    border-color: var(--app-primary-text-light, #A3AECF) !important;
+}
+.referral-count-button.ant-btn .anticon {
+    margin-right: 6px;
+}
+.referral-count-button.ant-btn .anticon:last-child {
+    margin-left: 6px;
+    margin-right: 0;
+}
+
+/* Settings Sections (Language, Theme, Sound) */
+.settings-section-wrapper {
+    padding: 16px;
+    background-color: var(--app-bg-dark-element, #08090A);
+    border-radius: 12px; /* Match card radius */
+}
+.settings-section {
+    margin-bottom: 16px;
+}
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section-title {
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    opacity: 0.6;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px !important;
+    text-align: left; /* Align to left */
+}
+
+.settings-segmented-control.ant-radio-group-solid {
+    width: 100%;
+    /* background-color from theme: Radio.wrapperBg */
+    border-radius: 10px !important; /* From theme: Radio.borderRadius */
+    padding: 4px !important;
+    display: flex !important;
+}
+
+.settings-segmented-control .ant-radio-button-wrapper {
+    flex-grow: 1;
+    text-align: center;
+    /* background-color from theme: Radio.buttonBg (for unselected) */
+    /* color from theme: Radio.buttonColor */
+    opacity: 0.7; /* Custom for unselected */
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 8px !important; /* Inner button rounding */
+    height: 36px !important; /* Custom height */
+    line-height: 34px !important; /* Adjust for border/padding */
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.settings-segmented-control .ant-radio-button-wrapper-checked {
+    /* background-color from theme: Radio.buttonSolidCheckedBg */
+    /* color from theme: Radio.buttonSolidCheckedColor */
+    opacity: 1 !important; /* Full opacity for selected */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important; /* Subtle shadow */
+}
+.settings-segmented-control .ant-radio-button-wrapper:not(:first-child)::before {
+    display: none !important; /* Remove default separators */
+}
+
+
+/* Referral Stats and Structure Specifics - Cards will use theme .ant-card */
+.referral-stats-card .ant-card-head-title,
+.referral-structure-card .ant-card-head-title {
+    /* color from theme: Card.colorTextHeading */
+    font-weight: 600;
+}
+/* Statistic styles will come from ConfigProvider */
+
+
+.referral-reward-plan-card {
+    background-color: var(--app-bg-dark-container, #1C1C1E) !important; /* Darker cards */
+    border-color: var(--app-border-color, #2D3142) !important;
+}
+.referral-reward-plan-card .plan-title {
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    font-weight: 600;
+}
+.referral-reward-plan-card .plan-detail {
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    opacity: 0.8;
+}
+.referral-reward-plan-card .plan-detail strong {
+    opacity: 1;
+}
+
+/* UserProfileCard styles (mostly .dashboard-*) */
 .profile-dashboard-card {
     margin-bottom: 24px !important;
-    padding: 12px !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    /* padding from card theme */
+    /* box-shadow from card theme */
+    /* background-color from card theme */
+    /* border from card theme */
 }
 
 .profile-dashboard-card .ant-card-body {
-    padding: 16px !important;
+    padding: 16px !important; /* Override if needed */
 }
 
 .dashboard-column {
     padding: 12px;
-
 }
-.dashboard-column:last-child {
-    border-right: none;
+.dashboard-column:not(:last-child) {
+   border-right: 1px solid var(--app-border-color, #2D3142);
 }
 
-@media (max-width: 991px) {
+@media (max-width: 991px) { /* lg breakpoint */
     .dashboard-column {
-        border-right: none;
-        border-bottom: 1px solid #252525;
+        border-right: none !important;
+        border-bottom: 1px solid var(--app-border-color, #2D3142);
         padding-bottom: 20px;
         margin-bottom: 20px;
     }
@@ -37,14 +244,15 @@
 }
 
 .dashboard-column-title {
-    color: #A0A0A5 !important;
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    opacity: 0.7;
     font-size: 0.9rem !important;
     font-weight: 500 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 16px !important;
     text-align: left;
-    border-bottom: 1px solid #303030;
+    border-bottom: 1px solid var(--app-border-color, #2D3142);
     padding-bottom: 8px;
 }
 
@@ -52,7 +260,8 @@
     margin-bottom: 12px !important;
     font-size: 0.9rem;
     line-height: 1.5;
-    color: #A0A0A5;
+    color: var(--app-primary-text-light, #A3AECF) !important;
+    opacity: 0.8;
 }
 .dashboard-text-item.ellipsis-text {
     overflow: hidden;
@@ -62,101 +271,71 @@
     align-items: center;
 }
 .dashboard-label {
-    color: #8E8E93 !important;
+    /* color from theme: Descriptions.colorTextSecondary or Statistic.colorTextDescription */
+    opacity: 0.6;
     font-weight: 500;
     margin-right: 6px;
 }
 .dashboard-value {
-    color: #E0E0E5 !important;
+    /* color from theme: Descriptions.colorText or Statistic.colorText */
     font-weight: 500;
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .dashboard-link {
-    color: #7065F0 !important;
+    color: var(--app-primary-text-light, #A3AECF) !important;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
+    text-decoration: underline;
 }
 .dashboard-link:hover {
-    color: #8c80f3 !important;
+    opacity: 0.8;
 }
 .dashboard-action-icon.ant-btn-text {
     padding: 0 4px;
     height: auto;
     line-height: inherit;
-    color: #7065F0 !important;
+    color: var(--app-primary-text-light, #A3AECF) !important;
     margin-left: 4px;
 }
 .dashboard-action-icon.ant-btn-text:hover {
-    background-color: rgba(112, 101, 240, 0.1) !important;
+    background-color: rgba(163, 174, 207, 0.1) !important;
 }
 
 
-.dashboard-statistic {
-    margin-bottom: 12px !important;
+.dashboard-statistic .ant-statistic-title { /* Uses Statistic theme */ }
+.dashboard-statistic .ant-statistic-content { /* Uses Statistic theme */ }
+.dashboard-statistic .ant-statistic-content .ant-statistic-content-suffix {
+    opacity: 0.7;
 }
-.dashboard-statistic .ant-statistic-title {
-    font-size: 0.85rem !important;
-    color: #8E8E93 !important;
-    margin-bottom: 4px !important;
-}
-.dashboard-statistic .ant-statistic-content {
-    font-size: 1.3rem !important;
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
-}
+
+
 .dashboard-value-equivalent {
-    color: #8E8E93 !important;
+    opacity: 0.5;
     font-size: 0.8rem !important;
     display: block;
     margin-top: -6px;
     margin-bottom: 16px;
 }
 
-.dashboard-button {
+.dashboard-button { /* General button styles from ConfigProvider */
     margin-top: 12px !important;
-    font-weight: 500 !important;
-    border-radius: 8px !important;
 }
-.dashboard-button.refresh-button {
-    background-color: #2C2C2E !important;
-    border-color: #38383A !important;
-    color: #E0E0E5 !important;
-}
-.dashboard-button.refresh-button:hover {
-    border-color: #7065F0 !important;
-    color: #7065F0 !important;
-}
-.dashboard-button.withdraw-usdt-button {
 
-}
-.dashboard-button.withdraw-arix-button {
+.dashboard-button.withdraw-arix-button { /* Specific override for ARIX yellow */
     background-color: #FFC107 !important;
     border-color: #FFC107 !important;
-    color: #1A1A1A !important;
+    color: var(--app-bg-dark-element, #08090A) !important;
 }
 .dashboard-button.withdraw-arix-button:hover {
     background-color: #ffca2c !important;
     border-color: #ffca2c !important;
 }
 
-.dashboard-button.unstake-button.ant-btn-dangerous:not([disabled]) {
-    background-color: #F44336 !important;
-    border-color: #F44336 !important;
-    color: #FFFFFF !important;
-}
-.dashboard-button.unstake-button.ant-btn-dangerous:not([disabled]):hover {
-    background-color: #d32f2f !important;
-    border-color: #d32f2f !important;
-}
-.dashboard-button.view-referral-button.ant-btn-default {
 
-}
-
-
-.mini-alert.ant-alert {
+.mini-alert.ant-alert { /* Uses Alert theme from ConfigProvider */
     font-size: 0.8rem !important;
     padding: 6px 10px !important;
     margin-top: 8px !important;
@@ -168,53 +347,42 @@
 
 .dashboard-note {
     font-size: 0.8em;
-    color: #A0A0A5;
+    opacity: 0.7;
     text-align: center;
     margin-top: 6px;
     line-height: 1.3;
 }
 
-.connect-wallet-prompt {
+.connect-wallet-prompt { /* For the full page prompt, not the card one */
     text-align: center;
     padding: 40px 20px !important;
+    /* background-color from card theme */
+    /* border from card theme */
 }
 .connect-wallet-icon {
     font-size: 48px !important;
-    color: #7065F0 !important;
+    color: var(--app-primary-color, #A3AECF) !important;
     margin-bottom: 20px !important;
 }
-.connect-wallet-title {
-    color: #E0E0E5 !important;
-    margin-bottom: 12px !important;
-}
-.connect-wallet-text {
-    color: #A0A0A5 !important;
-    margin-bottom: 24px !important;
-    font-size: 1rem !important;
-    line-height: 1.5;
-}
-
+.connect-wallet-title { margin-bottom: 12px !important; }
+.connect-wallet-text { opacity: 0.8; margin-bottom: 24px !important; font-size: 1rem !important; line-height: 1.5;}
 
 
 .user-page-divider {
     margin: 32px 0 20px 0 !important;
-    border-color: #303030 !important;
+    border-color: var(--app-border-color, #2D3142) !important;
 }
 .user-page-divider .divider-text {
-    color: #8E8E93;
+    opacity: 0.5;
     font-size: 0.8rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+/* Tabs styling from ConfigProvider (App.jsx) */
 .user-history-tabs.ant-tabs-centered > .ant-tabs-nav .ant-tabs-nav-wrap {
     justify-content: center;
-}
-.user-history-tabs .ant-tabs-tab {
-    padding: 10px 20px !important;
-    margin: 0 4px !important;
-    border-radius: 8px 8px 0 0 !important;
 }
 .user-history-tabs .user-tab-label {
     font-size: 0.95rem;
@@ -223,24 +391,16 @@
     align-items: center;
     gap: 8px;
 }
-.user-history-tabs .ant-tabs-tab-active {
-    background-color: #1A1A1A;
-}
-.user-history-tabs .ant-tabs-nav::before {
-    border-bottom: 1px solid #1A1A1A !important;
-}
 
 
-
-.transaction-list-card {
+.transaction-list-card { /* Card theme from ConfigProvider */
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
     border-top: none !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 .transaction-list-card.empty-list-card {
-    border-radius: 14px !important;
-    border-top: 1px solid #303030 !important;
+    border-radius: var(--app-border-radius-lg, 14px) !important;
+    border-top: 1px solid var(--app-border-color, #2D3142) !important;
 }
 .transaction-list-card.empty-list-card .ant-card-body {
     padding: 30px 20px !important;
@@ -248,12 +408,14 @@
 
 .transaction-list-item-wrapper.ant-list-item {
     padding: 16px 0px !important;
-    border-bottom: 1px solid #252525 !important;
+    /* border-bottom from List theme (colorSplit) */
 }
 .transaction-list-item-wrapper.ant-list-item:last-child {
     border-bottom: none !important;
 }
 
+
+/* Stake History Item / Game History Item from TransactionList.jsx */
 .stake-history-item, .game-history-item {
     padding: 16px 4px;
 }
@@ -261,16 +423,15 @@
     margin-bottom: 12px;
 }
 .stake-item-title {
-    color: #E0E0E5 !important;
     margin-bottom: 2px !important;
     font-weight: 500 !important;
     font-size: 1.1rem !important;
 }
 .stake-item-subtitle {
-    color: #8E8E93 !important;
+    opacity: 0.6;
     font-size: 0.85rem;
 }
-.status-tag.ant-tag {
+.status-tag.ant-tag { /* Tag theme from ConfigProvider */
     font-size: 0.75rem;
     padding: 2px 8px;
     border-radius: 6px;
@@ -281,64 +442,50 @@
     margin-top: 12px;
 }
 .history-detail-item {
-    color: #A0A0A5;
+    opacity: 0.8;
     font-size: 0.9rem;
     margin-bottom: 10px !important;
     line-height: 1.4;
 }
 .history-label {
-    color: #8E8E93 !important;
+    opacity: 0.6;
     font-weight: 500;
     display: block;
     margin-bottom: 3px;
 }
-.history-value {
-    color: #E0E0E5 !important;
-    font-weight: 500;
-}
-.history-value.highlight-value { color: #7065F0 !important; }
+.history-value { font-weight: 500; }
+.history-value.highlight-value { font-weight: bold; } /* Standard highlight */
 .history-value.success-value { color: #4CAF50 !important; }
 .history-value.error-value { color: #F44336 !important; }
-.history-sub-value {
-    display: block;
-    font-size: 0.8rem;
-    color: #6A6A6E;
-    margin-top: 3px;
-}
-.history-timestamp {
-    font-size: 0.8rem;
-    color: #6A6A6E;
-    display: block;
-}
+.history-sub-value { display: block; font-size: 0.8rem; opacity: 0.5; margin-top: 3px; }
+.history-timestamp { font-size: 0.8rem; opacity: 0.5; display: block; }
+
 .stake-item-footer {
     margin-top: 16px;
     padding-top: 12px;
-    border-top: 1px solid #252525;
+    border-top: 1px solid var(--app-border-color, #2D3142);
 }
-.unstake-button-in-list.ant-btn-sm {
+.unstake-button-in-list.ant-btn-sm { /* Uses Button theme */
     font-size: 0.8rem !important;
     padding: 3px 10px !important;
     height: auto !important;
-    border-radius: 6px !important;
 }
 
 .game-win-text { color: #4CAF50 !important; font-weight: 600; }
 .game-loss-text { color: #F44336 !important; font-weight: 600; }
-.game-item-choice-info { color: #A0A0A5; font-size: 0.85rem; }
+.game-item-choice-info { opacity: 0.8; font-size: 0.85rem; }
 .choice-tag.ant-tag {
     font-size: 0.8rem !important;
     padding: 1px 6px !important;
     border-radius: 4px !important;
-    background-color: #303030 !important;
-    border-color: #38383A !important;
-    color: #E0E0E5 !important;
+    background-color: var(--app-bg-dark-container, #1C1C1E) !important;
+    border-color: var(--app-border-color, #2D3142) !important;
     margin-left: 4px;
 }
 
-
 .history-tx-hash {
     font-size: 0.85rem;
-    color: #8E8E93;
+    opacity: 0.7;
     margin-top: 10px !important;
     word-break: break-all;
     display: flex;
@@ -352,85 +499,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.history-tx-hash .explorer-link:hover {
-    color: #7FE8FF !important;
-}
-.copy-tx-button.ant-btn-text {
-    color: #8E8E93 !important;
+.history-tx-hash .explorer-link:hover { color: #7FE8FF !important; }
+.copy-tx-button.ant-btn-text { /* Uses Button theme */
+    opacity: 0.6;
     padding: 0 4px !important;
     margin-left: 4px !important;
     height: auto !important;
 }
-.copy-tx-button.ant-btn-text:hover {
-    color: #7065F0 !important;
-    background-color: transparent !important;
-}
+.copy-tx-button.ant-btn-text:hover { opacity: 1; background-color: transparent !important; }
 
-
-.dark-theme-pagination.ant-pagination {
-    margin-top: 24px !important;
-}
-.dark-theme-pagination .ant-pagination-item a,
-.dark-theme-pagination .ant-pagination-item-link {
-    color: #A0A0A5 !important;
-}
-.dark-theme-pagination .ant-pagination-item-active a,
-.dark-theme-pagination .ant-pagination-item-active {
-    color: #FFFFFF !important;
-    background-color: #7065F0 !important;
-    border-color: #7065F0 !important;
-}
-.dark-theme-pagination .ant-pagination-item:hover a,
-.dark-theme-pagination .ant-pagination-item-link:hover {
-    color: #7065F0 !important;
-}
-.dark-theme-pagination .ant-pagination-disabled .ant-pagination-item-link {
-    color: #6A6A6E !important;
-}
-
-
-.modal-title-text {
-    color: #7065F0 !important;
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-.modal-text {
-    color: #D1D1D6;
-    margin-bottom: 12px;
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
-.modal-text.small-note {
-    font-size: 0.85rem;
-    color: #A0A0A5;
-}
-.modal-descriptions .ant-descriptions-item-label {
-    color: #A0A0A5 !important;
-    font-weight: 500;
-}
-.modal-descriptions .ant-descriptions-item-content {
-    color: #E0E0E5 !important;
-    font-weight: 500;
-}
-.modal-alert.ant-alert {
-    background-color: rgba(88, 214, 255, 0.08) !important;
-    border-color: rgba(88, 214, 255, 0.15) !important;
-    border-radius: 8px !important;
-}
-.modal-alert.ant-alert .ant-alert-message {
-    color: #E0E0E5 !important;
-    font-weight: 500;
-}
-.modal-alert.ant-alert .ant-alert-description {
-    color: #B0B0B5 !important;
-    font-size: 0.85rem;
-}
-.stake-selection-modal-content .ant-select {
-
-}
-.stake-selection-modal-content .ant-select-selector {
-
-}
-.stake-selection-modal-content .ant-select-arrow {
-    color: #A0A0A5 !important;
-}
+/* Pagination theme from ConfigProvider */
+/* Modal theme from ConfigProvider */
