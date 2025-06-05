@@ -39,6 +39,7 @@ const PushPage = () => {
 
     const numberOfLines = 72;
     const transitionAnimationDuration = 1200;
+    const dialogAppearDelay = 40;
 
     const fetchUserArixBalance = useCallback(async () => {
         if (rawAddress) {
@@ -70,7 +71,7 @@ const PushPage = () => {
                 setWheelState('IDLE_DIM');
                 setAnimatingWheelCenter(false);
                 setShowMainBottomSheet(true);
-            }, transitionAnimationDuration);
+            }, transitionAnimationDuration + dialogAppearDelay);
         }
     };
 

@@ -205,7 +205,6 @@
     transform-origin: 0.75px 134px;
     margin-left: -0.75px;
     border-radius: 0.5px;
-    opacity: 0.03;
 }
 
 .push-wheel-container.state-idle-lit .wheel-tick {
@@ -219,7 +218,7 @@
     animation-duration: var(--transition-animation-duration);
     animation-timing-function: linear;
     animation-fill-mode: forwards;
-    animation-delay: calc(var(--tick-index) * (var(--transition-animation-duration) / var(--number-of-lines) * 0.8));
+    animation-delay: calc(var(--tick-index) * (var(--transition-animation-duration) / var(--number-of-lines)));
 }
 
 @keyframes k-wheel-unfill {
@@ -238,7 +237,7 @@
     animation-duration: var(--transition-animation-duration);
     animation-timing-function: linear;
     animation-fill-mode: forwards;
-    animation-delay: calc(var(--tick-index) * (var(--transition-animation-duration) / var(--number-of-lines) * 0.8));
+    animation-delay: calc(var(--tick-index) * (var(--transition-animation-duration) / var(--number-of-lines)));
 }
 
 @keyframes k-wheel-fill {
