@@ -1,3 +1,4 @@
+/* AR_FRONTEND/src/App.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -11,11 +12,9 @@
   -webkit-text-size-adjust: 100%;
 
   color-scheme: dark;
-  /* Default text color and background for the whole app, overridden by Ant Design theme where applicable */
-  color: #A3AECF; /* var(--app-primary-text-light) */
-  background-color: #000000; /* var(--app-main-bg) */
+  color: #A3AECF; 
+  background-color: #000000; 
 
-  /* CSS Variables for easier management and consistency with AntD Theme */
   --app-primary-text-light: #A3AECF;
   --app-bg-dark-element: #08090A;
   --app-bg-dark-section: #111215;
@@ -25,8 +24,8 @@
   --app-button-primary-bg: #A3AECF;
   --app-button-primary-text: #08090A;
   --app-button-primary-hover-bg: #8D9AC3;
-  --app-banner-bg: #121800; /* Specific for game banner */
-  --app-banner-text-color: #CAD62A; /* Specific for game banner */
+  --app-banner-bg: #121800; 
+  --app-banner-text-color: #CAD62A; 
 }
 
 html, body {
@@ -52,7 +51,7 @@ body {
 
 a {
   font-weight: 500;
-  color: var(--app-primary-text-light); /* Use primary text for links too */
+  color: var(--app-primary-text-light); 
   text-decoration: none;
   transition: color 0.2s ease-in-out;
 }
@@ -96,7 +95,7 @@ h1, h2, h3, h4, h5, h6 {
 .ant-select-focused .ant-select-selector,
 .ant-picker-focused,
 .ant-btn:focus-visible {
-  outline: none !important; /* Ant Design components handle focus internally */
+  outline: none !important; 
 }
 
 .app-layout {
@@ -141,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
     text-transform: uppercase;
 }
 
-@media (min-width: 992px) { /* lg breakpoint */
+@media (min-width: 992px) { 
     .app-header {
         padding: 0 24px !important;
         height: 64px !important;
@@ -179,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-content-wrapper {
-    padding-top: 56px; /* Matches header height */
+    padding-top: 56px; 
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -188,12 +187,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-content-wrapper.mobile-view {
-    padding-bottom: 60px; /* Matches mobile nav height */
+    padding-bottom: 60px; 
 }
 
-@media (min-width: 992px) { /* lg breakpoint */
+@media (min-width: 992px) { 
     .app-content-wrapper {
-        padding-top: 64px; /* Matches desktop header height */
+        padding-top: 64px; 
     }
 }
 
@@ -205,7 +204,7 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
 }
 
-@media (min-width: 768px) { /* md breakpoint */
+@media (min-width: 768px) { 
     .app-content {
         padding: 24px;
     }
@@ -214,9 +213,9 @@ h1, h2, h3, h4, h5, h6 {
 .desktop-sider {
     background: var(--app-bg-dark-section) !important;
     border-right: 1px solid var(--app-border-color) !important;
-    height: calc(100vh - 64px); /* Matches desktop header height */
+    height: calc(100vh - 64px); 
     position: sticky !important;
-    top: 64px !important; /* Matches desktop header height */
+    top: 64px !important; 
     z-index: 999;
     overflow: auto;
 }
@@ -307,26 +306,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .responsive-nav-item.selected {
-    background-color: var(--app-button-primary-bg) !important; /* Primary button background for selected */
-    color: var(--app-button-primary-text) !important; /* Dark text for selected */
-    opacity: 1 !important; /* Full opacity */
-    border-radius: 6px; /* Optional: slight rounding for selected tab appearance */
-    margin: 4px; /* Add margin to prevent touching edges and other tabs */
-    height: calc(100% - 8px); /* Adjust height because of margin */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Subtle shadow */
+    background-color: transparent !important; 
+    color: var(--app-primary-text-light) !important; 
+    opacity: 1 !important; 
 }
-/* Ensure icon and label inside selected item also get the dark text color */
+
 .responsive-nav-item.selected .nav-item-icon,
 .responsive-nav-item.selected .nav-item-label {
-    color: var(--app-button-primary-text) !important;
+    color: var(--app-primary-text-light) !important;
 }
 
 
 .responsive-nav-item:active {
-    background-color: rgba(163, 174, 207, 0.08); /* Default active state if not selected */
+    background-color: rgba(163, 174, 207, 0.08); 
 }
 .responsive-nav-item.selected:active {
-    background-color: var(--app-button-primary-hover-bg) !important; /* Hover color for selected if needed */
+    background-color: rgba(163, 174, 207, 0.1) !important; 
 }
 
 
@@ -338,7 +333,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     transition: color 0.15s ease-in-out;
-    color: inherit;
+    color: inherit; 
 }
 
 .nav-item-icon .anticon svg {
@@ -357,7 +352,7 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 100%;
     padding: 0 2px;
     transition: color 0.15s ease-in-out;
-    color: inherit;
+    color: inherit; 
 }
 
 .responsive-nav-dropdown-overlay .ant-dropdown-menu {
@@ -390,23 +385,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-/* Ant Design Component Overrides (from theme object in App.jsx, but CSS can also be used) */
-/* Card */
 .ant-card {
-    box-shadow: var(--boxShadow, 0 4px 12px rgba(0, 0, 0, 0.35)) !important; /* Use antd theme var or fallback */
+    box-shadow: var(--boxShadow, 0 4px 12px rgba(0, 0, 0, 0.35)) !important; 
     background-color: var(--app-bg-dark-element) !important;
     color: var(--app-primary-text-light) !important;
     border: 1px solid var(--app-border-color) !important;
-    border-radius: var(--borderRadiusLG, 14px) !important; /* Use antd theme var or fallback */
+    border-radius: var(--borderRadiusLG, 14px) !important; 
 }
 .ant-card-head {
     color: var(--app-primary-text-light) !important;
     border-bottom: 1px solid var(--app-border-color) !important;
-    padding: 0 16px !important; /* Consistent padding for card head */
+    padding: 0 16px !important; 
     min-height: 48px !important;
 }
 .ant-card-head-title {
-    padding: 12px 0 !important; /* Vertical padding for title */
+    padding: 12px 0 !important; 
     font-size: 1rem;
     font-weight: 600;
 }
@@ -415,11 +408,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 .ant-card-body {
      color: var(--app-primary-text-light) !important;
-     padding: 16px !important; /* Default padding for card body */
+     padding: 16px !important; 
 }
 
 
-/* Buttons */
 .ant-btn {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     font-weight: 500;
@@ -441,12 +433,11 @@ h1, h2, h3, h4, h5, h6 {
     border-color: var(--app-border-color) !important;
 }
 .ant-btn-default:not([disabled]):hover, .ant-btn-default:not([disabled]):focus {
-    background-color: var(--app-bg-dark-element) !important; /* Darker hover for default */
+    background-color: var(--app-bg-dark-element) !important; 
     color: var(--app-primary-text-light) !important;
     border-color: var(--app-primary-text-light) !important;
 }
 
-/* Inputs */
 .ant-input-number-input-wrap input { text-align: left !important; }
 .ant-input, .ant-input-number, .ant-select-selector, .ant-picker {
     background-color: var(--app-bg-dark-element) !important;
@@ -467,7 +458,6 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--app-primary-text-light) !important;
 }
 
-/* Tabs */
 .ant-tabs-tab { padding: 10px 16px !important; font-weight: 500; }
 .ant-tabs-tab .ant-tabs-tab-btn { color: var(--app-primary-text-light) !important; opacity: 0.7; transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out; }
 .ant-tabs-tab-active .ant-tabs-tab-btn { color: var(--app-primary-text-light) !important; opacity: 1; }
@@ -475,7 +465,6 @@ h1, h2, h3, h4, h5, h6 {
 .ant-tabs-ink-bar { background: var(--app-primary-text-light) !important; }
 
 
-/* Modal styling */
 .ant-modal-content { background-color: var(--app-bg-dark-element) !important; color: var(--app-primary-text-light) !important; border-radius: var(--borderRadiusLG, 14px) !important; }
 .ant-modal-header { background-color: var(--app-bg-dark-element) !important; color: var(--app-primary-text-light) !important; border-bottom: 1px solid var(--app-border-color) !important; border-radius: var(--borderRadiusLG, 14px) var(--borderRadiusLG, 14px) 0 0 !important; }
 .ant-modal-title { color: var(--app-primary-text-light) !important; }
@@ -483,11 +472,9 @@ h1, h2, h3, h4, h5, h6 {
 .ant-modal-close:hover { color: var(--app-primary-text-light) !important; opacity: 0.7; }
 .ant-modal-footer { border-top: 1px solid var(--app-border-color) !important; background-color: var(--app-bg-dark-element) !important; border-radius: 0 0 var(--borderRadiusLG, 14px) var(--borderRadiusLG, 14px) !important; }
 
-/* Spin color */
 .ant-spin-dot-item { background-color: var(--app-primary-text-light) !important; }
 .ant-spin-text { color: var(--app-primary-text-light) !important; opacity: 0.8; }
 
-/* Alert styling */
 .ant-alert { border-radius: var(--borderRadiusLG, 12px) !important; border-width: 1px !important; }
 .ant-alert-info { background-color: rgba(163, 174, 207, 0.05) !important; border-color: rgba(163, 174, 207, 0.2) !important; }
 .ant-alert-success { background-color: rgba(76, 175, 80, 0.1) !important; border-color: rgba(76, 175, 80, 0.3) !important; }
@@ -500,7 +487,6 @@ h1, h2, h3, h4, h5, h6 {
 .ant-alert-warning .ant-alert-icon { color: #FFC107 !important; }
 .ant-alert-error .ant-alert-icon { color: #F44336 !important; }
 
-/* Descriptions */
 .ant-descriptions-item-label { color: var(--app-primary-text-light) !important; opacity: 0.7; }
 .ant-descriptions-item-content { color: var(--app-primary-text-light) !important; }
 .ant-descriptions-view { border: 1px solid var(--app-border-color) !important; }
@@ -509,19 +495,17 @@ h1, h2, h3, h4, h5, h6 {
 .ant-descriptions-bordered .ant-descriptions-item-content { border-right: 1px solid var(--app-border-color) !important; }
 
 
-/* Page Specific Title (if more prominent than section title) */
 .page-title {
     color: var(--app-primary-text-light) !important;
     font-weight: 600 !important;
     margin-bottom: 24px !important;
     text-align: center;
-    font-size: 1.7rem; /* Slightly larger for main page titles */
+    font-size: 1.7rem; 
 }
 @media (max-width: 767px) {
     .page-title { font-size: 1.5rem !important; }
 }
 
-/* Generic section title */
 .section-title {
     color: var(--app-primary-text-light) !important;
     font-weight: 600 !important;
@@ -543,12 +527,10 @@ h1, h2, h3, h4, h5, h6 {
 img { max-width: 100%; height: auto; display: block; }
 * { -webkit-tap-highlight-color: transparent; }
 
-/* Text utility classes */
 .text-primary-light { color: var(--app-primary-text-light) !important; }
 .text-secondary-light { color: var(--app-primary-text-light) !important; opacity: 0.7; }
 .text-tertiary-light { color: var(--app-primary-text-light) !important; opacity: 0.5; }
 
-/* Modal Text & Components */
 .modal-title-text { color: var(--app-primary-text-light) !important; font-weight: 600; }
 .modal-text { color: var(--app-primary-text-light) !important; opacity: 0.9; font-size: 0.95rem; line-height: 1.5; }
 .modal-input-label { color: var(--app-primary-text-light) !important; opacity: 0.8; display: block; margin-bottom: 6px; font-weight: 500; }

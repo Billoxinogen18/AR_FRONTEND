@@ -1,3 +1,4 @@
+// AR_FRONTEND/src/App.jsx
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
@@ -35,10 +36,10 @@ const DesktopMenu = () => {
     const location = useLocation();
     const navigate = useNavigate();
     let currentPath = location.pathname;
-    // Default to /game if at root or unknown path for desktop
+    
     if (currentPath === '/') currentPath = '/game';
     if (!menuConfig.some(item => item.key === currentPath)) {
-        const fallbackPath = '/game'; // Default to game page
+        const fallbackPath = '/game'; 
          useEffect(() => {
             if (location.pathname !== fallbackPath && !menuConfig.some(item => item.key === location.pathname)) {
               navigate(fallbackPath, { replace: true });
@@ -81,6 +82,14 @@ function App() {
     const screens = useBreakpoint();
     const isMobile = !screens.lg;
     const [tonConnectUI, setOptions] = useTonConnectUI();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+     useEffect(() => {
+        if (location.pathname === '/' && menuConfig.some(item => item.key === '/game')) {
+            navigate('/game', { replace: true });
+        }
+    }, [location.pathname, navigate]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -104,8 +113,8 @@ function App() {
     const APP_BG_DARK_CONTAINER = '#1C1C1E';
     const APP_MAIN_BG = '#000000';
     const APP_BORDER_COLOR = '#2D3142';
-    const APP_BUTTON_PRIMARY_BG = '#A3AECF'; // Your "white" for buttons
-    const APP_BUTTON_PRIMARY_TEXT = '#08090A'; // Dark text for primary buttons
+    const APP_BUTTON_PRIMARY_BG = '#A3AECF'; 
+    const APP_BUTTON_PRIMARY_TEXT = '#08090A'; 
 
     const NEW_TELEGRAM_DARK_THEME = {
         algorithm: antdTheme.darkAlgorithm,
@@ -158,8 +167,8 @@ function App() {
             Button: {
                 colorPrimary: APP_BUTTON_PRIMARY_BG,
                 colorPrimaryBg: APP_BUTTON_PRIMARY_BG,
-                colorPrimaryHover: '#8D9AC3', // Slightly darker primary color for hover
-                colorTextLightSolid: APP_BUTTON_PRIMARY_TEXT, // Text color on primary buttons
+                colorPrimaryHover: '#8D9AC3', 
+                colorTextLightSolid: APP_BUTTON_PRIMARY_TEXT, 
                 defaultBg: APP_BG_DARK_ELEMENT,
                 defaultColor: APP_PRIMARY_COLOR,
                 defaultBorderColor: APP_BG_DARK_ELEMENT,
@@ -205,10 +214,10 @@ function App() {
                 colorText: APP_PRIMARY_COLOR,
             },
             Radio: {
-                buttonSolidCheckedBg: APP_BUTTON_PRIMARY_BG, // Use button primary bg for selected radio
-                buttonSolidCheckedColor: APP_BUTTON_PRIMARY_TEXT, // Dark text on selected radio
-                buttonSolidCheckedHoverBg: '#8D9AC3', // Darker primary for hover
-                buttonSolidCheckedActiveBg: '#7C8BAE', // Even darker for active
+                buttonSolidCheckedBg: APP_BUTTON_PRIMARY_BG, 
+                buttonSolidCheckedColor: APP_BUTTON_PRIMARY_TEXT, 
+                buttonSolidCheckedHoverBg: '#8D9AC3', 
+                buttonSolidCheckedActiveBg: '#7C8BAE', 
                 colorBorder: APP_BORDER_COLOR,
                 buttonBg: APP_BG_DARK_CONTAINER,
                 buttonPaddingInline: 15,
@@ -296,7 +305,7 @@ function App() {
                         <Content className="app-content">
                             <Suspense fallback={loadingSpinner}>
                                 <Routes>
-                                    <Route path="/" element={<GamePage />} /> {/* Default to GamePage */}
+                                    <Route path="/" element={<GamePage />} /> 
                                     <Route path="/tasks" element={<TaskPage />} />
                                     <Route path="/earn" element={<EarnPage />} />
                                     <Route path="/game" element={<GamePage />} />

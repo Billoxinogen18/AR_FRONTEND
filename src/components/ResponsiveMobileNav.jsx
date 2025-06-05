@@ -1,9 +1,8 @@
-
+// AR_FRONTEND/src/components/ResponsiveMobileNav.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Dropdown, Grid } from 'antd';
+import { Menu, Dropdown } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
-
 
 const ResponsiveMobileNav = ({ menuConfig }) => {
     const location = useLocation();
@@ -16,9 +15,15 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
 
     let currentPath = location.pathname;
     
+    if (currentPath === '/') currentPath = '/game'; 
     if (!menuConfig.some(item => item.key === currentPath)) {
-        currentPath = '/earn';
+         const fallbackPath = '/game'; 
+         
+         if (location.pathname !== fallbackPath) {
+              currentPath = fallbackPath;
+         }
     }
+
 
     useEffect(() => {
         const calculateVisibleItems = () => {
@@ -26,8 +31,6 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
 
             const currentContainerWidth = containerRef.current.offsetWidth;
             setContainerWidth(currentContainerWidth);
-
-            
             
             const minTabWidth = 65; 
             const maxPossibleTabs = menuConfig.length;
@@ -35,7 +38,6 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
 
             let numVisible = maxPossibleTabs;
             let totalWidthNeeded = maxPossibleTabs * minTabWidth;
-
             
             if (totalWidthNeeded > currentContainerWidth) {
                 totalWidthNeeded += moreButtonWidth; 
@@ -60,24 +62,21 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
             clearTimeout(debouncedCalculate);
             window.removeEventListener('resize', calculateVisibleItems);
         };
-    }, [menuConfig]); 
+    }, [menuConfig, location.pathname]); 
 
     const handleNavigation = (path) => {
         navigate(path);
     };
+    
+    const isHiddenItemSelected = hiddenItems.some(item => item.key === currentPath);
 
     const dropdownMenu = {
         items: hiddenItems.map(item => ({
             key: item.key,
-            icon: React.cloneElement(item.icon, { style: { fontSize: '16px', marginRight: '8px', color: item.key === currentPath ? '#7065F0' : '#A0A0A5' } }),
-            label: <span style={{color: item.key === currentPath ? '#7065F0' : '#E0E0E5'}}>{item.labelText}</span>,
+            icon: React.cloneElement(item.icon, { style: { fontSize: '16px', marginRight: '8px', color: item.key === currentPath ? 'var(--app-primary-text-light)' : 'var(--app-primary-text-light)', opacity: item.key === currentPath ? 1 : 0.6 } }),
+            label: <span style={{color: item.key === currentPath ? 'var(--app-primary-text-light)' : 'var(--app-primary-text-light)', opacity: item.key === currentPath ? 1 : 0.8}}>{item.labelText}</span>,
             onClick: () => handleNavigation(item.key),
         })),
-        style: {
-            backgroundColor: '#252525', 
-            borderRadius: '10px', 
-            border: '1px solid #303030', 
-        }
     };
 
     
@@ -105,11 +104,11 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
                             {React.cloneElement(item.icon, {
                                 style: {
                                     fontSize: containerWidth < 350 ? '18px' : '20px',
-                                    color: isSelected ? '#7065F0' : '#8E8E93'
+                                    color: isSelected ? 'var(--app-primary-text-light)' : 'inherit'
                                 }
                             })}
                         </div>
-                        <div className="nav-item-label" style={{color: isSelected ? '#7065F0' : '#8E8E93' }}>
+                        <div className="nav-item-label" style={{color: isSelected ? 'var(--app-primary-text-light)' : 'inherit' }}>
                             {item.labelText}
                         </div>
                     </div>
@@ -124,15 +123,15 @@ const ResponsiveMobileNav = ({ menuConfig }) => {
                     overlayClassName="responsive-nav-dropdown-overlay"
                 >
                     <div
-                        className={`responsive-nav-item more-button ${hiddenItems.some(item => item.key === currentPath) ? 'selected' : ''}`}
+                        className={`responsive-nav-item more-button ${isHiddenItemSelected ? 'selected' : ''}`}
                         style={{ flexBasis: itemFlexBasis }}
                         role="button"
                         tabIndex={0}
                     >
                         <div className="nav-item-icon">
-                            <MoreOutlined style={{ fontSize: containerWidth < 350 ? '18px' : '20px', color: hiddenItems.some(item => item.key === currentPath) ? '#7065F0' : '#8E8E93' }}/>
+                            <MoreOutlined style={{ fontSize: containerWidth < 350 ? '18px' : '20px', color: isHiddenItemSelected ? 'var(--app-primary-text-light)' : 'inherit' }}/>
                         </div>
-                        <div className="nav-item-label" style={{color: hiddenItems.some(item => item.key === currentPath) ? '#7065F0' : '#8E8E93' }}>
+                        <div className="nav-item-label" style={{color: isHiddenItemSelected ? 'var(--app-primary-text-light)' : 'inherit' }}>
                             MORE
                         </div>
                     </div>
