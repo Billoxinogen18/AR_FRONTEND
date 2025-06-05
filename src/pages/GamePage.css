@@ -1,71 +1,204 @@
-
+:root {
+    --app-primary-text-light: #A3AECF;
+    --app-bg-dark-element: #08090A;
+    --app-bg-dark-section: #111215;
+    --app-bg-dark-container: #1C1C1E;
+    --app-banner-bg: #121800;
+    --app-button-primary-hover-bg: #8D9AC3;
+}
 
 .game-page-container {
-    padding: 0px 0px 24px 0px;
+    background-color: #000000;
+    min-height: calc(100vh - 56px - 60px);
+    padding: 0 16px 24px 16px;
+    box-sizing: border-box;
+    color: var(--app-primary-text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.game-page-banner.ant-alert {
+.header-content-wrapper {
+    background-color: var(--app-bg-dark-section);
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 16px 16px 16px;
+    margin-top: 4px;
+    margin-bottom: 20px;
     border-radius: 12px;
-    margin-bottom: 24px;
-    background-color: #252525 !important;
-    border: 1px solid #38383A !important;
-    padding: 16px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.game-page-banner .ant-alert-icon {
+.push-balance-section {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.balance-info-box {
+    background-color: var(--app-bg-dark-element);
+    border-radius: 12px;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.balance-amount-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.balance-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--app-bg-dark-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.balance-icon-representation {
+    color: var(--app-primary-text-light);
     font-size: 20px;
-    margin-top: 2px;
+    line-height: 1;
 }
-.game-page-banner .ant-alert-message .ant-typography {
-    font-size: 1.05rem;
-    font-weight: 600;
+
+.push-balance-amount {
+    color: var(--app-primary-text-light) !important;
+    font-weight: 600 !important;
+    font-size: 2.2rem !important;
+    line-height: 1 !important;
+    margin: 0 !important;
 }
-.game-page-banner .ant-alert-description .ant-typography {
-    font-size: 0.9rem;
+.balance-spin .ant-spin-dot i {
+    background-color: var(--app-primary-text-light) !important;
 }
-.game-page-banner .banner-play-button {
-    font-weight: 500;
+
+.push-balance-currency {
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    margin-top: 2px !important;
+    letter-spacing: 0.5px;
+}
+
+.game-page-top-banner {
+    background: var(--app-banner-bg);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.game-page-top-banner-text {
+    color: #CAD62A !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.3;
+    margin: 0 !important;
+}
+
+.game-page-title {
+    color: var(--app-primary-text-light) !important;
+    font-weight: 700 !important;
+    font-size: 2.2rem !important;
+    text-align: center;
+    margin-bottom: 8px !important;
 }
 
 .game-page-intro-text {
     text-align: center;
-    color: #A0A0A5;
-    font-size: 1rem;
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.8;
+    font-size: 0.95rem;
     margin-bottom: 24px;
     max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    line-height: 1.6;
 }
 
-.game-selection-card {
-    text-align: center;
-    border-width: 1px !important;
+.game-card-list {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-card {
+    background-color: var(--app-bg-dark-element) !important;
+    border-radius: 16px !important;
+    border: none !important;
+    width: 100%;
+    overflow: hidden;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
 }
-.game-selection-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+.game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
-.coinflip-promo-card .ant-card-body {
+.game-card .ant-card-body {
     padding: 0 !important;
 }
 
-.game-promo-image-col {
+.game-card-row {
+    display: flex;
+    min-height: 200px;
+}
+
+.game-card-image-section {
+    flex: 0 0 45%;
+    background-color: #050607;
+    padding: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #121212;
-    padding: 20px;
-    border-radius: 12px 0 0 12px;
-}
-.game-promo-image {
-    max-width: 100%;
-    max-height: 150px;
-    object-fit: contain;
+    position: relative;
+    overflow: hidden;
 }
 
-.game-promo-content-col {
+.game-card-image-section img {
+    max-width: 100%;
+    max-height: 100%; /* Ensure image fits within the section */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Or 'cover' depending on desired effect */
+    z-index: 1;
+}
+
+.game-card-image-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(163, 174, 207, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(163, 174, 207, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: 0;
+}
+
+.game-card-content-section {
+    flex: 1;
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -74,53 +207,83 @@
     text-align: left;
 }
 
-.game-promo-title {
-    color: #7065F0 !important;
-    font-weight: 700 !important;
-    font-size: 1.6rem !important;
+.game-card-title {
+    color: var(--app-primary-text-light) !important;
+    font-weight: 600 !important;
+    font-size: 1.3rem !important;
     margin-bottom: 8px !important;
-    letter-spacing: 0.5px;
 }
 
-.game-promo-description {
-    color: #A0A0A5;
-    font-size: 0.95rem;
+.game-card-description {
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7;
+    font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 20px !important;
 }
 
-.game-promo-button {
+.game-card-button.ant-btn {
+    background: var(--app-primary-text-light) !important;
+    color: var(--app-bg-dark-element) !important;
+    border: none !important;
     font-weight: 600 !important;
-    font-size: 1rem !important;
-    height: 42px !important;
-    padding: 0 24px !important;
+    font-size: 0.95rem !important;
+    height: 40px !important;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
 }
-.game-promo-button .anticon {
+.game-card-button.ant-btn:hover {
+    background: var(--app-button-primary-hover-bg) !important;
+    color: var(--app-bg-dark-element) !important;
+}
+.game-card-button .button-arrow {
     margin-left: 8px;
+    font-size: 1.1em;
 }
 
-
-.coming-soon-card {
-    opacity: 0.7;
-}
-.coming-soon-card .ant-btn {
-    background-color: #38383A !important;
-    border-color: #38383A !important;
-    color: #8E8E93 !important;
-    cursor: not-allowed;
-}
-
-@media (max-width: 575px) {
-    .game-promo-image-col {
-        border-radius: 12px 12px 0 0;
-        min-height: 160px;
+@media (max-width: 767px) {
+    .game-card-row {
+        flex-direction: column;
     }
-    .game-promo-content-col {
+    .game-card-image-section {
+        flex: 0 0 auto;
+        min-height: 180px;
+        border-radius: 16px 16px 0 0;
+    }
+     .game-card-image-section img {
+        max-height: 140px; /* Adjust for stacked view */
+    }
+    .game-card-content-section {
         align-items: center;
         text-align: center;
         padding: 20px;
     }
-    .game-page-banner .ant-alert-action {
-        margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+    .game-page-title {
+        font-size: 1.8rem !important;
+    }
+    .game-page-intro-text {
+        font-size: 0.9rem;
+    }
+    .game-card-image-section {
+        min-height: 160px;
+    }
+    .game-card-image-section img {
+        max-height: 120px;
+    }
+    .game-card-title {
+        font-size: 1.1rem !important;
+    }
+    .game-card-description {
+        font-size: 0.85rem;
+    }
+    .game-card-button.ant-btn {
+        font-size: 0.9rem !important;
+        height: 38px !important;
+        padding: 0 16px !important;
     }
 }
