@@ -83,16 +83,18 @@ const GamePage = () => {
                             <img 
                                 src="/img/coinflip-card-visual.png" 
                                 alt="Coinflip Game Visual"
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }} /* Optional: hide if image fails */
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                         </div>
                         <div className="game-card-content-section">
                             <Title level={4} className="game-card-title">Heads or Tails?</Title>
                             <Paragraph className="game-card-description">
-                                Make a choice and increase your balance up to x2!0! Take a risk and win!
+                                Make a choice and increase your balance up to x210! Take a risk and win!
                             </Paragraph>
                             <Button className="game-card-button">
-                                Test your luck <span className="button-arrow">→</span>
+                                <span className="button-icon-circle">●</span>
+                                Test your luck 
+                                <span className="button-arrow">→</span>
                             </Button>
                         </div>
                     </div>

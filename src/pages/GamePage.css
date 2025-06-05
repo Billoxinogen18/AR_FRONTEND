@@ -161,6 +161,7 @@
 
 .game-card-row {
     display: flex;
+    flex-direction: row; /* Default to side-by-side */
     min-height: 200px;
 }
 
@@ -177,9 +178,9 @@
 
 .game-card-image-section img {
     max-width: 100%;
-    max-height: 100%; /* Ensure image fits within the section */
-    height: auto; /* Maintain aspect ratio */
-    object-fit: contain; /* Or 'cover' depending on desired effect */
+    max-height: 100%;
+    height: auto;
+    object-fit: contain;
     z-index: 1;
 }
 
@@ -238,14 +239,22 @@
     background: var(--app-button-primary-hover-bg) !important;
     color: var(--app-bg-dark-element) !important;
 }
+
+.game-card-button .button-icon-circle {
+    margin-right: 8px;
+    font-size: 0.8em;
+    line-height: 1;
+    color: var(--app-bg-dark-element);
+}
+
 .game-card-button .button-arrow {
     margin-left: 8px;
     font-size: 1.1em;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 575px) { /* Changed breakpoint from 767px to 575px */
     .game-card-row {
-        flex-direction: column;
+        flex-direction: column; /* Stack on small screens */
     }
     .game-card-image-section {
         flex: 0 0 auto;
@@ -253,7 +262,7 @@
         border-radius: 16px 16px 0 0;
     }
      .game-card-image-section img {
-        max-height: 140px; /* Adjust for stacked view */
+        max-height: 140px;
     }
     .game-card-content-section {
         align-items: center;
