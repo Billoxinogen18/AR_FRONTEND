@@ -1,39 +1,33 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Button, Modal, Alert, Spin, message } from 'antd'; 
+import { Typography, Button, Modal, Alert, Spin, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
     RightCircleOutlined,
-    RiseOutlined,
     CloseOutlined,
     CopyOutlined,
     InfoCircleOutlined,
     DollarCircleOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { getUserProfile } from '../services/api'; 
+import { getUserProfile } from '../services/api';
 
 import './PushPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 
-
-const FALLBACK_IMAGE_URL = '/img/fallback-icon.png'; 
-
 const ArixPushIcon = () => (
-    <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE_URL; }} />
+    <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = '/img/fallback-icon.png'; }} />
 );
 
 const PROJECT_ARIX_DEPOSIT_ADDRESS = "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWEK9wfDd";
 
 const PushPage = () => {
     const navigate = useNavigate();
-    
     const rawAddress = useTonAddress(false);
 
-    const [isWheelActive, setIsWheelActive] = useState(true);
+    const [isWheelActive, setIsWheelActive] = useState(false); // Start with scanning animation
     const [showMainBottomSheet, setShowMainBottomSheet] = useState(false);
     const [animatingWheel, setAnimatingWheel] = useState(false);
 
@@ -42,6 +36,8 @@ const PushPage = () => {
 
     const [claimableArix, setClaimableArix] = useState('0');
     const [loadingBalance, setLoadingBalance] = useState(false);
+
+    const numberOfLines = 60; // Matched in CSS variable --number-of-lines
 
     const fetchUserArixBalance = useCallback(async () => {
         if (rawAddress) {
@@ -67,20 +63,20 @@ const PushPage = () => {
     const handleWheelPress = () => {
         if (animatingWheel) return;
         setAnimatingWheel(true);
-        setIsWheelActive(false); 
+        setIsWheelActive(true); // Trigger all ticks to light up
         setTimeout(() => {
-            setShowMainBottomSheet(true); 
-            setAnimatingWheel(false); 
-        }, 1500); 
+            setShowMainBottomSheet(true);
+            setAnimatingWheel(false);
+        }, 1500);
     };
 
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
-        setShowMainBottomSheet(false); 
-                                      
+        setShowMainBottomSheet(false);
         if (!playCoinflip) {
-            
-            
-            setIsWheelActive(true); 
+            setIsWheelActive(true); // Keep all ticks lit if modal is just closed
+        } else {
+            // If navigating away or starting game, we might want to reset to scanning
+            // For now, it stays lit until page reload/navigation naturally resets component state
         }
     };
 
@@ -102,28 +98,22 @@ const PushPage = () => {
             });
     };
 
-    const numberOfLines = 60;
-
     return (
-        <div className="push-page-container">
-            {}
+        <div className="push-page-container" style={{'--number-of-lines': numberOfLines}}>
             <div className="push-balance-section">
-                <div className="push-balance-display">
-                    <div className="balance-icon-container">
-                        <div className="balance-icon-circle">
-                            <span className="balance-icon-text">V</span> {}
-                        </div>
+                <div className="balance-info-box">
+                    <div className="balance-icon-wrapper">
+                        <span className="balance-icon-representation">♢</span>
                     </div>
-                    <div className="balance-amount-display">
+                    <div className="balance-details-wrapper">
                         <Text className="push-balance-amount">
-                            {loadingBalance ? <Spin size="small" style={{ marginRight: '5px' }} /> : claimableArix}
+                            {loadingBalance ? <Spin size="small" /> : claimableArix}
                         </Text>
+                        <Text className="push-balance-currency">ARIX</Text>
                     </div>
                 </div>
-                <Text className="push-balance-currency">Arix</Text> {}
             </div>
 
-            {}
             <div className="push-top-buttons">
                 <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
                     <ArrowDownOutlined /> Top up
@@ -133,23 +123,17 @@ const PushPage = () => {
                 </Button>
             </div>
 
-            {}
             <div className="push-banner-container">
                 <div className="push-banner-content">
-                    <div className="banner-icon">
-                        <RiseOutlined />
-                    </div>
                     <div className="banner-text">
-                        <Text className="banner-title">X2 or maybe x256? Play Coinflip and try your luck!</Text>
-                        <Button className="banner-play-button" icon={<RightCircleOutlined />} onClick={() => navigate('/game')} />
+                        <Text className="banner-title">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
                     </div>
                 </div>
             </div>
 
-            {}
             <div className="push-wheel-area">
                 <div
-                    className={`push-wheel-container ${animatingWheel ? 'animating' : ''}`}
+                    className={`push-wheel-container ${animatingWheel ? 'animating' : ''} ${isWheelActive ? 'all-ticks-active' : 'scanning-mode'}`}
                     onClick={handleWheelPress}
                     role="button"
                     aria-label="Activate Push Wheel"
@@ -160,8 +144,11 @@ const PushPage = () => {
                         {Array.from({ length: numberOfLines }).map((_, index) => (
                             <div
                                 key={index}
-                                className={`wheel-tick ${isWheelActive ? 'active' : 'inactive'}`}
-                                style={{ transform: `rotate(${index * (360 / numberOfLines)}deg)` }}
+                                className={`wheel-tick ${isWheelActive ? 'active' : ''}`}
+                                style={{
+                                    transform: `rotate(${index * (360 / numberOfLines)}deg)`,
+                                    '--tick-index': index
+                                }}
                             />
                         ))}
                     </div>
@@ -186,19 +173,17 @@ const PushPage = () => {
                 </div>
             </div>
 
-            {}
             <Modal
                 open={showMainBottomSheet}
                 onCancel={() => handleCloseMainBottomSheet(false)}
                 footer={null}
-                className="push-bottom-sheet-modal" 
-                closable={false} 
+                className="push-bottom-sheet-modal"
+                closable={false}
                 maskClosable={true}
-                
-                destroyOnClose 
-                wrapClassName="push-bottom-sheet-modal-wrapper" 
-                maskTransitionName="" 
-                transitionName="" 
+                destroyOnClose
+                wrapClassName="push-bottom-sheet-modal-wrapper"
+                maskTransitionName=""
+                transitionName=""
             >
                 <div className="push-bottom-sheet-content">
                     <Button
@@ -213,7 +198,7 @@ const PushPage = () => {
                         Terminal Station continues to follow its roadmap.
                     </Paragraph>
                     <div className="bottom-sheet-next-steps">
-                        <Text strong className="next-steps-title"><RiseOutlined style={{ marginRight: 8 }} />Next steps</Text>
+                        <Text strong className="next-steps-title"><RightCircleOutlined style={{ marginRight: 8, color: '#FFD700' }} />Next steps</Text>
                         <ol className="next-steps-list">
                             <li>New phase</li>
                             <li>Developing existing games and adding new ones to the Game Center</li>
@@ -229,7 +214,6 @@ const PushPage = () => {
                 </div>
             </Modal>
 
-            {}
             <Modal
                 open={showTopUpModal}
                 onCancel={() => setShowTopUpModal(false)}
@@ -237,9 +221,9 @@ const PushPage = () => {
                 className="push-topup-modal"
                 closable={false}
                 maskClosable={true}
-                centered 
+                centered
                 destroyOnClose
-                wrapClassName="push-topup-modal-wrapper" 
+                wrapClassName="push-topup-modal-wrapper"
                 width={400}
             >
                 <div className="push-topup-content">
@@ -255,7 +239,7 @@ const PushPage = () => {
                         <Title level={4} className="topup-modal-title">Balance</Title>
                     </div>
                     <div className="topup-modal-actions">
-                        <Button className="push-top-button top-up active"> {}
+                        <Button className="push-top-button top-up active">
                             <ArrowDownOutlined /> Top up
                         </Button>
                         <Button className="push-top-button cashout" onClick={() => { setShowTopUpModal(false); setShowCashoutModal(true); }}>
@@ -298,7 +282,6 @@ const PushPage = () => {
                 </div>
             </Modal>
 
-            {}
             <Modal
                 open={showCashoutModal}
                 onCancel={() => setShowCashoutModal(false)}
@@ -306,7 +289,7 @@ const PushPage = () => {
                 className="push-cashout-modal"
                 closable={false}
                 maskClosable={true}
-                centered 
+                centered
                 destroyOnClose
                 wrapClassName="push-cashout-modal-wrapper"
                 width={400}
@@ -327,14 +310,14 @@ const PushPage = () => {
                         <Button className="push-top-button top-up" onClick={() => { setShowCashoutModal(false); setShowTopUpModal(true); }}>
                             <ArrowDownOutlined /> Top up
                         </Button>
-                        <Button className="push-top-button cashout active"> {}
+                        <Button className="push-top-button cashout active">
                             <ArrowUpOutlined /> Cashout
                         </Button>
                     </div>
                     <Alert
                         message="ARIX withdrawal is only possible after playing at least one Coinflip game."
                         type="error"
-                        showIcon 
+                        showIcon
                         icon={<DollarCircleOutlined />}
                         className="cashout-condition-alert"
                         action={
