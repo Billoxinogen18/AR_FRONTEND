@@ -7,9 +7,8 @@
     --app-bg-dark-container: #1C1C1E;
     --app-bg-dark-box: #252525;
     --app-banner-bg: #121800;
-    --app-banner-border: #2c3a00;
     --app-modal-content-bg: #0D0E10;
-    --app-button-primary-hover-bg: #8D9AC3; /* Darker A3AECF */
+    --app-button-primary-hover-bg: #8D9AC3;
 }
 
 .push-page-container {
@@ -30,14 +29,14 @@
     background-color: var(--app-bg-dark-section);
     width: 100%;
     max-width: 400px;
-    padding: 16px 16px 20px 16px;
-    margin-top: 10px;
+    padding: 10px 16px 16px 16px;
+    margin-top: 4px;
     margin-bottom: 16px;
     border-radius: 12px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .push-balance-section {
@@ -49,7 +48,7 @@
 .balance-info-box {
     background-color: var(--app-bg-dark-element);
     border-radius: 12px;
-    padding: 10px 16px;
+    padding: 8px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -99,7 +98,7 @@
     font-size: 0.8rem !important;
     font-weight: 500 !important;
     text-transform: uppercase;
-    margin-top: 4px !important;
+    margin-top: 2px !important;
     letter-spacing: 0.5px;
 }
 
@@ -145,7 +144,6 @@
 
 .push-banner-content {
     background: var(--app-banner-bg);
-    border: 1px solid var(--app-banner-border);
     border-radius: 10px;
     padding: 14px 16px;
     display: flex;
@@ -424,7 +422,7 @@
 }
 
 .close-bottom-sheet-button.ant-btn:hover {
-    color: #bac3e0 !important; /* Lighter shade of A3AECF */
+    color: #bac3e0 !important;
 }
 
 .bottom-sheet-text {
@@ -635,7 +633,7 @@
 .cashout-condition-alert .cashout-play-button.ant-btn {
     background-color: #EF5350 !important;
     border-color: #EF5350 !important;
-    color: #FFFFFF !important; /* Error button text remains white for contrast on red */
+    color: #FFFFFF !important;
     font-weight: 500 !important;
     border-radius: 6px !important;
     font-size: 0.85rem;
@@ -771,11 +769,12 @@
 @media (max-width: 380px) {
     .header-content-wrapper {
         max-width: 100%;
-        padding: 12px 12px 16px 12px;
+        padding: 8px 12px 12px 12px;
+        margin-top: 0;
     }
     .balance-info-box {
         min-width: auto;
-        padding: 8px 12px;
+        padding: 6px 12px;
     }
     .push-balance-amount {
         font-size: 1.8rem !important;
