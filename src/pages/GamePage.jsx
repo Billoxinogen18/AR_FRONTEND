@@ -92,7 +92,7 @@ const GamePage = () => {
                                 Make a choice and increase your balance up to x210! Take a risk and win!
                             </Paragraph>
                             <Button className="game-card-button">
-                                <span className="button-icon-circle">●</span>
+                                <span className="button-icon-circle"></span>
                                 Test your luck 
                                 <span className="button-arrow">→</span>
                             </Button>

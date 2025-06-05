@@ -162,11 +162,10 @@
 .game-card-row {
     display: flex;
     flex-direction: row; /* Default to side-by-side */
-    min-height: 200px;
 }
 
 .game-card-image-section {
-    flex: 0 0 45%;
+    flex: 0 0 45%; /* Image section takes 45% of the width */
     background-color: #050607;
     padding: 20px;
     display: flex;
@@ -174,6 +173,7 @@
     justify-content: center;
     position: relative;
     overflow: hidden;
+    min-height: 200px; /* Ensure a minimum height */
 }
 
 .game-card-image-section img {
@@ -199,13 +199,14 @@
 }
 
 .game-card-content-section {
-    flex: 1;
+    flex: 1; /* Content section takes the remaining space */
     padding: 24px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
     text-align: left;
+    min-height: 200px; /* Ensure a minimum height */
 }
 
 .game-card-title {
@@ -241,23 +242,28 @@
 }
 
 .game-card-button .button-icon-circle {
+    width: 10px;
+    height: 10px;
+    background-color: var(--app-bg-dark-element);
+    border-radius: 50%;
+    display: inline-block;
     margin-right: 8px;
-    font-size: 0.8em;
-    line-height: 1;
-    color: var(--app-bg-dark-element);
+    vertical-align: middle;
 }
 
 .game-card-button .button-arrow {
     margin-left: 8px;
     font-size: 1.1em;
+    vertical-align: middle;
 }
 
-@media (max-width: 575px) { /* Changed breakpoint from 767px to 575px */
+@media (max-width: 575px) {
     .game-card-row {
         flex-direction: column; /* Stack on small screens */
     }
     .game-card-image-section {
-        flex: 0 0 auto;
+        flex: 0 0 auto; /* Reset flex basis for column layout */
+        width: 100%; /* Take full width when stacked */
         min-height: 180px;
         border-radius: 16px 16px 0 0;
     }
@@ -265,9 +271,12 @@
         max-height: 140px;
     }
     .game-card-content-section {
+        flex: 0 0 auto; /* Reset flex basis for column layout */
+        width: 100%; /* Take full width when stacked */
         align-items: center;
         text-align: center;
         padding: 20px;
+        min-height: auto; /* Reset min-height for stacked content */
     }
 }
 
@@ -294,5 +303,10 @@
         font-size: 0.9rem !important;
         height: 38px !important;
         padding: 0 16px !important;
+    }
+    .game-card-button .button-icon-circle {
+        width: 8px;
+        height: 8px;
+        margin-right: 6px;
     }
 }
