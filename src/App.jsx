@@ -35,9 +35,10 @@ const DesktopMenu = () => {
     const location = useLocation();
     const navigate = useNavigate();
     let currentPath = location.pathname;
-    if (currentPath === '/') currentPath = '/tasks';
+    // Default to /game if at root or unknown path for desktop
+    if (currentPath === '/') currentPath = '/game';
     if (!menuConfig.some(item => item.key === currentPath)) {
-        const fallbackPath = menuConfig[0]?.key || '/tasks';
+        const fallbackPath = '/game'; // Default to game page
          useEffect(() => {
             if (location.pathname !== fallbackPath && !menuConfig.some(item => item.key === location.pathname)) {
               navigate(fallbackPath, { replace: true });
@@ -45,6 +46,7 @@ const DesktopMenu = () => {
         }, [navigate, fallbackPath, location.pathname]);
         currentPath = fallbackPath;
     }
+
 
     const desktopMenuItems = menuConfig.map(item => ({
         key: item.key,
@@ -102,6 +104,8 @@ function App() {
     const APP_BG_DARK_CONTAINER = '#1C1C1E';
     const APP_MAIN_BG = '#000000';
     const APP_BORDER_COLOR = '#2D3142';
+    const APP_BUTTON_PRIMARY_BG = '#A3AECF'; // Your "white" for buttons
+    const APP_BUTTON_PRIMARY_TEXT = '#08090A'; // Dark text for primary buttons
 
     const NEW_TELEGRAM_DARK_THEME = {
         algorithm: antdTheme.darkAlgorithm,
@@ -152,10 +156,10 @@ function App() {
                 popupBg: APP_BG_DARK_SECTION,
             },
             Button: {
-                colorPrimary: APP_PRIMARY_COLOR,
-                colorPrimaryBg: APP_PRIMARY_COLOR,
-                colorPrimaryHover: '#8D9AC3',
-                colorTextLightSolid: APP_BG_DARK_ELEMENT,
+                colorPrimary: APP_BUTTON_PRIMARY_BG,
+                colorPrimaryBg: APP_BUTTON_PRIMARY_BG,
+                colorPrimaryHover: '#8D9AC3', // Slightly darker primary color for hover
+                colorTextLightSolid: APP_BUTTON_PRIMARY_TEXT, // Text color on primary buttons
                 defaultBg: APP_BG_DARK_ELEMENT,
                 defaultColor: APP_PRIMARY_COLOR,
                 defaultBorderColor: APP_BG_DARK_ELEMENT,
@@ -201,15 +205,15 @@ function App() {
                 colorText: APP_PRIMARY_COLOR,
             },
             Radio: {
-                buttonSolidCheckedBg: APP_BG_DARK_ELEMENT,
-                buttonSolidCheckedColor: APP_PRIMARY_COLOR,
-                buttonSolidCheckedHoverBg: `rgba(8, 9, 10, 0.8)`,
-                buttonSolidCheckedActiveBg: `rgba(8, 9, 10, 0.7)`,
+                buttonSolidCheckedBg: APP_BUTTON_PRIMARY_BG, // Use button primary bg for selected radio
+                buttonSolidCheckedColor: APP_BUTTON_PRIMARY_TEXT, // Dark text on selected radio
+                buttonSolidCheckedHoverBg: '#8D9AC3', // Darker primary for hover
+                buttonSolidCheckedActiveBg: '#7C8BAE', // Even darker for active
                 colorBorder: APP_BORDER_COLOR,
                 buttonBg: APP_BG_DARK_CONTAINER,
                 buttonPaddingInline: 15,
                 buttonColor: `rgba(163, 174, 207, 0.6)`,
-                wrapperBg: APP_BG_DARK_CONTAINER, // For the whole group
+                wrapperBg: APP_BG_DARK_CONTAINER,
             },
             Tabs: {
                 cardBg: APP_BG_DARK_ELEMENT,
@@ -258,7 +262,7 @@ function App() {
                 controlItemBgActive: `rgba(163, 174, 207, 0.15)`,
                 colorText: APP_PRIMARY_COLOR,
             },
-            Select: { // Added for Modal Select in UserPage
+            Select: {
                 colorBgElevated: APP_BG_DARK_SECTION,
                 optionSelectedBg: `rgba(163, 174, 207, 0.15)`,
                 optionSelectedColor: APP_PRIMARY_COLOR,
@@ -292,7 +296,7 @@ function App() {
                         <Content className="app-content">
                             <Suspense fallback={loadingSpinner}>
                                 <Routes>
-                                    <Route path="/" element={<TaskPage />} />
+                                    <Route path="/" element={<GamePage />} /> {/* Default to GamePage */}
                                     <Route path="/tasks" element={<TaskPage />} />
                                     <Route path="/earn" element={<EarnPage />} />
                                     <Route path="/game" element={<GamePage />} />

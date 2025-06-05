@@ -506,6 +506,7 @@
     margin-left: 4px !important;
     height: auto !important;
 }
+
 .copy-tx-button.ant-btn-text:hover { opacity: 1; background-color: transparent !important; }
 
 

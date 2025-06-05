@@ -223,11 +223,11 @@
 }
 .task-modal-url a:hover { opacity: 0.8; }
 
-/* For Alert in TaskPage when wallet not connected */
 .task-page-container .ant-alert-info {
     /* Uses Alert theme from ConfigProvider */
     margin-left: 0; /* Adjusted in JSX for mobile */
     margin-right: 0; /* Adjusted in JSX for mobile */
 }
+
 
 
