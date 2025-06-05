@@ -1,3 +1,11 @@
+/* Define CSS variables at a higher scope if needed, or on .push-page-container */
+:root {
+    --number-of-lines-default: 72; /* More ticks for denser look */
+    --fill-animation-duration-default: 1.2s;
+    --idle-scan-duration: 4s;
+    --idle-scan-arc-length-percentage: 0.08; /* Approx 5-6 ticks for 72 total */
+}
+
 .push-page-container {
     background: #000000;
     min-height: calc(100vh - 56px - 60px);
@@ -5,92 +13,94 @@
     flex-direction: column;
     align-items: center;
     color: #E0E0E5;
-    padding: 0 16px 20px 16px;
+    padding: 0 16px 20px 16px; /* No top padding for header */
     box-sizing: border-box;
     overflow-x: hidden;
-    --scan-duration: 3s;
-    --scan-arc-length-percentage: 0.10; /* 10% of circumference, e.g., 6 out of 60 ticks */
+    --number-of-lines: var(--number-of-lines-default); /* Fallback if not set by JS */
+    --fill-animation-duration: var(--fill-animation-duration-default); /* Fallback */
 }
 
 .push-balance-section {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center; /* Center the balance info box */
     width: 100%;
     margin-top: 10px;
     margin-bottom: 16px;
 }
 
 .balance-info-box {
-    background-color: #1C1C1E; /* Matches screenshot */
+    background-color: #1C1C1E;
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 10px 16px;
     display: flex;
-    align-items: center;
-    justify-content: space-between; /* Adjusted from screenshot to look right */
-    width: 100%;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+    flex-direction: column; /* Stack amount line and currency */
+    align-items: center; /* Center content horizontally */
+    /* width: 100%; Ensure this takes content width or fixed based on design */
+    min-width: 180px; /* Example to ensure it doesn't collapse too much */
+    max-width: 250px; /* Example from rough visual */
     box-sizing: border-box;
 }
 
+.balance-amount-line {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center icon and amount together */
+    gap: 10px; /* Space between icon and amount */
+}
+
 .balance-icon-wrapper {
-    width: 36px;
-    height: 36px;
+    width: 32px; /* Adjusted to screenshot proportions */
+    height: 32px;
     border-radius: 50%;
-    background-color: #3A3A3C; /* Matches screenshot */
+    background-color: #3A3A3C;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .balance-icon-representation {
     color: #FFFFFF;
-    font-size: 22px;
+    font-size: 20px; /* Adjusted */
     line-height: 1;
-}
-
-.balance-details-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
 }
 
 .push-balance-amount {
     color: #FFFFFF !important;
     font-weight: 600 !important;
-    font-size: 2.4rem !important; /* Large like screenshot */
+    font-size: 2.2rem !important; /* Adjusted */
     line-height: 1 !important;
     margin: 0 !important;
 }
-.push-balance-amount .ant-spin-dot i {
+.balance-spin .ant-spin-dot i {
     background-color: #FFFFFF !important;
 }
 
+
 .push-balance-currency {
-    color: #8A8A8E !important; /* Grey like screenshot */
-    font-size: 0.85rem !important;
+    color: #8A8A8E !important;
+    font-size: 0.8rem !important; /* Slightly smaller */
     font-weight: 500 !important;
     text-transform: uppercase;
-    margin-top: 2px !important;
+    margin-top: 4px !important; /* Space below amount line */
     letter-spacing: 0.5px;
 }
+
 
 .push-top-buttons {
     display: flex;
     gap: 12px;
     margin-bottom: 20px;
     width: 100%;
-    max-width: 400px; /* Consistent width with balance box */
+    max-width: 400px;
 }
 
 .push-top-button {
-    background-color: #2C2C2E !important; /* Dark grey from screenshot */
+    background-color: #2C2C2E !important;
     border: none !important;
     color: #FFFFFF !important;
     font-weight: 500 !important;
-    border-radius: 10px !important; /* Rounded like screenshot */
+    border-radius: 10px !important;
     padding: 0 20px !important;
     height: 42px !important;
     font-size: 0.9rem !important;
@@ -119,7 +129,7 @@
 }
 
 .push-banner-content {
-    background: #252E00; /* Simplified, dark olive/yellow */
+    background: #252E00;
     border: 1px solid #4D5C00;
     border-radius: 10px;
     padding: 14px 16px;
@@ -137,7 +147,7 @@
 }
 
 .banner-title {
-    color: #CAD62A !important; /* Yellow from screenshot */
+    color: #CAD62A !important;
     font-weight: 500 !important;
     font-size: 0.9rem !important;
     line-height: 1.3;
@@ -161,22 +171,25 @@
     height: 280px;
     cursor: pointer;
     transition: transform 0.3s ease;
-    --number-of-lines: 60; /* Default, can be overridden by inline style on container */
 }
 
-.push-wheel-container:hover {
-    transform: scale(1.02);
+.push-wheel-container:hover:not(.filling-active) .push-wheel-center { /* No hover effect during fill */
+    transform: translate(-50%, -50%) scale(1.03);
+}
+.push-wheel-container:hover:not(.filling-active) .pixel.filled {
+    background-color: #C0C8D3;
 }
 
-.push-wheel-container.animating {
-    animation: wheelSpin 1.5s ease-in-out;
+
+.push-wheel-container.animating-center-pulse .push-wheel-center {
+    animation: wheelCenterPulse 1s ease-in-out; /* Shorter for visual sync */
 }
 
-@keyframes wheelSpin {
-    0%   { transform: scale(1); }
-    7%   { transform: scale(1.03); } /* Subtle pulse, matching video */
-    15%  { transform: scale(1); }
-    100% { transform: scale(1); }
+@keyframes wheelCenterPulse {
+    0%   { transform: translate(-50%,-50%) scale(1); }
+    7%   { transform: translate(-50%,-50%) scale(1.05); } /* Sync with tick brightness head */
+    15%  { transform: translate(-50%,-50%) scale(1); }
+    100% { transform: translate(-50%,-50%) scale(1); }
 }
 
 .push-wheel-outer-ring {
@@ -184,72 +197,89 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 2px solid #2A2A2C; /* Dark border */
-    background: linear-gradient(135deg, #1E1E20 0%, #141416 100%); /* Dark gradient */
-    box-shadow: 0 0 15px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.15);
+    border: 2px solid #1A1A1B; /* Darker border matching screenshot */
+    background: #111112; /* Very dark, almost flat grey background like screenshot */
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2); /* Subtle inner shadow */
 }
 
 .wheel-tick {
     position: absolute;
-    width: 2px;
-    height: 25px;
-    background: #C0C0C8; /* Screenshot's light cool grey for active ticks */
-    top: 5px;
+    width: 1.5px; /* Thinner ticks for denser look */
+    height: 23px; /* Adjusted height */
+    background: #ADB9C7; /* Base color for active tick (screenshot's light cool grey) */
+    top: 6px; /* Adjusted for new border */
     left: 50%;
-    transform-origin: 1px 135px;
-    margin-left: -1px;
-    border-radius: 1px;
-    opacity: 0; /* Default for transition */
-    transition: opacity 0.25s ease;
+    transform-origin: 0.75px 134px; /* Center of width, distance to center */
+    margin-left: -0.75px; /* Half of width */
+    border-radius: 0.5px;
+    opacity: 0; /* Default for transition, initial is very dim */
+    transition: opacity 0.3s ease-out; /* For simple transitions if needed */
 }
 
-/* Scanning animation for idle state (when container has .scanning-mode) */
-.push-wheel-container.scanning-mode .wheel-tick {
-    animation-name: k-scanning-arc;
-    animation-duration: var(--scan-duration);
-    animation-timing-function: linear;
+/* --- IDLE SCANNING ANIMATION --- */
+.push-wheel-container.idle-scanning .wheel-tick {
+    opacity: 0.03; /* Very dim base for idle scanning */
+    animation-name: k-idle-scanning-arc;
+    animation-duration: var(--idle-scan-duration);
+    animation-timing-function: ease-in-out; /* Smoother scan */
     animation-iteration-count: infinite;
-    animation-delay: calc(var(--tick-index) * ( (var(--scan-duration) / var(--number-of-lines)) * -1 ));
+    /* Individual delay based on index, creating the sweeping motion */
+    animation-delay: calc(var(--tick-index) * ( (var(--idle-scan-duration) / var(--number-of-lines)) * -1 ));
 }
 
-@keyframes k-scanning-arc {
-    0% { opacity: 0.05; }
-    calc(var(--scan-arc-length-percentage) * 50%) { opacity: 0.7; } /* Middle of the lit segment passing by */
-    calc(var(--scan-arc-length-percentage) * 100%) { opacity: 0.7; }  /* Keep bright for segment length */
-    calc(var(--scan-arc-length-percentage) * 100% + 1%) { opacity: 0.05; } /* Start fading after segment passes */
-    100% { opacity: 0.05; }
+@keyframes k-idle-scanning-arc {
+    0% { opacity: 0.03; } /* Dim */
+    2% { opacity: 0.03; } /* Dim before arc hits (approximation of 0.08 * 25%) */
+    4% { opacity: 0.2; }  /* Peak brightness of scanning arc - subtle (approximation of 0.08 * 50%) */
+    6% { opacity: 0.03; } /* Dim after arc passes (approximation of 0.08 * 75%) */
+    100% { opacity: 0.03; }
 }
 
-/* Styles for when all ticks are lit (container has .all-ticks-active) */
-.push-wheel-container.all-ticks-active .wheel-tick.active {
-    opacity: 1; /* Fully visible */
-    animation: none; /* Important: stop scanning animation */
+
+/* --- FILLING ANIMATION ON CLICK --- */
+.push-wheel-container.filling-active .wheel-tick {
+    opacity: 0.03; /* Start from dim */
+    animation-name: k-wheel-fill;
+    animation-duration: var(--fill-animation-duration);
+    animation-timing-function: linear; /* Consistent fill speed */
+    animation-fill-mode: forwards; /* Stay at final state */
+    /* Delay each tick's animation start to create the sequential fill */
+    animation-delay: calc(var(--tick-index) * (var(--fill-animation-duration) / var(--number-of-lines) * 0.8)); /* 0.8 factor to make fill slightly faster than full duration to look like it completes just before sheet appears */
 }
 
-/* Staggered delays for the RIPPLE-IN effect when 'active' class is added */
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n+1) { transition-delay: 0.05s; }
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n+2) { transition-delay: 0.10s; }
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n+3) { transition-delay: 0.15s; }
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n+4) { transition-delay: 0.20s; }
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n+5) { transition-delay: 0.25s; }
-.push-wheel-container.all-ticks-active .wheel-tick.active:nth-child(6n)   { transition-delay: 0.30s; }
+@keyframes k-wheel-fill {
+    0% { opacity: 0.03; } /* Initial very dim state */
+    /* The tick becomes fully bright when the "head" of the sweep passes it */
+    /* This keyframe will be active for a very short duration for each tick */
+    /* The delay is handled by animation-delay. This defines how one tick behaves once its animation starts. */
+    1%   { opacity: 1; }     /* Bright flash as "head" hits */
+    5%   { opacity: 0.65; }  /* Settle to "filled" brightness */
+    100% { opacity: 0.65; }  /* Remain in "filled" state */
+}
+
+/* --- ALL TICKS LIT (FINAL STATIC STATE, e.g. after modal close) --- */
+.push-wheel-container.all-ticks-lit-final .wheel-tick {
+    animation: none; /* Stop any ongoing animations */
+    opacity: 0.65; /* Consistent "filled" brightness */
+}
 
 
 .push-wheel-center {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* Base transform */
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2C2C2F 0%, #1F1F22 100%); /* Dark center */
-    border: 2px solid #3A3A3D; /* Slightly lighter border */
+    background: #161618; /* Darker center, matches screenshot */
+    border: 2px solid #252528; /* Subtle border for center */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 2px 8px rgba(255,255,255,0.03);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2), inset 0 1px 3px rgba(255,255,255,0.02);
     z-index: 10;
+    transition: transform 0.2s ease-out; /* For hover effect if any */
 }
 
 .wheel-center-icon {
@@ -279,17 +309,20 @@
 
 .pixel.filled {
     background-color: #ADB9C7; /* Light lavender-grey from screenshot */
+    transition: background-color 0.2s ease-out;
 }
 
-.push-wheel-container:hover .pixel.filled {
-    background-color: #C0C8D3; /* Slightly lighter on hover */
-}
 
-.push-page-arix-icon {
+/* Remaining CSS for Modals and other components as previously provided */
+/* ... (ensure to include all your other existing correct CSS styles below this line) ... */
+
+.push-page-arix-icon { /* Copied from previous just in case */
     width: 24px;
     height: 24px;
 }
 
+/* All modal related CSS, Alert CSS etc. should follow from your prior correct version */
+/* Example modal wrapper, ensure you have the complete modal CSS from before */
 .push-bottom-sheet-modal-wrapper {
     position: fixed !important;
     top: 0 !important;
@@ -450,6 +483,8 @@
     transform: translateY(-1px);
 }
 
+
+/* Topup/Cashout Modals - copy from your previous accurate CSS */
 .push-topup-modal-wrapper .ant-modal-content,
 .push-cashout-modal-wrapper .ant-modal-content {
     background-color: #1A1A1A !important;
@@ -523,8 +558,9 @@
 .topup-modal-actions .push-top-button.active,
 .cashout-modal-actions .push-top-button.active {
     background-color: #383838 !important;
-    border-color: #505050 !important;
+    /* border-color: #505050 !important; */ /* Original style from you had this, verify if still needed for these modal buttons */
 }
+
 
 .topup-warning-alert.ant-alert {
     background-color: rgba(255, 179, 0, 0.1) !important;
@@ -553,7 +589,7 @@
     background-color: rgba(239, 83, 80, 0.1) !important;
     border: 1px solid rgba(239, 83, 80, 0.4) !important;
     border-radius: 8px !important;
-    margin-top: 20px !important;
+    margin-top: 20px !important; /* Added for cashout modal only from your code */
     text-align: left;
     padding: 12px 16px !important;
 }
@@ -637,9 +673,10 @@
     line-height: 1.4;
 }
 
-.address-display-box .ant-typography {
+.address-display-box .ant-typography { /* This targets antd specific typography if used in address */
     color: #E0E0E5 !important;
 }
+
 
 .fee-info-text {
     color: #8E8E93;
@@ -697,12 +734,22 @@
     .push-banner-container {
         max-width: calc(100% - 16px);
     }
-
+     .balance-info-box {
+        min-width: auto; /* Allow it to shrink more on small screens */
+        padding: 8px 12px;
+    }
     .push-balance-amount {
-        font-size: 2rem !important;
+        font-size: 1.8rem !important; /* Smaller for tight spaces */
+    }
+    .balance-icon-wrapper {
+        width: 28px;
+        height: 28px;
+    }
+    .balance-icon-representation {
+        font-size: 18px;
     }
     .push-balance-currency {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
     }
     .push-top-button {
         padding: 0 12px !important;
@@ -713,19 +760,23 @@
         font-size: 0.85rem !important;
     }
     .push-wheel-container {
-        width: 240px;
-        height: 240px;
+        width: 230px; /* Slightly smaller to fit better */
+        height: 230px;
     }
     .wheel-tick {
-        transform-origin: 1px 115px;
+        height: 20px;
+        top: 5px;
+        transform-origin: 0.75px 110px; /* (230/2 - 5 - 20/2) roughly for center origin */
     }
     .push-wheel-center {
-        width: 100px;
-        height: 100px;
+        width: 95px; /* Smaller center */
+        height: 95px;
     }
     .pixel-icon {
-        transform: scale(3.5);
+        transform: scale(3.2); /* Slightly smaller pixels */
     }
+
+    /* Modal specific adjustments */
     .bottom-sheet-title {
         font-size: 1.2rem !important;
     }

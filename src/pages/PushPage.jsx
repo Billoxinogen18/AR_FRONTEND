@@ -27,9 +27,11 @@ const PushPage = () => {
     const navigate = useNavigate();
     const rawAddress = useTonAddress(false);
 
-    const [isWheelActive, setIsWheelActive] = useState(false); // Start with scanning animation
+    const [isWheelIdleScanning, setIsWheelIdleScanning] = useState(true); // For initial scanning
+    const [isWheelFilling, setIsWheelFilling] = useState(false); // For the fill animation on click
+    const [areAllTicksLit, setAreAllTicksLit] = useState(false); // After fill or direct from screenshot state
     const [showMainBottomSheet, setShowMainBottomSheet] = useState(false);
-    const [animatingWheel, setAnimatingWheel] = useState(false);
+    const [animatingWheelCenter, setAnimatingWheelCenter] = useState(false); // For center disc pulse
 
     const [showTopUpModal, setShowTopUpModal] = useState(false);
     const [showCashoutModal, setShowCashoutModal] = useState(false);
@@ -37,7 +39,8 @@ const PushPage = () => {
     const [claimableArix, setClaimableArix] = useState('0');
     const [loadingBalance, setLoadingBalance] = useState(false);
 
-    const numberOfLines = 60; // Matched in CSS variable --number-of-lines
+    const numberOfLines = 72; // Increased density, matches CSS variable
+    const fillAnimationDuration = 1200; // ms, matches CSS
 
     const fetchUserArixBalance = useCallback(async () => {
         if (rawAddress) {
@@ -61,22 +64,30 @@ const PushPage = () => {
     }, [fetchUserArixBalance]);
 
     const handleWheelPress = () => {
-        if (animatingWheel) return;
-        setAnimatingWheel(true);
-        setIsWheelActive(true); // Trigger all ticks to light up
+        if (isWheelFilling || animatingWheelCenter) return;
+
+        setIsWheelIdleScanning(false); // Stop idle scan
+        setIsWheelFilling(true);       // Start fill animation
+        setAnimatingWheelCenter(true); // Pulse center
+
+        // After the fill animation duration, all ticks should be lit
         setTimeout(() => {
+            setIsWheelFilling(false);
+            setAreAllTicksLit(true);
+            setAnimatingWheelCenter(false); // End pulse
             setShowMainBottomSheet(true);
-            setAnimatingWheel(false);
-        }, 1500);
+        }, fillAnimationDuration);
     };
 
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
         setShowMainBottomSheet(false);
-        if (!playCoinflip) {
-            setIsWheelActive(true); // Keep all ticks lit if modal is just closed
-        } else {
-            // If navigating away or starting game, we might want to reset to scanning
-            // For now, it stays lit until page reload/navigation naturally resets component state
+        // When modal closes, keep all ticks lit (matching screenshot behavior after interaction)
+        setIsWheelIdleScanning(false);
+        setIsWheelFilling(false);
+        setAreAllTicksLit(true);
+
+        if (playCoinflip) {
+            // Reset to idle if navigating away and component might unmount/remount
         }
     };
 
@@ -98,19 +109,29 @@ const PushPage = () => {
             });
     };
 
+    let wheelContainerClasses = "push-wheel-container";
+    if (animatingWheelCenter) wheelContainerClasses += " animating-center-pulse";
+    if (isWheelIdleScanning) wheelContainerClasses += " idle-scanning";
+    if (isWheelFilling) wheelContainerClasses += " filling-active";
+    if (areAllTicksLit) wheelContainerClasses += " all-ticks-lit-final";
+
+
     return (
-        <div className="push-page-container" style={{'--number-of-lines': numberOfLines}}>
+        <div className="push-page-container" style={{
+            '--number-of-lines': numberOfLines,
+            '--fill-animation-duration': `${fillAnimationDuration}ms`
+         }}>
             <div className="push-balance-section">
                 <div className="balance-info-box">
-                    <div className="balance-icon-wrapper">
-                        <span className="balance-icon-representation">♢</span>
-                    </div>
-                    <div className="balance-details-wrapper">
+                    <div className="balance-amount-line">
+                        <div className="balance-icon-wrapper">
+                            <span className="balance-icon-representation">♢</span>
+                        </div>
                         <Text className="push-balance-amount">
-                            {loadingBalance ? <Spin size="small" /> : claimableArix}
+                            {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : claimableArix}
                         </Text>
-                        <Text className="push-balance-currency">ARIX</Text>
                     </div>
+                    <Text className="push-balance-currency">ARIX</Text>
                 </div>
             </div>
 
@@ -133,7 +154,7 @@ const PushPage = () => {
 
             <div className="push-wheel-area">
                 <div
-                    className={`push-wheel-container ${animatingWheel ? 'animating' : ''} ${isWheelActive ? 'all-ticks-active' : 'scanning-mode'}`}
+                    className={wheelContainerClasses}
                     onClick={handleWheelPress}
                     role="button"
                     aria-label="Activate Push Wheel"
@@ -144,10 +165,10 @@ const PushPage = () => {
                         {Array.from({ length: numberOfLines }).map((_, index) => (
                             <div
                                 key={index}
-                                className={`wheel-tick ${isWheelActive ? 'active' : ''}`}
+                                className="wheel-tick"
                                 style={{
                                     transform: `rotate(${index * (360 / numberOfLines)}deg)`,
-                                    '--tick-index': index
+                                    '--tick-index': index,
                                 }}
                             />
                         ))}
@@ -172,7 +193,6 @@ const PushPage = () => {
                     </div>
                 </div>
             </div>
-
             <Modal
                 open={showMainBottomSheet}
                 onCancel={() => handleCloseMainBottomSheet(false)}
