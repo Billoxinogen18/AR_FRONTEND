@@ -4,18 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
-    RightCircleOutlined,
     CloseOutlined,
     CopyOutlined,
     InfoCircleOutlined,
-    DollarCircleOutlined
+    DollarCircleOutlined,
+    FireOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getUserProfile } from '../services/api';
 
 import './PushPage.css';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 const ArixPushIcon = () => (
     <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = '/img/fallback-icon.png'; }} />
@@ -117,27 +117,29 @@ const PushPage = () => {
             '--number-of-lines': numberOfLines,
             '--transition-animation-duration': `${transitionAnimationDuration}ms`
          }}>
-            <div className="push-balance-section">
-                <div className="balance-info-box">
-                    <div className="balance-amount-line">
-                        <div className="balance-icon-wrapper">
-                            <span className="balance-icon-representation">♢</span>
+            <div className="header-content-wrapper">
+                <div className="push-balance-section">
+                    <div className="balance-info-box">
+                        <div className="balance-amount-line">
+                            <div className="balance-icon-wrapper">
+                                <span className="balance-icon-representation">♢</span>
+                            </div>
+                            <Text className="push-balance-amount">
+                                {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : claimableArix}
+                            </Text>
                         </div>
-                        <Text className="push-balance-amount">
-                            {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : claimableArix}
-                        </Text>
+                        <Text className="push-balance-currency">ARIX</Text>
                     </div>
-                    <Text className="push-balance-currency">ARIX</Text>
                 </div>
-            </div>
 
-            <div className="push-top-buttons">
-                <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
-                    <ArrowDownOutlined /> Top up
-                </Button>
-                <Button className="push-top-button cashout" onClick={() => setShowCashoutModal(true)}>
-                    <ArrowUpOutlined /> Cashout
-                </Button>
+                <div className="push-top-buttons">
+                    <Button className="push-top-button top-up" onClick={() => setShowTopUpModal(true)}>
+                        <ArrowDownOutlined /> Top up
+                    </Button>
+                    <Button className="push-top-button cashout" onClick={() => setShowCashoutModal(true)}>
+                        <ArrowUpOutlined /> Cashout
+                    </Button>
+                </div>
             </div>
 
             <div className="push-banner-container">
@@ -202,19 +204,24 @@ const PushPage = () => {
                 transitionName=""
             >
                 <div className="push-bottom-sheet-content">
-                    <Button
-                        shape="circle"
-                        icon={<CloseOutlined />}
-                        className="close-bottom-sheet-button"
-                        onClick={() => handleCloseMainBottomSheet(false)}
-                        aria-label="Close"
-                    />
-                    <Title level={3} className="bottom-sheet-title">Pushing season is over!</Title>
+                    <div className="bottom-sheet-header-bar">
+                        <Text className="bottom-sheet-header-title">Pushing season is over!</Text>
+                        <Button
+                            shape="circle"
+                            icon={<CloseOutlined />}
+                            className="close-bottom-sheet-button"
+                            onClick={() => handleCloseMainBottomSheet(false)}
+                            aria-label="Close"
+                        />
+                    </div>
                     <Paragraph className="bottom-sheet-text">
                         Terminal Station continues to follow its roadmap.
                     </Paragraph>
                     <div className="bottom-sheet-next-steps">
-                        <Text strong className="next-steps-title"><RightCircleOutlined style={{ marginRight: 8, color: '#FFD700' }} />Next steps</Text>
+                        <div className="next-steps-title-container">
+                            <FireOutlined />
+                            <Text className="next-steps-title-text">Next Steps</Text>
+                        </div>
                         <ol className="next-steps-list">
                             <li>New phase</li>
                             <li>Developing existing games and adding new ones to the Game Center</li>
@@ -252,7 +259,7 @@ const PushPage = () => {
                     />
                     <div className="topup-modal-header">
                         <ArixPushIcon />
-                        <Title level={4} className="topup-modal-title">Balance</Title>
+                        <Text className="topup-modal-title">Balance</Text>
                     </div>
                     <div className="topup-modal-actions">
                         <Button className="push-top-button top-up active">
@@ -271,7 +278,7 @@ const PushPage = () => {
                         className="topup-warning-alert"
                     />
                     <div className="topup-instructions">
-                        <Text className="instruction-link" onClick={() => message.info("How it works: Coming soon!")}>How it works <RightCircleOutlined /></Text>
+                        <Text className="instruction-link" onClick={() => message.info("How it works: Coming soon!")}>How it works</Text>
                         <Text className="instruction-link" onClick={() => message.info("Instructions: Coming soon!")}>Instruction</Text>
                     </div>
                     <Paragraph className="address-label">ADDRESS</Paragraph>
@@ -320,7 +327,7 @@ const PushPage = () => {
                     />
                     <div className="cashout-modal-header">
                         <ArixPushIcon />
-                        <Title level={4} className="cashout-modal-title">Balance</Title>
+                        <Text className="cashout-modal-title">Balance</Text>
                     </div>
                     <div className="cashout-modal-actions">
                         <Button className="push-top-button top-up" onClick={() => { setShowCashoutModal(false); setShowTopUpModal(true); }}>

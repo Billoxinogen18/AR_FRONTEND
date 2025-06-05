@@ -1,6 +1,15 @@
 :root {
     --number-of-lines-default: 72;
     --transition-animation-duration-default: 1.2s;
+    --app-primary-text-light: #A3AECF;
+    --app-bg-dark-element: #08090A;
+    --app-bg-dark-section: #111215;
+    --app-bg-dark-container: #1C1C1E;
+    --app-bg-dark-box: #252525;
+    --app-banner-bg: #121800;
+    --app-banner-border: #2c3a00;
+    --app-modal-content-bg: #0D0E10;
+    --app-button-primary-hover-bg: #8D9AC3; /* Darker A3AECF */
 }
 
 .push-page-container {
@@ -9,7 +18,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #E0E0E5;
+    color: var(--app-primary-text-light);
     padding: 0 16px 20px 16px;
     box-sizing: border-box;
     overflow-x: hidden;
@@ -17,23 +26,35 @@
     --transition-animation-duration: var(--transition-animation-duration-default);
 }
 
+.header-content-wrapper {
+    background-color: var(--app-bg-dark-section);
+    width: 100%;
+    max-width: 400px;
+    padding: 16px 16px 20px 16px;
+    margin-top: 10px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .push-balance-section {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: 10px;
-    margin-bottom: 16px;
 }
 
 .balance-info-box {
-    background-color: #1C1C1E;
+    background-color: var(--app-bg-dark-element);
     border-radius: 12px;
     padding: 10px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 180px;
-    max-width: 250px;
+    min-width: 200px;
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -48,7 +69,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background-color: #3A3A3C;
+    background-color: var(--app-bg-dark-container);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,24 +77,25 @@
 }
 
 .balance-icon-representation {
-    color: #FFFFFF;
+    color: var(--app-primary-text-light);
     font-size: 20px;
     line-height: 1;
 }
 
 .push-balance-amount {
-    color: #FFFFFF !important;
+    color: var(--app-primary-text-light) !important;
     font-weight: 600 !important;
     font-size: 2.2rem !important;
     line-height: 1 !important;
     margin: 0 !important;
 }
 .balance-spin .ant-spin-dot i {
-    background-color: #FFFFFF !important;
+    background-color: var(--app-primary-text-light) !important;
 }
 
 .push-balance-currency {
-    color: #8A8A8E !important;
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7;
     font-size: 0.8rem !important;
     font-weight: 500 !important;
     text-transform: uppercase;
@@ -84,15 +106,13 @@
 .push-top-buttons {
     display: flex;
     gap: 12px;
-    margin-bottom: 20px;
     width: 100%;
-    max-width: 400px;
 }
 
 .push-top-button {
-    background-color: #2C2C2E !important;
+    background-color: var(--app-bg-dark-element) !important;
     border: none !important;
-    color: #FFFFFF !important;
+    color: var(--app-primary-text-light) !important;
     font-weight: 500 !important;
     border-radius: 10px !important;
     padding: 0 20px !important;
@@ -108,12 +128,13 @@
 }
 
 .push-top-button:hover {
-    background-color: #3A3A3C !important;
+    background-color: var(--app-bg-dark-container) !important;
 }
 
 .push-top-button .anticon {
     font-size: 1em;
     margin-right: 6px;
+    color: var(--app-primary-text-light);
 }
 
 .push-banner-container {
@@ -123,8 +144,8 @@
 }
 
 .push-banner-content {
-    background: #252E00;
-    border: 1px solid #4D5C00;
+    background: var(--app-banner-bg);
+    border: 1px solid var(--app-banner-border);
     border-radius: 10px;
     padding: 14px 16px;
     display: flex;
@@ -171,7 +192,7 @@
     transform: translate(-50%, -50%) scale(1.03);
 }
 .push-wheel-container:hover.state-idle-lit .pixel.filled {
-    background-color: #C0C8D3;
+    background-color: #bac3e0;
 }
 
 .push-wheel-container.animating-center-pulse .push-wheel-center {
@@ -199,7 +220,7 @@
     position: absolute;
     width: 1.5px;
     height: 23px;
-    background: #ADB9C7;
+    background: var(--app-primary-text-light);
     top: 6px;
     left: 50%;
     transform-origin: 0.75px 134px;
@@ -292,13 +313,14 @@
 }
 
 .pixel.filled {
-    background-color: #ADB9C7;
+    background-color: var(--app-primary-text-light);
     transition: background-color 0.2s ease-out;
 }
 
 .push-page-arix-icon {
     width: 24px;
     height: 24px;
+    color: var(--app-primary-text-light);
 }
 
 .push-bottom-sheet-modal-wrapper {
@@ -335,7 +357,7 @@
 }
 
 .push-bottom-sheet-modal-wrapper .ant-modal-content {
-    background-color: #1A1A1A !important;
+    background-color: var(--app-modal-content-bg) !important;
     border-radius: 20px 20px 0 0 !important;
     padding: 0 !important;
     box-shadow: 0 -10px 30px rgba(0,0,0,0.5) !important;
@@ -361,88 +383,107 @@
 }
 
 .push-bottom-sheet-content {
-    padding: 24px 20px 32px;
+    padding: 0 20px 32px;
     text-align: center;
     position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.bottom-sheet-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    margin-bottom: 12px;
+    background-color: transparent;
+}
+
+.bottom-sheet-header-title {
+    color: var(--app-primary-text-light) !important;
+    font-weight: 600 !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+    flex-grow: 1;
+    text-align: center;
+    padding-left: 32px;
 }
 
 .close-bottom-sheet-button.ant-btn {
-    position: absolute !important;
-    top: 16px !important;
-    right: 16px !important;
-    background-color: #333 !important;
-    border: 1px solid #444 !important;
-    color: #FFFFFF !important;
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--app-primary-text-light) !important;
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
-    border-radius: 50% !important;
     padding: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    z-index: 10;
+    font-size: 1.2rem;
 }
 
 .close-bottom-sheet-button.ant-btn:hover {
-    background-color: #444 !important;
-    border-color: #555 !important;
-}
-
-.bottom-sheet-title {
-    color: #FFFFFF !important;
-    font-weight: 600 !important;
-    font-size: 1.4rem !important;
-    margin-bottom: 16px !important;
-    margin-top: 8px !important;
+    color: #bac3e0 !important; /* Lighter shade of A3AECF */
 }
 
 .bottom-sheet-text {
-    color: #A0A0A5 !important;
-    font-size: 1rem !important;
+    color: var(--app-primary-text-light) !important;
+    font-size: 0.95rem !important;
     line-height: 1.5;
     margin-bottom: 20px !important;
+    text-align: left;
 }
 
 .bottom-sheet-next-steps {
-    background-color: #252525;
+    background-color: var(--app-bg-dark-element);
     padding: 16px;
     border-radius: 12px;
     margin-bottom: 24px;
     text-align: left;
 }
 
-.next-steps-title {
-    color: #E0E0E5 !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
+.next-steps-title-container {
     display: flex;
     align-items: center;
     margin-bottom: 12px;
+    gap: 10px;
 }
 
-.next-steps-title .anticon {
-    color: #FFD700;
+.next-steps-title-container .anticon-fire {
+    color: var(--app-primary-text-light);
+    font-size: 1.5rem;
+}
+
+.next-steps-title-text {
+    color: var(--app-primary-text-light) !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
 }
 
 .next-steps-list {
     list-style-type: decimal;
-    padding-left: 20px;
-    color: #A0A0A5;
+    padding-left: 24px;
+    color: var(--app-primary-text-light);
     font-size: 0.9rem;
     margin: 0;
 }
 
 .next-steps-list li {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     line-height: 1.4;
 }
+.next-steps-list li::marker {
+    color: var(--app-primary-text-light);
+}
+
 
 .bottom-sheet-text.coinflip-prompt {
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 24px;
     font-weight: 500;
-    color: #E0E0E5 !important;
+    color: var(--app-primary-text-light) !important;
+    text-align: center;
 }
 
 .play-coinflip-button-sheet.ant-btn {
@@ -450,20 +491,21 @@
     font-size: 1.1rem !important;
     font-weight: 600 !important;
     border-radius: 12px !important;
-    background: #7065F0 !important;
+    background: var(--app-primary-text-light) !important;
     border: none !important;
     width: 100% !important;
-    color: #FFFFFF !important;
+    color: var(--app-bg-dark-element) !important;
 }
 
 .play-coinflip-button-sheet.ant-btn:hover {
-    background: #8c80f3 !important;
+    background: var(--app-button-primary-hover-bg) !important;
+    color: var(--app-bg-dark-element) !important;
     transform: translateY(-1px);
 }
 
 .push-topup-modal-wrapper .ant-modal-content,
 .push-cashout-modal-wrapper .ant-modal-content {
-    background-color: #1A1A1A !important;
+    background-color: var(--app-bg-dark-container) !important;
     border-radius: 16px !important;
     padding: 0 !important;
     border: 1px solid #333 !important;
@@ -485,9 +527,9 @@
     position: absolute !important;
     top: 16px !important;
     right: 16px !important;
-    background-color: #333 !important;
+    background-color: var(--app-bg-dark-box) !important;
     border: 1px solid #444 !important;
-    color: #FFFFFF !important;
+    color: var(--app-primary-text-light) !important;
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
@@ -510,9 +552,15 @@
     gap: 10px;
     margin-bottom: 20px;
 }
+.topup-modal-header .push-page-arix-icon,
+.cashout-modal-header .push-page-arix-icon {
+   color: var(--app-primary-text-light);
+}
+
 
 .topup-modal-title, .cashout-modal-title {
-    color: #8E8E93 !important;
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7;
     font-weight: 500 !important;
     font-size: 1rem !important;
     margin: 0 !important;
@@ -529,11 +577,18 @@
 .topup-modal-actions .push-top-button,
 .cashout-modal-actions .push-top-button {
     flex: 1;
+    background-color: var(--app-bg-dark-element) !important;
+    color: var(--app-primary-text-light) !important;
 }
+.topup-modal-actions .push-top-button .anticon,
+.cashout-modal-actions .push-top-button .anticon {
+    color: var(--app-primary-text-light) !important;
+}
+
 
 .topup-modal-actions .push-top-button.active,
 .cashout-modal-actions .push-top-button.active {
-    background-color: #383838 !important;
+    background-color: var(--app-bg-dark-box) !important;
 }
 
 .topup-warning-alert.ant-alert {
@@ -580,7 +635,7 @@
 .cashout-condition-alert .cashout-play-button.ant-btn {
     background-color: #EF5350 !important;
     border-color: #EF5350 !important;
-    color: #FFFFFF !important;
+    color: #FFFFFF !important; /* Error button text remains white for contrast on red */
     font-weight: 500 !important;
     border-radius: 6px !important;
     font-size: 0.85rem;
@@ -601,20 +656,23 @@
 }
 
 .instruction-link {
-    color: #8E8E93 !important;
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7;
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
 }
 .instruction-link:hover {
-    color: #7065F0 !important;
+    color: var(--app-primary-text-light) !important;
+    opacity: 1;
 }
 .instruction-link .anticon {
     margin-left: 4px;
 }
 
 .address-label {
-    color: #8E8E93;
+    color: var(--app-primary-text-light);
+    opacity: 0.7;
     font-size: 0.75rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -625,7 +683,7 @@
 }
 
 .address-display-box {
-    background-color: #252525;
+    background-color: var(--app-bg-dark-box);
     padding: 12px 16px;
     border-radius: 8px;
     border: 1px solid #333;
@@ -633,14 +691,16 @@
     text-align: left;
 }
 .address-display-box .ant-typography-copy {
-    color: #8E8E93;
+    color: var(--app-primary-text-light);
+    opacity: 0.7;
 }
 .address-display-box .ant-typography-copy:hover {
-    color: #FFFFFF;
+    color: var(--app-primary-text-light);
+    opacity: 1;
 }
 
 .deposit-address-text {
-    color: #E0E0E5 !important;
+    color: var(--app-primary-text-light) !important;
     font-size: 0.9rem;
     font-weight: 500;
     word-break: break-all;
@@ -648,38 +708,43 @@
 }
 
 .address-display-box .ant-typography {
-    color: #E0E0E5 !important;
+    color: var(--app-primary-text-light) !important;
 }
 
 .fee-info-text {
-    color: #8E8E93;
+    color: var(--app-primary-text-light);
+    opacity: 0.7;
     font-size: 0.8rem;
     margin-bottom: 16px;
     text-align: center;
 }
 .fee-info-text strong {
-    color: #A0A0A5;
+    color: var(--app-primary-text-light);
+    opacity: 1;
     font-weight: 600;
 }
 
 .min-deposit-info {
-    color: #A0A0A5;
+    color: var(--app-primary-text-light);
+    opacity: 0.7;
     font-size: 0.85rem;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background-color: #252525;
+    background-color: var(--app-bg-dark-box);
     padding: 8px 12px;
     border-radius: 8px;
 }
 .min-deposit-info .anticon {
-    color: #A0A0A5;
+    color: var(--app-primary-text-light);
+    opacity: 0.7;
     font-size: 1em;
 }
 .min-deposit-info strong {
-    color: #E0E0E5;
+    color: var(--app-primary-text-light);
+    opacity: 1;
     font-weight: 600;
 }
 
@@ -688,26 +753,27 @@
     font-size: 1.1rem !important;
     font-weight: 600 !important;
     border-radius: 12px !important;
-    background: #7065F0 !important;
+    background: var(--app-primary-text-light) !important;
     border: none !important;
     width: 100% !important;
-    color: #FFFFFF !important;
+    color: var(--app-bg-dark-element) !important;
 }
 .copy-address-button.ant-btn:hover {
-    background: #8c80f3 !important;
+    background: var(--app-button-primary-hover-bg) !important;
+    color: var(--app-bg-dark-element) !important;
     transform: translateY(-1px);
 }
 .copy-address-button.ant-btn .anticon {
     margin-right: 8px;
+    color: var(--app-bg-dark-element) !important;
 }
 
 @media (max-width: 380px) {
-    .balance-info-box,
-    .push-top-buttons,
-    .push-banner-container {
-        max-width: calc(100% - 16px);
+    .header-content-wrapper {
+        max-width: 100%;
+        padding: 12px 12px 16px 12px;
     }
-     .balance-info-box {
+    .balance-info-box {
         min-width: auto;
         padding: 8px 12px;
     }
@@ -749,8 +815,8 @@
         transform: scale(3.2);
     }
 
-    .bottom-sheet-title {
-        font-size: 1.2rem !important;
+    .bottom-sheet-header-title {
+        font-size: 1.1rem !important;
     }
     .bottom-sheet-text {
         font-size: 0.9rem !important;
