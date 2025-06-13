@@ -1,5 +1,6 @@
-// This is the FRONTEND service file: AR_FRONTEND/src/services/gameService.js
-// This file's only job is to make API calls to your backend.
+// This is the CORRECT FRONTEND service file.
+// Its only job is to make API calls to your backend.
+// It should NOT contain any 'require' statements or database logic.
 import api from './api';
 
 // --- COINFLIP FUNCTIONS ---
@@ -11,7 +12,6 @@ import api from './api';
  * @returns {Promise<object>} The result of the game from the backend.
  */
 export const playCoinFlip = async (betAmountArix, choice) => {
-    // The backend's authentication middleware will handle associating this with the user.
     const response = await api.post('/game/coinflip', {
         betAmountArix,
         choice
@@ -30,7 +30,7 @@ export const getCoinflipHistory = async () => {
 
 
 // --- CRASH GAME FUNCTIONS ---
-// These are the functions that were missing and causing your build to fail.
+// These are the functions that your CrashGame.jsx component needs.
 
 /**
  * Fetches the current state of the crash game from the backend.
