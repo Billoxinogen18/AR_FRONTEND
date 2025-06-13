@@ -1,9 +1,5 @@
-
 import { Address, Cell, TonClient4, beginCell, toNano as tonToNano } from "@ton/ton";
 import { getHttpV4Endpoint } from "@orbs-network/ton-access";
-
-
-
 
 export const ARIX_DECIMALS = 9;
 export const USDT_DECIMALS = 6; 
@@ -11,29 +7,21 @@ export const USD_DECIMALS = 2;
 
 export const MIN_USDT_WITHDRAWAL_USD_VALUE = 3;
 
-
 export const TONCONNECT_MANIFEST_URL = import.meta.env.VITE_TONCONNECT_MANIFEST_URL || '/tonconnect-manifest.json';
-
 
 export const TON_NETWORK = import.meta.env.VITE_TON_NETWORK || 'mainnet';
 
-
 export const TON_EXPLORER_URL = TON_NETWORK === 'testnet' ? 'https://testnet.tonscan.org' : 'https://tonscan.org';
-
 
 export const TELEGRAM_BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'arix_terminal_tma_bot';
 
-
 export const REFERRAL_LINK_BASE = import.meta.env.VITE_TMA_URL || window.location.origin;
-
 
 export const FALLBACK_IMAGE_URL = '/img/placeholder-image.png';
 export const COINFLIP_HEADS_IMG = '/img/coin_heads.png';
 export const COINFLIP_TAILS_IMG = '/img/coin_tails.png';
 export const COINFLIP_SPINNING_GIF = '/img/coin_spinning.gif';
 export const COINFLIP_DEFAULT_IMG = '/img/coin-default-cf.png';
-
-
 
 let memoizedTonClient = null;
 
@@ -83,7 +71,6 @@ export const fromSmallestUnits = (amountInSmallestUnits, decimals) => {
 
         const fractionalString = fractionalPart.toString().padStart(decimals, '0');
         
-        
         return parseFloat(`${integerPart}.${fractionalString}`);
     } catch(e) {
         console.error("Error in fromSmallestUnits: ", e, {amountInSmallestUnits, decimals});
@@ -101,6 +88,13 @@ export const fromUsdtSmallestUnits = (amountInSmallestUnits) => {
 
 
 export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAddressString) => {
+    // FIX: Added validation to prevent errors when the owner address is not yet available or invalid.
+    // This stops the 500 Internal Server Error from the logs.
+    if (!ownerAddressString || typeof ownerAddressString !== 'string' || !ownerAddressString.includes(':')) {
+        console.warn(`[tonUtils.js] Invalid or missing ownerAddressString provided: ${ownerAddressString}. Cannot fetch Jetton wallet address.`);
+        return null;
+    }
+
     try {
         const client = await getTonClient();
         if (!client) throw new Error("TonClient not available in getJettonWalletAddress");
@@ -117,9 +111,6 @@ export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAdd
         return result.stack.readAddress().toString({bounceable: true, testOnly: TON_NETWORK === 'testnet'});
     } catch (error) {
         console.error(`[tonUtils.js] Error getting Jetton wallet address for owner ${ownerAddressString} and master ${jettonMasterAddressString}:`, error.message);
-        
-        
-        
         return null;
     }
 };
@@ -183,8 +174,6 @@ export const createJettonTransferMessage = (
 
 
 export const createStakeForwardPayload = (params) => {
-    
-    
     return beginCell()
         .storeUint(0xf010c513, 32) 
         .storeUint(params.queryId, 64)
@@ -202,16 +191,6 @@ export const waitForTransactionConfirmation = async (walletAddressString, sentMe
 
     const walletAddress = Address.parse(walletAddressString);
 
-    
-    
-    
-    
-    
-
-    
-    
-    
-
     console.log(`[tonUtils.js] Starting transaction confirmation poll for wallet: ${walletAddressString}. This may take a few minutes.`);
 
     const startTime = Date.now();
@@ -223,38 +202,10 @@ export const waitForTransactionConfirmation = async (walletAddressString, sentMe
         try {
             const transactions = await client.getTransactions(walletAddress, {
                 limit: 10, 
-                
-                
                 archival: true 
             });
 
-            
-            
-            
-            
-
-            
-            
             for (const tx of transactions) {
-                
-                
-                
-                
-                
-                
-                
-
-                
-                
-                
-
-                
-                
-                
-
-                
-                
-                
                 if (tx.inMessage && tx.inMessage.info.type === 'external-in') {
                     if (tx.description?.computePhase?.type === 'vm' && tx.description.computePhase.success) {
                         console.log(`[tonUtils.js] Potentially related new transaction found for ${walletAddressString}: ${tx.hash().toString('hex')}`);
@@ -265,8 +216,6 @@ export const waitForTransactionConfirmation = async (walletAddressString, sentMe
             if (transactions.length > 0) {
                 const currentLastLt = transactions[0].lt; 
                 if (lastLt && BigInt(currentLastLt) > lastLt) {
-                    
-                    
                 }
                 lastLt = BigInt(currentLastLt);
             }

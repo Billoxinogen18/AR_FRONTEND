@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Typography, Card, Button, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-// Removed CoinflipGame import as we navigate to it now
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getUserProfile } from '../services/api';
 import './GamePage.css';
@@ -38,12 +37,12 @@ const GamePage = () => {
 
     // Simplified navigation handlers
     const handlePlayCoinflip = () => {
-        navigate('/games/coinflip');
+        navigate('/game/coinflip');
     };
     
     // NEW: Navigation handler for Crash Game
     const handlePlayCrash = () => {
-        navigate('/games/crash');
+        navigate('/game/crash');
     };
 
 
