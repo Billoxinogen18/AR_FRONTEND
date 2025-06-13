@@ -1,7 +1,7 @@
 // AR_FRONTEND/src/App.jsx
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, TonConnectUIProvider, useTonConnectUI } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid, Spin } from 'antd';
 import {
     CheckSquareFilled,
@@ -12,13 +12,18 @@ import {
 } from '@ant-design/icons';
 import './App.css';
 import ResponsiveMobileNav from './components/ResponsiveMobileNav';
-import { TELEGRAM_BOT_USERNAME, REFERRAL_LINK_BASE, TONCONNECT_MANIFEST_URL } from './utils/constants';
+import { TONCONNECT_MANIFEST_URL } from './utils/constants';
 
+// --- Page Imports (Lazy Loaded) ---
 const EarnPage = lazy(() => import('./pages/EarnPage'));
 const GamePage = lazy(() => import('./pages/GamePage'));
 const UserPage = lazy(() => import('./pages/UserPage'));
 const TaskPage = lazy(() => import('./pages/TaskPage'));
 const PushPage = lazy(() => import('./pages/PushPage'));
+// --- Game Component Imports ---
+import CoinflipGame from './components/game/CoinFlipGame';
+import CrashGame from './components/game/crash/CrashGame';
+
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
@@ -38,10 +43,16 @@ const DesktopMenu = () => {
     let currentPath = location.pathname;
     
     if (currentPath === '/') currentPath = '/game';
+    // This logic ensures that if the user somehow lands on a game-specific URL like /game/crash,
+    // the main "GAME" menu item is still highlighted.
+    if (currentPath.startsWith('/game/')) {
+        currentPath = '/game';
+    }
+
     if (!menuConfig.some(item => item.key === currentPath)) {
         const fallbackPath = '/game'; 
          useEffect(() => {
-            if (location.pathname !== fallbackPath && !menuConfig.some(item => item.key === location.pathname)) {
+            if (!menuConfig.some(item => location.pathname.startsWith(item.key))) {
               navigate(fallbackPath, { replace: true });
             }
         }, [navigate, fallbackPath, location.pathname]);
@@ -86,7 +97,7 @@ function App() {
     const navigate = useNavigate();
 
      useEffect(() => {
-        if (location.pathname === '/' && menuConfig.some(item => item.key === '/game')) {
+        if (location.pathname === '/') {
             navigate('/game', { replace: true });
         }
     }, [location.pathname, navigate]);
@@ -311,6 +322,10 @@ function App() {
                                     <Route path="/game" element={<GamePage />} />
                                     <Route path="/push" element={<PushPage />} />
                                     <Route path="/user" element={<UserPage />} />
+                                    
+                                    {/* --- Game Specific Routes --- */}
+                                    <Route path="/game/coinflip" element={<CoinflipGame />} />
+                                    <Route path="/game/crash" element={<CrashGame />} />
                                 </Routes>
                             </Suspense>
                         </Content>
@@ -323,9 +338,11 @@ function App() {
 }
 
 const RootApp = () => (
-    <Router>
-        <App />
-    </Router>
+    <TonConnectUIProvider manifestUrl={TONCONNECT_MANIFEST_URL}>
+        <Router>
+            <App />
+        </Router>
+    </TonConnectUIProvider>
 );
 
 export default RootApp;
