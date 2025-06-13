@@ -5,15 +5,15 @@ const ARIX_DECIMALS = 9;
 
 /**
  * A local helper to update a user's ARIX balance within a transaction.
- * This ensures consistent balance updates for all games.
+ * This ensures consistent balance updates for all games, as per the documentation.
  * @param {object} client - The active database client from a transaction.
  * @param {string} userWalletAddress - The user's wallet address.
  * @param {number} amountDelta - The amount to add (positive) or subtract (negative).
  * @returns {Promise<{newBalance: number, userId: number}>}
  */
 const updateUserBalanceInGame = async (client, userWalletAddress, amountDelta) => {
-    // Ensure the user exists and get their current balance and ID.
-    // This is the most robust pattern from your documentation's logic.
+    // This query ensures the user exists and gets their current balance and ID.
+    // It's the most robust pattern, combining creation and retrieval.
     const userRes = await client.query(
         `INSERT INTO users (wallet_address, created_at, updated_at, claimable_arix_rewards)
          VALUES ($1, NOW(), NOW(), 0)
@@ -125,7 +125,7 @@ class GameService {
         try {
             await client.query('BEGIN');
             
-            // This now updates the main balance, aligning with the PDF.
+            // This now updates the main balance, aligning with the PDF and ensuring players are rewarded/debited.
             const { newBalance } = await updateUserBalanceInGame(client, userWalletAddress, amountDelta);
 
             await client.query(
