@@ -1,0 +1,214 @@
+/* src/components/game/crash/CrashGame.css */
+/* UPDATED FILE with animation styles */
+
+@keyframes countdown-animation {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+@keyframes particle-fade {
+  0% { transform: var(--transform-start); opacity: 1; }
+  100% { transform: var(--transform-end); opacity: 0; }
+}
+
+.crash-game-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; /* Prevent animations from spilling out */
+}
+
+.history-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none; /* Firefox */
+}
+.history-bar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+.history-item {
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+}
+.history-item.green {
+    background-color: rgba(46, 204, 113, 0.15);
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+.history-item.red {
+    background-color: rgba(231, 76, 60, 0.15);
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.crash-chart-container {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background: #162232;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* --- Countdown --- */
+.countdown-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(22, 34, 50, 0.7);
+    z-index: 10;
+}
+.countdown-text {
+    font-size: 1.2rem;
+    color: #a0a0b8;
+}
+.countdown-timer {
+    width: 80%;
+    height: 6px;
+    background-color: #1a1a2e;
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+.countdown-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #e74c3c, #f1c40f, #2ecc71);
+    border-radius: 3px;
+    /* WAITING_TIME is 8000ms in backend */
+    animation: countdown-animation 8s linear forwards;
+}
+
+/* --- Multiplier & Rocket --- */
+.multiplier-overlay {
+    position: absolute;
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    transition: color 0.3s ease;
+    z-index: 5;
+}
+
+.rocket-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 24px;
+    color: #f1c40f;
+    will-change: transform;
+    z-index: 4;
+}
+.rocket-container svg {
+    filter: drop-shadow(0 0 5px #f1c40f);
+}
+
+/* --- Particles --- */
+.particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    z-index: 6;
+    animation: particle-fade 0.8s forwards ease-out;
+}
+
+
+/* --- Controls & Messages --- */
+.controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    background-color: #162232;
+    border-radius: 8px;
+}
+.bet-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #1a1a2e;
+    padding: 10px;
+    border-radius: 6px;
+}
+.bet-input-wrapper span {
+    font-size: 0.9rem;
+    color: #a0a0b8;
+}
+.bet-input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    width: 100px;
+}
+.bet-input:focus { outline: none; }
+.bet-input::-webkit-outer-spin-button, .bet-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.bet-input[type=number] { -moz-appearance: textfield; }
+
+.crash-btn {
+    width: 100%; padding: 15px; border: none; border-radius: 8px;
+    font-size: 1.2rem; font-weight: 700; color: #ffffff; cursor: pointer;
+    transition: all 0.2s ease-in-out; text-transform: uppercase;
+}
+.crash-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+.crash-btn.place-bet {
+    background: linear-gradient(45deg, #28a745, #218838);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+.crash-btn.place-bet:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+}
+.crash-btn.cashout {
+    background: linear-gradient(45deg, #ffc107, #e0a800);
+    color: #1e1e1e;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+.crash-btn.placed, .crash-btn.cashed-out, .crash-btn.crashed {
+    background: #5a6268;
+}
+.crash-error-message, .payout-message {
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: -5px;
+    margin-bottom: 5px;
+}
+.crash-error-message {
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+}
+.payout-message {
+    color: #2ecc71;
+    background-color: rgba(46, 204, 113, 0.1);
+}

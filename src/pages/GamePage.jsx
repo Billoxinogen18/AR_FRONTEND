@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Typography, Card, Button, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import CoinflipGame from '../components/game/CoinFlipGame';
+// Removed CoinflipGame import as we navigate to it now
 import { useTonAddress } from '@tonconnect/ui-react';
 import { getUserProfile } from '../services/api';
 import './GamePage.css';
@@ -10,7 +10,6 @@ const { Title, Text, Paragraph } = Typography;
 
 const GamePage = () => {
     const navigate = useNavigate();
-    const [showCoinflipGameComponent, setShowCoinflipGameComponent] = useState(false);
     const rawAddress = useTonAddress(false);
     const [claimableArix, setClaimableArix] = useState('0');
     const [loadingBalance, setLoadingBalance] = useState(false);
@@ -37,17 +36,16 @@ const GamePage = () => {
     }, [fetchUserArixBalance]);
 
 
+    // Simplified navigation handlers
     const handlePlayCoinflip = () => {
-        setShowCoinflipGameComponent(true);
+        navigate('/games/coinflip');
+    };
+    
+    // NEW: Navigation handler for Crash Game
+    const handlePlayCrash = () => {
+        navigate('/games/crash');
     };
 
-    const handleBackToGamesList = () => {
-        setShowCoinflipGameComponent(false);
-    };
-
-    if (showCoinflipGameComponent) {
-        return <CoinflipGame onBack={handleBackToGamesList} />;
-    }
 
     return (
         <div className="game-page-container">
@@ -77,13 +75,14 @@ const GamePage = () => {
             </Paragraph>
 
             <div className="game-card-list">
+                {/* --- CoinFlip Card --- */}
                 <Card className="game-card" hoverable onClick={handlePlayCoinflip}>
                     <div className="game-card-row">
                         <div className="game-card-image-section">
                             <img 
                                 src="/img/coinflip-card-visual.png" 
                                 alt="Coinflip Game Visual"
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Coin'; }}
                             />
                         </div>
                         <div className="game-card-content-section">
@@ -94,6 +93,31 @@ const GamePage = () => {
                             <Button className="game-card-button">
                                 <span className="button-icon-circle"></span>
                                 Test your luck 
+                                <span className="button-arrow">→</span>
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* --- NEW: Crash Game Card --- */}
+                <Card className="game-card" hoverable onClick={handlePlayCrash}>
+                    <div className="game-card-row">
+                        <div className="game-card-image-section">
+                            <img 
+                                src="/img/crash-card-visual.png" // You'll need to add this image
+                                alt="Crash Game Visual"
+                                // Placeholder image if the primary one fails
+                                onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Crash'; }}
+                            />
+                        </div>
+                        <div className="game-card-content-section">
+                            <Title level={4} className="game-card-title">Crash</Title>
+                            <Paragraph className="game-card-description">
+                                Cash out before the rocket crashes. The higher the multiplier, the bigger the win!
+                            </Paragraph>
+                            <Button className="game-card-button">
+                                <span className="button-icon-circle"></span>
+                                Fly to the moon
                                 <span className="button-arrow">→</span>
                             </Button>
                         </div>
