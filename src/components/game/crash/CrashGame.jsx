@@ -1,42 +1,34 @@
-// src/components/game/crash/CrashGame.jsx
-// UPDATED FILE with full animations
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { getCrashGameState, placeCrashBet, cashOutCrashBet } from '../../../services/gameService';
+import { placeCrashBet, cashOutCrashBet } from '../../../services/gameService';
+import { useTonAddress } from '@tonconnect/ui-react';
 import { FaRocket } from 'react-icons/fa';
-import './CrashGame.css'; // Make sure to use the new CSS file content
+import './CrashGame.css';
 
-// --- Animation Component ---
 const CrashAnimation = ({ gameState }) => {
-    const { status, multiplier, crashPoint } = gameState;
-    const containerRef = useRef(null);
+    const { phase, multiplier, crashPoint } = gameState;
     const [rocketStyle, setRocketStyle] = useState({ transform: 'translate(20px, 180px) rotate(-45deg)', opacity: 0 });
     const [particles, setParticles] = useState([]);
 
-    // Path points for the graph line
     const pathPoints = useMemo(() => {
         let points = "0,200";
-        if (status === 'running' || status === 'crashed') {
-            const endMultiplier = status === 'crashed' ? crashPoint : multiplier;
+        if (phase === 'RUNNING' || phase === 'CRASHED') {
+            const endMultiplier = phase === 'CRASHED' ? crashPoint : multiplier;
             for (let i = 1; i <= endMultiplier; i += 0.1) {
                 const x = 10 + Math.log2(i) * 50;
                 const y = 200 - Math.pow(i, 1.2) * 2;
-                if (x > 400 || y < 0) break; // stay within bounds
+                if (x > 400 || y < 0) break;
                 points += ` ${x},${y}`;
             }
         }
         return points;
-    }, [status, multiplier, crashPoint]);
+    }, [phase, multiplier, crashPoint]);
     
-    // Animate the rocket along the path
     useEffect(() => {
-        if (status === 'running') {
-             // Show the rocket
+        if (phase === 'RUNNING') {
             setParticles([]);
             const x = 10 + Math.log2(multiplier) * 50;
             const y = 200 - Math.pow(multiplier, 1.2) * 2;
             
-            // Calculate angle for rocket rotation
             const prevMultiplier = Math.max(1, multiplier - 0.05);
             const prevX = 10 + Math.log2(prevMultiplier) * 50;
             const prevY = 200 - Math.pow(prevMultiplier, 1.2) * 2;
@@ -47,8 +39,7 @@ const CrashAnimation = ({ gameState }) => {
                 opacity: 1,
                 transition: 'transform 0.1s linear'
             });
-        } else if (status === 'crashed') {
-            // Create explosion particles at the last rocket position
+        } else if (phase === 'CRASHED') {
             const newParticles = Array.from({ length: 30 }).map(() => ({
                 left: rocketStyle.transform.match(/translate\(([^,]+)px/)[1],
                 top: rocketStyle.transform.match(/,\s*([^,]+)px/)[1],
@@ -56,37 +47,29 @@ const CrashAnimation = ({ gameState }) => {
                 backgroundColor: ['#ffc107', '#e74c3c', '#ffffff'][Math.floor(Math.random() * 3)],
             }));
             setParticles(newParticles);
-             // Hide the rocket
             setRocketStyle(prev => ({ ...prev, opacity: 0, transition: 'opacity 0.1s' }));
-        } else if (status === 'waiting') {
-            // Reset rocket position
+        } else if (phase === 'WAITING') {
             setParticles([]);
             setRocketStyle({ transform: 'translate(20px, 180px) rotate(-45deg)', opacity: 0, transition: 'opacity 0.5s' });
         }
+    }, [multiplier, phase]);
 
-    }, [multiplier, status]);
-
-    const multiplierColor = status === 'crashed' ? '#e74c3c' : '#2ecc71';
+    const multiplierColor = phase === 'CRASHED' ? '#e74c3c' : '#2ecc71';
 
     return (
-        <div className="crash-chart-container" ref={containerRef}>
-            {/* Countdown Overlay */}
-            {status === 'waiting' && (
+        <div className="crash-chart-container">
+            {phase === 'WAITING' && (
                  <div className="countdown-overlay">
                     <div className="countdown-text">Starting in...</div>
-                    <div className="countdown-timer">
+                    <div className="countdown-timer" style={{animationDuration: '8s'}}>
                         <div className="countdown-bar"></div>
                     </div>
                 </div>
             )}
-            
-            {/* Multiplier Text */}
              <div className="multiplier-overlay" style={{ color: multiplierColor }}>
-                {status === 'crashed' && 'Crashed @ '}
-                {parseFloat(status === 'crashed' ? crashPoint : multiplier).toFixed(2)}x
+                {phase === 'CRASHED' && 'Crashed @ '}
+                {parseFloat(phase === 'CRASHED' ? crashPoint : multiplier).toFixed(2)}x
             </div>
-            
-            {/* SVG Graph */}
             <svg width="100%" height="220" viewBox="0 0 400 220" preserveAspectRatio="none">
                  <defs>
                     <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -103,13 +86,9 @@ const CrashAnimation = ({ gameState }) => {
                     points={pathPoints}
                 />
             </svg>
-
-            {/* Rocket Icon */}
             <div className="rocket-container" style={rocketStyle}>
                  <FaRocket />
             </div>
-
-            {/* Explosion Particles */}
             {particles.map((p, i) => (
                 <div key={i} className="particle" style={p} />
             ))}
@@ -117,10 +96,9 @@ const CrashAnimation = ({ gameState }) => {
     );
 };
 
-// --- Main Game Component ---
 const CrashGame = () => {
     const [gameState, setGameState] = useState({
-        status: 'loading',
+        phase: 'CONNECTING',
         multiplier: 1.00,
         crashPoint: null,
         history: [],
@@ -131,38 +109,51 @@ const CrashGame = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [lastPayout, setLastPayout] = useState(null);
-
-    const gameStateRef = useRef(gameState);
-    useEffect(() => {
-        gameStateRef.current = gameState;
-    }, [gameState]);
+    
+    const userWalletAddress = useTonAddress();
+    const socketRef = useRef(null);
 
     useEffect(() => {
-        const interval = setInterval(async () => {
-            try {
-                const state = await getCrashGameState();
-                setGameState(state);
+        const backendHost = window.location.hostname.includes('localhost')
+            ? 'localhost:3001'
+            : 'smartterminalbackend.vercel.app';
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${backendHost}`;
+        
+        socketRef.current = new WebSocket(wsUrl);
 
-                if (state.status === 'waiting' && gameStateRef.current.status !== 'waiting') {
-                    setIsBetPlaced(false);
-                    setIsCashedOut(false);
-                    setError('');
-                    setLastPayout(null);
+        socketRef.current.onopen = () => console.log('[WebSocket] Connection established');
+        socketRef.current.onclose = () => console.log('[WebSocket] Connection closed');
+        socketRef.current.onerror = (err) => console.error('[WebSocket] Error:', err);
+
+        socketRef.current.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'game_update' || data.type === 'full_state') {
+                setGameState(data.payload);
+                if (data.payload.phase === 'WAITING') {
+                    if (isBetPlaced || isCashedOut) {
+                        setIsBetPlaced(false);
+                        setIsCashedOut(false);
+                        setLastPayout(null);
+                        setError('');
+                    }
                 }
-            } catch (err) {
-                console.error("Error fetching game state:", err);
-                setError('Connection error. Please refresh.');
             }
-        }, 300); // Polling faster for smoother animation sync
+        };
 
-        return () => clearInterval(interval);
-    }, []);
+        return () => {
+            if (socketRef.current) socketRef.current.close();
+        };
+    }, [isBetPlaced, isCashedOut]);
 
     const handlePlaceBet = async () => {
         setIsLoading(true);
         setError('');
         try {
-            await placeCrashBet(parseFloat(betAmount));
+            await placeCrashBet({
+                userWalletAddress,
+                betAmountArix: parseFloat(betAmount)
+            });
             setIsBetPlaced(true);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to place bet.');
@@ -174,7 +165,7 @@ const CrashGame = () => {
         setIsLoading(true);
         setError('');
         try {
-            const result = await cashOutCrashBet();
+            const result = await cashOutCrashBet({ userWalletAddress });
             setIsCashedOut(true);
             setLastPayout({ amount: result.payout, multiplier: result.cashOutMultiplier });
         } catch (err) {
@@ -184,13 +175,13 @@ const CrashGame = () => {
     };
 
     const renderButton = () => {
-        if (gameState.status === 'waiting') {
+        if (gameState.phase === 'WAITING') {
             if (isBetPlaced) {
                 return <button disabled className="crash-btn placed">Bet Placed</button>;
             }
-            return <button onClick={handlePlaceBet} disabled={isLoading} className="crash-btn place-bet">Place Bet</button>;
+            return <button onClick={handlePlaceBet} disabled={isLoading || !userWalletAddress} className="crash-btn place-bet">Place Bet</button>;
         }
-        if (gameState.status === 'running') {
+        if (gameState.phase === 'RUNNING') {
             if (isBetPlaced && !isCashedOut) {
                 return <button onClick={handleCashOut} disabled={isLoading} className="crash-btn cashout">Cash Out @ {gameState.multiplier}x</button>;
             }
@@ -205,8 +196,8 @@ const CrashGame = () => {
         <div className="crash-game-container">
             <div className="history-bar">
                 {gameState.history && gameState.history.map((h, i) => (
-                    <span key={i} className={`history-item ${h < 2 ? 'red' : 'green'}`}>
-                        {parseFloat(h).toFixed(2)}x
+                    <span key={i} className={`history-item ${h.crash_multiplier < 2 ? 'red' : 'green'}`}>
+                        {parseFloat(h.crash_multiplier).toFixed(2)}x
                     </span>
                 ))}
             </div>
@@ -229,7 +220,7 @@ const CrashGame = () => {
                         onChange={(e) => setBetAmount(e.target.value)}
                         placeholder="10"
                         className="bet-input"
-                        disabled={isBetPlaced || gameState.status !== 'waiting'}
+                        disabled={isBetPlaced || gameState.phase !== 'WAITING'}
                     />
                     <span>ARIX</span>
                  </div>
@@ -240,4 +231,3 @@ const CrashGame = () => {
 };
 
 export default CrashGame;
-
