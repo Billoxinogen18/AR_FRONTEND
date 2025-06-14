@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { FaUsers, FaHistory } from 'react-icons/fa';
+import { FaPlane, FaUsers, FaHistory } from 'react-icons/fa';
 import { Table, Tabs, Input, Button, Spin, Tag, Empty, Card, Grid, message, Switch } from 'antd';
 import { getCrashHistoryForUser } from '../../../services/api';
 import './CrashGame.css';
 
 const { useBreakpoint } = Grid;
 
-// The plane is now a stylized emoji for the vintage look
-const ChartIcon = () => <span className="plane-emoji-icon">✈️</span>;
+// Using the FontAwesome icon again for better rotation control
+const ChartIcon = () => <FaPlane size={24} className="plane-icon" />;
 
 // NEW: Circular Countdown Component to replicate the video's timer
 const CircularCountdown = ({ duration }) => {
     const [timeLeft, setTimeLeft] = useState(duration);
 
     useEffect(() => {
+        if (duration <= 0) return;
         setTimeLeft(duration);
         const timer = setInterval(() => {
             setTimeLeft(prev => {
@@ -42,7 +43,6 @@ const CircularCountdown = ({ duration }) => {
                 />
             </svg>
             <div className="game-countdown-number">{timeLeft}</div>
-            <div className="game-countdown-label">Starting...</div>
         </div>
     );
 };
@@ -51,19 +51,17 @@ const CircularCountdown = ({ duration }) => {
 // REVISED CRASH ANIMATION COMPONENT
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
-    const [planeStyle, setPlaneStyle] = useState({ bottom: '10%', left: '5%', opacity: 0 });
+    const [planeStyle, setPlaneStyle] = useState({ bottom: '0%', left: '0%', opacity: 0 });
     const [isExploding, setIsExploding] = useState(false);
     
-    // REVISED: SVG path for a FILLED, persistent trail
+    // REVISED: SVG path for a prominent, stroked trail
     const [trailPath, setTrailPath] = useState('');
-    const previousPositionRef = useRef(null);
     const containerRef = useRef(null);
 
     useEffect(() => {
         if (phase === 'WAITING') {
             setIsExploding(false);
-            setTrailPath('');
-            previousPositionRef.current = null;
+            setTrailPath(''); // Clear the trail
         }
 
         if (phase === 'RUNNING' && containerRef.current) {
@@ -72,45 +70,35 @@ const CrashAnimation = ({ gameState }) => {
             const containerWidth = containerRef.current.offsetWidth;
             const containerHeight = containerRef.current.offsetHeight;
 
-            const progress = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(19));
-            const xPercent = 5 + progress * 85; 
-            const yPercent = 10 + Math.pow(progress, 0.7) * 75;
+            // --- NEW: Bézier Curve Path Calculation ---
+            // Define the curve's start, control (for the arc), and end points
+            const p0 = { x: containerWidth * 0.05, y: containerHeight * 0.9 }; // Start Point (bottom-left)
+            const p1 = { x: containerWidth * 0.45, y: containerHeight * 0.15 }; // Control Point (pulls the curve up)
+            const p2 = { x: containerWidth * 0.95, y: containerHeight * 0.05 }; // Logical End Point of the whole curve
 
-            const currentX = (xPercent / 100) * containerWidth;
-            const currentY = containerHeight - ((yPercent / 100) * containerHeight);
+            // `t` is the progress along the curve (0.0 to 1.0)
+            const t = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(39)); // Normalize progress towards a goal of 40x
 
-            let rotation = 15;
-            if (previousPositionRef.current) {
-                const dx = currentX - previousPositionRef.current.x;
-                const dy = currentY - previousPositionRef.current.y;
-                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                rotation = angle; // The emoji is already oriented correctly
-            }
-            previousPositionRef.current = { x: currentX, y: currentY };
+            // Quadratic Bézier curve formula: B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+            const currentX = (1 - t) ** 2 * p0.x + 2 * (1 - t) * t * p1.x + t ** 2 * p2.x;
+            const currentY = (1 - t) ** 2 * p0.y + 2 * (1 - t) * t * p1.y + t ** 2 * p2.y;
 
-            // REVISED: Path logic to create a filled shape
-            setTrailPath(prevPath => {
-                const startX = 0.05 * containerWidth;
-                const startY = containerHeight - (0.10 * containerHeight);
-                const firstPoint = `M ${startX},${startY} L ${currentX},${currentY}`;
-                
-                if (prevPath === '') {
-                    return firstPoint;
-                }
-                // Append new point and draw lines down to the bottom to create the fill area
-                const newSegment = ` L ${currentX},${currentY}`;
-                const closingSegment = ` L ${currentX},${containerHeight} L ${startX},${containerHeight} Z`;
+            // --- NEW: Correct Plane Orientation using Curve's Tangent ---
+            // Derivative of the Bézier formula: B'(t) = 2(1-t)(P1-P0) + 2t(P2-P1)
+            const dx = 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
+            const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
 
-                // Rebuild the path to include the new point and the closing shape
-                return prevPath.replace(/ L [0-9.]+?,[0-9.]+? Z$/, '') + newSegment + closingSegment;
-            });
+            // Update the SVG trail path
+            setTrailPath(`M ${p0.x},${p0.y} Q ${p1.x},${p1.y} ${currentX},${currentY}`);
 
+            // Update plane's style
             const newStyle = {
-                left: `${xPercent}%`,
-                bottom: `${yPercent}%`,
-                transform: `rotate(${rotation}deg)`,
+                left: `${currentX}px`,
+                top: `${currentY}px`,
+                transform: `translate(-50%, -50%) rotate(${angle}deg)`,
                 opacity: 1,
-                transition: 'all 0.1s linear',
+                transition: 'transform 0.1s linear, top 0.1s linear, left 0.1s linear'
             };
             setPlaneStyle(newStyle);
 
@@ -119,7 +107,7 @@ const CrashAnimation = ({ gameState }) => {
             setIsExploding(true);
         } else {
             setIsExploding(false);
-            setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: `rotate(15deg)`, transition: 'opacity 0.5s ease-out' });
+            setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: 'translate(-50%, -50%) rotate(15deg)', transition: 'opacity 0.5s ease-out' });
         }
     }, [phase, multiplier]);
 
@@ -129,7 +117,16 @@ const CrashAnimation = ({ gameState }) => {
 
     return (
         <div className="crash-chart-container" ref={containerRef}>
-            {/* NEW: Parallax background layers */}
+            {/* SVG Gradient Definition is now self-contained here */}
+            <svg width="0" height="0" style={{ position: 'absolute' }}>
+                <defs>
+                    <linearGradient id="trail-stroke-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{ stopColor: '#FFC107' }} />
+                        <stop offset="100%" style={{ stopColor: '#F44336' }} />
+                    </linearGradient>
+                </defs>
+            </svg>
+            
             <div className="parallax-bg layer-1"></div>
             <div className="parallax-bg layer-2"></div>
             <div className="parallax-bg layer-3"></div>
@@ -143,13 +140,13 @@ const CrashAnimation = ({ gameState }) => {
             </div>
 
             <svg className="trail-svg-container">
-                <path d={trailPath} className="trail-path-fill" />
+                <path d={trailPath} className="trail-path-line" />
             </svg>
 
             {!isExploding && <div className="rocket-container" style={planeStyle}><ChartIcon /></div>}
 
             {isExploding &&
-                <div className="explosion-container" style={{ left: planeStyle.left, bottom: planeStyle.bottom }}>
+                <div className="explosion-container" style={{ left: planeStyle.left, top: planeStyle.top }}>
                     <div className="shockwave" />
                     <div className="shockwave shockwave-delayed" />
                     <div className="explosion-flash" />
@@ -334,7 +331,6 @@ const CrashGame = () => {
                                  </div>
                              </Tabs.TabPane>
                              <Tabs.TabPane tab="Auto" key="2">
-                                {/* REVISED: Added a wrapper with specific class for better styling control */}
                                 <div className="controls-container auto-controls-container">
                                     <Input.Group compact>
                                         <Input addonBefore="Base Bet" type="number" value={betAmount} onChange={e => setBetAmount(e.target.value)} disabled={isAutoBetting} className="bet-input"/>

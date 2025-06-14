@@ -213,7 +213,7 @@
 }
 @keyframes crash-pulse { from { opacity: 0.8; transform: scale(1); } to { opacity: 1; transform: scale(1.1); } }
 
-/* REVISED: SVG Trail System for filled path */
+/* REVISED: SVG Trail System for a prominent stroked path */
 .trail-svg-container {
   position: absolute;
   top: 0; left: 0;
@@ -221,12 +221,15 @@
   pointer-events: none;
   z-index: 2;
 }
-.trail-path-fill {
-  fill: url(#trail-gradient);
-  stroke: none;
-  filter: drop-shadow(0 -5px 15px rgba(255, 193, 7, 0.3));
-  opacity: 0.75;
+.trail-path-line {
+  fill: none;
+  stroke: url(#trail-stroke-gradient);
+  stroke-width: 5; /* Thicker line like in the video */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px #ffc107);
 }
+
 
 /* REVISED: Plane Icon */
 .rocket-container {
@@ -234,10 +237,10 @@
   z-index: 3;
   transition: all 0.1s linear;
 }
-.plane-emoji-icon {
-  font-size: 32px;
-  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.7));
-  display: block;
+.plane-icon { /* Reverted to FontAwesome icon */
+  font-size: 24px;
+  color: #fff;
+  filter: drop-shadow(0 0 10px #ffc107) drop-shadow(0 0 20px #ffc107);
 }
 
 /* ================================================================ */
