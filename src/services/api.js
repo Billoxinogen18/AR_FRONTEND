@@ -1,64 +1,76 @@
-
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+const VITE_BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
-if (!API_BASE_URL) {
+if (!VITE_BACKEND_API_URL) {
   const errorMsg = "FATAL: VITE_BACKEND_API_URL is not set in environment variables. Frontend cannot connect to backend.";
   console.error(errorMsg);
+  // You might want to display an error to the user here
 }
 
+// --- REVISION: CONSTRUCT THE CORRECT API URL WITH /api PREFIX ---
+// Your backend routes (in app.js) are all prefixed with /api.
+// This ensures that all requests from the frontend correctly target those routes.
+const API_URL = `${VITE_BACKEND_API_URL}/api`;
+
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL, // Use the new, corrected URL
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 30000, 
 });
 
-
+// Staking/Earn endpoints
 export const getStakingConfig = () => apiClient.get('/earn/config');
 export const recordUserStake = (data) => apiClient.post('/earn/stake', data);
 export const initiateArixUnstake = (data) => apiClient.post('/earn/initiate-arix-unstake', data);
 export const confirmArixUnstake = (data) => apiClient.post('/earn/confirm-arix-unstake', data);
 export const getUserStakesAndRewards = (walletAddress) => apiClient.get(`/earn/stakes/${walletAddress}`);
 
+// Withdrawal endpoints
 export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usdt-withdrawal', data); 
 export const requestArixRewardWithdrawal = (data) => apiClient.post('/earn/request-arix-withdrawal', data);
 
-
-
+// Game endpoints
 export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
 export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
+// Note: Crash game API calls (place/cashout) are now in a separate gameService.js file
 
-
+// Task endpoints
 export const getActiveTasks = (userWalletAddress) => {
     const params = userWalletAddress ? { userWalletAddress } : {};
-    return apiClient.get('/task/active', { params });
+    return apiClient.get('/tasks/active', { params }); // CORRECTED PATH to match backend
 };
-export const submitTaskCompletion = (taskId, data) => apiClient.post(`/task/${taskId}/submit`, data);
-export const getUserTaskHistory = (walletAddress) => apiClient.get(`/task/user/${walletAddress}`);
+export const submitTaskCompletion = (taskId, data) => apiClient.post(`/tasks/${taskId}/submit`, data); // CORRECTED PATH to match backend
+export const getUserTaskHistory = (walletAddress) => apiClient.get(`/tasks/user/${walletAddress}`); // CORRECTED PATH to match backend
 
-
+// Push/Announcement endpoints
 export const getAnnouncements = () => apiClient.get('/push/announcements');
 
-
+// User profile endpoint
 export const getUserProfile = (walletAddress, launchParams) => {
-  return apiClient.get(`/user/profile/${walletAddress}`, { params: launchParams });
+  // CORRECTED PATH to match backend router: app.use('/api/users', userRoutes);
+  return apiClient.get(`/users/profile/${walletAddress}`, { params: launchParams });
 };
 
+// Referral endpoints
+export const getUserReferralData = (walletAddress) => apiClient.get(`/referrals/data/${walletAddress}`);
+export const getReferralProgramDetails = () => apiClient.get('/referrals/program-details');
 
-export const getUserReferralData = (walletAddress) => apiClient.get(`/referral/data/${walletAddress}`);
-export const getReferralProgramDetails = () => apiClient.get('/referral/program-details');
-
-
+// Interceptor for improved error logging
 apiClient.interceptors.response.use(
   response => response,
   error => {
     if (error.response) {
-      console.error('API Error Response:', error.response.data, error.response.status, error.response.headers);
+      console.error('API Error Response:', { 
+        data: error.response.data, 
+        status: error.response.status, 
+        headers: error.response.headers,
+        url: error.config.url
+      });
     } else if (error.request) {
-      console.error('API No Response:', error.request);
+      console.error('API No Response (Network error or CORS):', error.request);
     } else {
       console.error('API Error Message:', error.message);
     }

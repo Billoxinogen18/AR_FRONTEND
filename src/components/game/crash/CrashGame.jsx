@@ -114,9 +114,11 @@ const CrashGame = () => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        const backendHost = window.location.hostname.includes('localhost')
-            ? 'localhost:3001'
-            : 'smartterminalbackend.vercel.app';
+        // --- REVISION: CONSTRUCT WEBSOCKET URL DYNAMICALLY ---
+        // This constructs the correct WebSocket URL (wss:// or ws://) from your VITE variable.
+        // It replaces the old hardcoded 'smartterminalbackend.vercel.app' URL.
+        const backendUrl = import.meta.env.VITE_BACKEND_API_URL;
+        const backendHost = new URL(backendUrl).host;
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${wsProtocol}//${backendHost}`;
         
