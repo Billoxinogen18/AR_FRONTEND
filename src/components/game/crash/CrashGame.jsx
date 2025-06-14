@@ -1,36 +1,68 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { FaPlane, FaUsers, FaHistory } from 'react-icons/fa';
+import { FaUsers, FaHistory } from 'react-icons/fa';
 import { Table, Tabs, Input, Button, Spin, Tag, Empty, Card, Grid, message, Switch } from 'antd';
 import { getCrashHistoryForUser } from '../../../services/api';
 import './CrashGame.css';
 
 const { useBreakpoint } = Grid;
 
-const ChartIcon = () => <FaPlane size={24} className="plane-icon" />;
+// The plane is now a stylized emoji for the vintage look
+const ChartIcon = () => <span className="plane-emoji-icon">✈️</span>;
 
-// ====================================================================================
+// NEW: Circular Countdown Component to replicate the video's timer
+const CircularCountdown = ({ duration }) => {
+    const [timeLeft, setTimeLeft] = useState(duration);
+
+    useEffect(() => {
+        setTimeLeft(duration);
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [duration]);
+
+    return (
+        <div className="game-countdown-container">
+            <svg className="game-countdown-svg" viewBox="0 0 120 120">
+                <circle className="game-countdown-bg" cx="60" cy="60" r="54" />
+                <circle
+                    className="game-countdown-fg"
+                    cx="60"
+                    cy="60"
+                    r="54"
+                    style={{ animationDuration: `${duration}s` }}
+                />
+            </svg>
+            <div className="game-countdown-number">{timeLeft}</div>
+            <div className="game-countdown-label">Starting...</div>
+        </div>
+    );
+};
+
+
 // REVISED CRASH ANIMATION COMPONENT
-// ====================================================================================
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
     const [planeStyle, setPlaneStyle] = useState({ bottom: '10%', left: '5%', opacity: 0 });
     const [isExploding, setIsExploding] = useState(false);
     
-    // NEW: SVG path for a persistent, high-performance trail
+    // REVISED: SVG path for a FILLED, persistent trail
     const [trailPath, setTrailPath] = useState('');
-    const previousPositionRef = useRef(null); // Ref to store the last position for angle calculation
-    const countdownRef = useRef(null);
+    const previousPositionRef = useRef(null);
     const containerRef = useRef(null);
 
     useEffect(() => {
-        const bar = countdownRef.current;
-        if (phase === 'WAITING' && bar) {
-            bar.classList.remove('animate');
-            void bar.offsetWidth; 
-            bar.classList.add('animate');
+        if (phase === 'WAITING') {
             setIsExploding(false);
-            setTrailPath(''); // Clear the trail for the new round
+            setTrailPath('');
             previousPositionRef.current = null;
         }
 
@@ -40,39 +72,43 @@ const CrashAnimation = ({ gameState }) => {
             const containerWidth = containerRef.current.offsetWidth;
             const containerHeight = containerRef.current.offsetHeight;
 
-            // Same smooth curve calculation
             const progress = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(19));
             const xPercent = 5 + progress * 85; 
             const yPercent = 10 + Math.pow(progress, 0.7) * 75;
 
-            // Convert percentages to pixel values for accurate SVG path and angle calculation
             const currentX = (xPercent / 100) * containerWidth;
-            const currentY = containerHeight - ((yPercent / 100) * containerHeight); // Y is from top for SVG
+            const currentY = containerHeight - ((yPercent / 100) * containerHeight);
 
-            // --- NEW: DYNAMIC PLANE ORIENTATION ---
-            let rotation = 15; // Default rotation
+            let rotation = 15;
             if (previousPositionRef.current) {
                 const dx = currentX - previousPositionRef.current.x;
                 const dy = currentY - previousPositionRef.current.y;
-                // Calculate angle and convert from radians to degrees. Add 45deg to align the FontAwesome icon.
                 const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                rotation = angle + 45;
+                rotation = angle; // The emoji is already oriented correctly
             }
             previousPositionRef.current = { x: currentX, y: currentY };
 
-            // --- NEW: PERSISTENT TRAIL LOGIC ---
-            // The plane draws the trail from start to finish. It does not disappear.
+            // REVISED: Path logic to create a filled shape
             setTrailPath(prevPath => {
+                const startX = 0.05 * containerWidth;
+                const startY = containerHeight - (0.10 * containerHeight);
+                const firstPoint = `M ${startX},${startY} L ${currentX},${currentY}`;
+                
                 if (prevPath === '') {
-                    return `M ${currentX},${currentY}`; // Start the path
+                    return firstPoint;
                 }
-                return `${prevPath} L ${currentX},${currentY}`; // Draw a line to the new point
+                // Append new point and draw lines down to the bottom to create the fill area
+                const newSegment = ` L ${currentX},${currentY}`;
+                const closingSegment = ` L ${currentX},${containerHeight} L ${startX},${containerHeight} Z`;
+
+                // Rebuild the path to include the new point and the closing shape
+                return prevPath.replace(/ L [0-9.]+?,[0-9.]+? Z$/, '') + newSegment + closingSegment;
             });
 
             const newStyle = {
                 left: `${xPercent}%`,
                 bottom: `${yPercent}%`,
-                transform: `rotate(${rotation}deg) scale(1)`,
+                transform: `rotate(${rotation}deg)`,
                 opacity: 1,
                 transition: 'all 0.1s linear',
             };
@@ -83,7 +119,7 @@ const CrashAnimation = ({ gameState }) => {
             setIsExploding(true);
         } else {
             setIsExploding(false);
-            setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: `rotate(-45deg) scale(0.8)`, transition: 'opacity 0.5s ease-out' });
+            setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: `rotate(15deg)`, transition: 'opacity 0.5s ease-out' });
         }
     }, [phase, multiplier]);
 
@@ -93,20 +129,21 @@ const CrashAnimation = ({ gameState }) => {
 
     return (
         <div className="crash-chart-container" ref={containerRef}>
-            {phase === 'WAITING' && (
-                <div className="countdown-overlay">
-                    <div className="countdown-text">NEXT ROUND</div>
-                    <div className="countdown-timer"><div ref={countdownRef} className="countdown-bar animate"></div></div>
-                </div>
-            )}
+            {/* NEW: Parallax background layers */}
+            <div className="parallax-bg layer-1"></div>
+            <div className="parallax-bg layer-2"></div>
+            <div className="parallax-bg layer-3"></div>
+            <div className="chart-grid-overlay"></div>
+
+            {phase === 'WAITING' && <CircularCountdown duration={5} />}
+
             <div className="multiplier-overlay" style={{ color: multiplierColor }}>
                 {displayMultiplier}x
                 {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
             </div>
 
-            {/* --- NEW: SVG Trail Rendering --- */}
             <svg className="trail-svg-container">
-                <path d={trailPath} className="trail-path" />
+                <path d={trailPath} className="trail-path-fill" />
             </svg>
 
             {!isExploding && <div className="rocket-container" style={planeStyle}><ChartIcon /></div>}
@@ -125,7 +162,7 @@ const CrashAnimation = ({ gameState }) => {
     );
 };
 
-
+// ... (CurrentBetsList and MyBetsHistory components remain unchanged)
 const CurrentBetsList = ({ players, myWalletAddress }) => {
     if (!players || players.length === 0) return <Empty description="No players this round." image={Empty.PRESENTED_IMAGE_SIMPLE}/>;
     return(
@@ -161,9 +198,7 @@ const MyBetsHistory = ({ walletAddress }) => {
     return <Table columns={columns} dataSource={history} pagination={{ pageSize: 5 }} size="small" rowKey="id" />
 };
 
-// ====================================================================================
 // FINAL, REVISED CRASH GAME COMPONENT
-// ====================================================================================
 const CrashGame = () => {
     const screens = useBreakpoint();
     const isMobile = !screens.md;
@@ -174,8 +209,8 @@ const CrashGame = () => {
     const [gameState, setGameState] = useState({ phase: 'CONNECTING', multiplier: 1.00, history: [], players: [] });
     const [placingBet, setPlacingBet] = useState(false);
     
-    // --- NEW: Auto-betting state ---
-    const [betAmount, setBetAmount] = useState("10"); // Unified bet amount for both tabs
+    // Auto-betting state remains
+    const [betAmount, setBetAmount] = useState("10");
     const [autoCashout, setAutoCashout] = useState("2.0");
     const [isAutoBetting, setIsAutoBetting] = useState(false);
     const [isAutoCashout, setIsAutoCashout] = useState(true);
@@ -185,20 +220,20 @@ const CrashGame = () => {
         return gameState.players.find(p => p.user_wallet_address === userWalletAddress);
     }, [gameState.players, userWalletAddress]);
     
+    // Function definitions remain the same
     const sendMessage = (type, payload) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({ type, payload }));
         }
     };
-    
     const handlePlaceBet = useCallback(() => {
         if (!userWalletAddress) { tonConnectUI.openModal(); return; }
         setPlacingBet(true);
         sendMessage('PLACE_BET', { userWalletAddress, betAmountArix: parseFloat(betAmount) });
     }, [userWalletAddress, betAmount, tonConnectUI]);
-    
     const handleCashOut = useCallback(() => sendMessage('CASH_OUT', { userWalletAddress }), [userWalletAddress]);
     
+    // useEffect hooks for WebSocket and auto-betting logic remain the same
     useEffect(() => {
         const { VITE_BACKEND_API_URL } = import.meta.env;
         if (!VITE_BACKEND_API_URL) return;
@@ -238,41 +273,30 @@ const CrashGame = () => {
         return () => { isMounted = false; socketRef.current?.close(); };
     }, [userWalletAddress]);
 
-    // --- NEW: Full Auto-betting Logic ---
     useEffect(() => {
-        // Auto-place bet when auto-betting is active and a new round starts
         if (isAutoBetting && gameState.phase === 'WAITING' && !myCurrentBet && !placingBet) {
             handlePlaceBet();
         }
-
-        // Auto-cashout logic (this part was already present but now connected to a dedicated switch)
         if(isAutoCashout && myCurrentBet?.status === 'placed' && gameState.phase === 'RUNNING' && gameState.multiplier >= parseFloat(autoCashout)) {
             handleCashOut();
         }
     }, [gameState.phase, gameState.multiplier, isAutoBetting, isAutoCashout, myCurrentBet, placingBet, handlePlaceBet, handleCashOut, autoCashout]);
 
-
     const renderButton = () => {
         const hasBet = !!myCurrentBet;
         const hasCashedOut = myCurrentBet?.status === 'cashed_out';
-
         if (gameState.phase === 'CONNECTING') return <Button className="crash-btn" loading disabled>CONNECTING</Button>;
-        
         if (hasCashedOut) return <Button disabled className="crash-btn cashed-out">Cashed Out @ {myCurrentBet.cash_out_multiplier.toFixed(2)}x</Button>;
-        
         if (gameState.phase === 'RUNNING') {
             if (hasBet) return <Button onClick={handleCashOut} className="crash-btn cashout">Cash Out @ {gameState.multiplier.toFixed(2)}x</Button>;
             return <Button disabled className="crash-btn">Bets Closed</Button>;
         }
-        
         if (gameState.phase === 'WAITING') {
             if (placingBet) return <Button loading className="crash-btn placed">Placing Bet...</Button>;
             if (hasBet) return <Button disabled className="crash-btn placed">Bet Placed</Button>;
             return <Button onClick={handlePlaceBet} className="crash-btn place-bet" disabled={!userWalletAddress}>Place Bet</Button>;
         }
-        
         if (gameState.phase === 'CRASHED' && hasBet) return <Button disabled className="crash-btn crashed">Crashed</Button>;
-        
         return <Button disabled className="crash-btn">Waiting For Next Round...</Button>;
     };
 
@@ -310,14 +334,15 @@ const CrashGame = () => {
                                  </div>
                              </Tabs.TabPane>
                              <Tabs.TabPane tab="Auto" key="2">
-                                <div className="controls-container">
+                                {/* REVISED: Added a wrapper with specific class for better styling control */}
+                                <div className="controls-container auto-controls-container">
                                     <Input.Group compact>
                                         <Input addonBefore="Base Bet" type="number" value={betAmount} onChange={e => setBetAmount(e.target.value)} disabled={isAutoBetting} className="bet-input"/>
                                     </Input.Group>
-                                     <Input.Group compact style={{alignItems: 'center'}}>
+                                     <div className="auto-cashout-row">
                                         <Input addonBefore="Auto Cashout" addonAfter="x" type="number" value={autoCashout} onChange={e => setAutoCashout(e.target.value)} disabled={isAutoBetting || !isAutoCashout} className="bet-input"/>
-                                        <Switch checked={isAutoCashout} onChange={setIsAutoCashout} disabled={isAutoBetting} style={{ marginLeft: 12}} />
-                                    </Input.Group>
+                                        <Switch checked={isAutoCashout} onChange={setIsAutoCashout} disabled={isAutoBetting} />
+                                    </div>
                                     <Button 
                                       className={`crash-btn ${isAutoBetting ? 'crashed' : 'place-bet'}`} 
                                       onClick={() => setIsAutoBetting(!isAutoBetting)}
