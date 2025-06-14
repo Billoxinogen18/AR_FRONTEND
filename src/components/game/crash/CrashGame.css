@@ -1,118 +1,742 @@
-/* AR_FRONTEND/src/components/game/crash/CrashGame.css */
-
-/* --- KEYFRAME ANIMATIONS --- */
-
-@keyframes countdown-animation {
-    from {
-        width: 100%;
-        background-color: #2ecc71; /* Green */
-    }
-    to {
-        width: 0%;
-        background-color: #f1c40f; /* Yellow */
-    }
-}
-
-/* More dynamic particle explosion */
-@keyframes particle-burst {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-    }
-    100% {
-        /* Each particle flies out in a random direction */
-        transform: translate(var(--x-end), var(--y-end)) scale(0);
-        opacity: 0;
-    }
-}
-
-/* The rocket's idle pulse animation */
-@keyframes rocket-pulse {
-    0%, 100% { transform: scale(1) rotate(-45deg); filter: drop-shadow(0 0 8px #f1c40f); }
-    50% { transform: scale(1.1) rotate(-45deg); filter: drop-shadow(0 0 14px #f1c40f); }
-}
-
-/* --- MAIN LAYOUT & PANELS --- */
-
+/* Crash Game Main Styles */
 .crash-game-page-container {
-    padding: 12px;
-    width: 100%;
-    max-width: 1024px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+  color: white;
+  font-family: 'Arial', sans-serif;
 }
+
+.history-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.history-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.history-item {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  min-width: 40px;
+  text-align: center;
+}
+
+.history-item.green {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.history-item.red {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
 .crash-game-area {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-    width: 100%;
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
 }
+
 .bets-panel {
-    flex: 1;
-    min-width: 280px;
-    max-width: 350px;
-    background-color: var(--app-bg-dark-element);
-    border-radius: 12px;
-    border: 1px solid var(--app-border-color);
-    overflow: hidden;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .chart-and-controls-panel {
-    flex: 2.5;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* --- HISTORY & BETS/PLAYERS LISTS --- */
+/* Crash Chart Container */
+.crash-chart-container {
+  position: relative;
+  height: 400px;
+  background: radial-gradient(ellipse at center, rgba(22, 33, 62, 0.8) 0%, rgba(12, 12, 12, 0.9) 70%);
+  border-radius: 15px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.05);
+}
 
-.history-bar { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-.history-bar::-webkit-scrollbar { display: none; }
-.history-item { background: var(--app-bg-dark-container); border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; border: 1px solid var(--app-border-color); cursor: pointer; }
-.history-item.green { color: #2ecc71; }
-.history-item.red { color: #e74c3c; }
-.game-history-tabs .ant-tabs-nav { margin: 0 16px; }
-.game-history-tabs .ant-table-wrapper { background-color: transparent; }
-.game-history-tabs .ant-table, .ant-table-thead > tr > th { background: transparent !important; color: var(--app-primary-text-light); }
-.game-history-tabs .ant-table-cell { border-bottom: 1px solid var(--app-border-color) !important; padding: 10px 8px; font-size: 0.8rem;}
-.my-bet-row td { background-color: rgba(163, 174, 207, 0.05); font-weight: 600; }
+/* Countdown Styles */
+.countdown-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
 
-/* --- CHART & VISUALS --- */
+.countdown-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
 
-.crash-chart-container { position: relative; width: 100%; height: 300px; background: radial-gradient(circle at 10% 90%, var(--app-bg-dark-container) 0%, var(--app-bg-dark-section) 70%); border-radius: 12px; border: 1px solid var(--app-border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.countdown-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; backdrop-filter: blur(2px); }
-.countdown-text { font-size: 1.1rem; color: var(--app-primary-text-light); text-transform: uppercase; letter-spacing: 1px; }
-.countdown-timer { width: 80%; height: 6px; background-color: var(--app-bg-dark-container); border-radius: 3px; margin-top: 10px; overflow: hidden; }
-.countdown-bar.animate { width: 100%; height: 100%; animation: countdown-animation 8s linear forwards; }
-.multiplier-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 700; text-align: center; z-index: 5; transition: color 0.3s ease; text-shadow: 0 0 15px rgba(0, 0, 0, 0.5); }
-.crashed-text { font-size: 0.5em; display: block; font-weight: 500; letter-spacing: 1px; color: #e74c3c; text-shadow: 0 0 10px rgba(231, 76, 60, 0.7); }
+.countdown-timer {
+  width: 200px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto;
+}
 
-/* Plane & Trail/Explosion Styles */
-.rocket-container { position: absolute; will-change: transform, opacity; z-index: 10; animation: rocket-pulse 2s infinite ease-in-out; }
-.trail { position: absolute; width: 60px; height: 12px; background: linear-gradient(to right, rgba(241, 196, 15, 0), rgba(241, 196, 15, 0.4)); transform-origin: 0% 50%; will-change: transform; pointer-events: none; z-index: 9; border-radius: 50%; }
-.explosion-container { position: absolute; pointer-events: none; z-index: 15; }
-.particle { position: absolute; border-radius: 50%; opacity: 0; animation: particle-burst 0.8s ease-out; background-color: var(--color, #f1c40f); animation-delay: calc(var(--i) * 0.01s); width: var(--size, 4px); height: var(--size, 4px); }
+.countdown-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #0abde3);
+  background-size: 400% 100%;
+  border-radius: 3px;
+  transition: none;
+}
 
-/* --- CONTROLS SECTION --- */
-.bet-controls-area .ant-card-body { padding: 12px !important; }
-.controls-container { display: flex; flex-direction: column; gap: 12px; }
-.bet-input-row, .auto-cashout-row { margin-bottom: 8px; }
-.bet-input-row .ant-input-group, .auto-cashout-row .ant-input-group { display: flex; }
-.bet-input .ant-input-group-addon { background: var(--app-bg-dark-container); border-color: var(--app-border-color); color: var(--app-primary-text-light); }
-.bet-input .ant-input { text-align: center; font-size: 1.1rem; }
-.auto-cashout-row { display: flex; align-items: center; gap: 12px; }
-.auto-cashout-row span { font-size: 0.9rem; color: var(--app-primary-text-light); opacity: 0.8; }
-.quick-bet-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
-.quick-bet-buttons .ant-btn { flex: 1; }
+.countdown-bar.animate {
+  animation: countdown-progress 5s linear forwards, countdown-shimmer 0.5s ease-in-out infinite alternate;
+}
 
-/* --- THE CRASH BUTTON (ALL STATES) --- */
-.crash-btn { width: 100%; height: 50px !important; font-size: 1.1rem !important; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; transition: all 0.2s ease-in-out !important; }
-.crash-btn.place-bet { background-color: #28a745 !important; border-color: #2ecc71 !important; color: white !important; }
-.crash-btn.place-bet:not([disabled]):hover { background-color: #218838 !important; border-color: #1e7e34 !important; }
-.crash-btn.cashout { background-color: #ffc107 !important; border-color: #ffc107 !important; color: var(--app-bg-dark-element) !important; }
-.crash-btn.cashout:not([disabled]):hover { background-color: #e0a800 !important; border-color: #d39e00 !important; }
-.crash-btn.placed { background-color: #17a2b8 !important; border-color: #17a2b8 !important; color: white !important; cursor: not-allowed; }
-.crash-btn.crashed, .crash-btn:disabled { background-color: #5a6268 !important; border-color: #5a6268 !important; color: #a0a0b8 !important; cursor: not-allowed; }
-.crash-btn.cashed-out { background-color: #007bff !important; border-color: #007bff !important; color: white !important; cursor: not-allowed; }
+@keyframes countdown-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
 
-/* Responsive Layout */
-@media (max-width: 900px) { .crash-game-area { flex-direction: column-reverse; } }
-@media (max-width: 576px) { .crash-game-page-container { padding: 8px; } .bet-controls-area { padding: 12px; } }
+@keyframes countdown-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Multiplier Display */
+.multiplier-overlay {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 48px;
+  font-weight: bold;
+  z-index: 5;
+  text-shadow: 
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    2px 2px 4px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.crashed-text {
+  display: block;
+  font-size: 24px;
+  color: #e74c3c;
+  animation: crash-pulse 0.5s ease-in-out infinite alternate;
+  text-shadow: 
+    0 0 10px #e74c3c,
+    0 0 20px #e74c3c,
+    0 0 30px #e74c3c;
+}
+
+@keyframes crash-pulse {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Trail System */
+.trail-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.trail-point {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, 
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 215, 0, 0.8) 30%,
+    rgba(255, 140, 0, 0.6) 60%,
+    rgba(255, 69, 0, 0.4) 80%,
+    transparent 100%
+  );
+  box-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 140, 0, 0.4),
+    0 0 30px rgba(255, 69, 0, 0.2);
+  animation: trail-particle 2s ease-out forwards;
+  transform-origin: center;
+}
+
+@keyframes trail-particle {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* Rocket/Plane Styles */
+.rocket-container {
+  position: absolute;
+  z-index: 3;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+  transition: all 0.1s linear;
+}
+
+.plane-icon {
+  color: #ffffff;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  animation: plane-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes plane-glow {
+  0% { 
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  }
+  100% { 
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 30px rgba(255, 140, 0, 0.6));
+  }
+}
+
+/* Explosion Effects */
+.explosion-container {
+  position: absolute;
+  z-index: 10;
+  transform: translate(-50%, 50%);
+  pointer-events: none;
+}
+
+.explosion-flash {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, 
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 215, 0, 0.9) 20%,
+    rgba(255, 140, 0, 0.8) 40%,
+    rgba(255, 69, 0, 0.6) 60%,
+    rgba(220, 20, 60, 0.4) 80%,
+    transparent 100%
+  );
+  animation: explosion-flash 0.3s ease-out;
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    0 0 50px rgba(255, 255, 255, 0.8),
+    0 0 100px rgba(255, 215, 0, 0.6),
+    0 0 150px rgba(255, 69, 0, 0.4);
+}
+
+@keyframes explosion-flash {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+    box-shadow: 
+      0 0 0px rgba(255, 255, 255, 0.8),
+      0 0 0px rgba(255, 215, 0, 0.6),
+      0 0 0px rgba(255, 69, 0, 0.4);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 
+      0 0 80px rgba(255, 255, 255, 1),
+      0 0 120px rgba(255, 215, 0, 0.8),
+      0 0 160px rgba(255, 69, 0, 0.6);
+  }
+  70% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.8);
+    box-shadow: 
+      0 0 100px rgba(255, 255, 255, 0.6),
+      0 0 150px rgba(255, 215, 0, 0.4),
+      0 0 200px rgba(255, 69, 0, 0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.5);
+    box-shadow: 
+      0 0 50px rgba(255, 255, 255, 0.2),
+      0 0 80px rgba(255, 215, 0, 0.1),
+      0 0 100px rgba(255, 69, 0, 0.1);
+  }
+}
+
+/* Fire Particles */
+.fire-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 215, 0, 0.9) 30%,
+    rgba(255, 69, 0, 0.8) 70%,
+    rgba(220, 20, 60, 0.6) 100%
+  );
+  animation: fire-explosion 1.5s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 69, 0, 0.6);
+}
+
+@keyframes fire-explosion {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    box-shadow: 
+      0 0 5px rgba(255, 215, 0, 0.8),
+      0 0 10px rgba(255, 69, 0, 0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5) rotate(calc(var(--i) * 36deg));
+    box-shadow: 
+      0 0 15px rgba(255, 215, 0, 1),
+      0 0 25px rgba(255, 69, 0, 0.8);
+  }
+  60% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--i) * 72deg)) 
+               translateY(calc(-50px - var(--i) * 5px)) 
+               translateX(calc(sin(var(--i) * 0.628) * 40px));
+    box-shadow: 
+      0 0 10px rgba(255, 215, 0, 0.6),
+      0 0 20px rgba(255, 69, 0, 0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(calc(var(--i) * 108deg)) 
+               translateY(calc(-120px - var(--i) * 15px)) 
+               translateX(calc(cos(var(--i) * 0.628) * 80px));
+    box-shadow: 
+      0 0 5px rgba(255, 215, 0, 0.2),
+      0 0 10px rgba(255, 69, 0, 0.1);
+  }
+}
+
+/* Smoke Particles */
+.smoke-particle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(100, 100, 100, 0.8) 0%,
+    rgba(60, 60, 60, 0.6) 50%,
+    rgba(30, 30, 30, 0.4) 80%,
+    transparent 100%
+  );
+  animation: smoke-explosion 2.5s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  transform: translate(-50%, -50%);
+  filter: blur(1px);
+}
+
+@keyframes smoke-explosion {
+  0% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    filter: blur(1px);
+  }
+  15% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1) rotate(calc(var(--i) * 25deg));
+    filter: blur(1px);
+  }
+  40% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(2) rotate(calc(var(--i) * 50deg)) 
+               translateY(calc(-30px - var(--i) * 8px)) 
+               translateX(calc(sin(var(--i) * 0.4) * 30px));
+    filter: blur(2px);
+  }
+  70% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(3.5) rotate(calc(var(--i) * 80deg)) 
+               translateY(calc(-80px - var(--i) * 12px)) 
+               translateX(calc(cos(var(--i) * 0.4) * 50px));
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(5) rotate(calc(var(--i) * 120deg)) 
+               translateY(calc(-150px - var(--i) * 20px)) 
+               translateX(calc(sin(var(--i) * 0.3) * 80px));
+    filter: blur(5px);
+  }
+}
+
+/* Debris Particles */
+.debris-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(45deg,
+    rgba(139, 69, 19, 1) 0%,
+    rgba(160, 82, 45, 0.8) 30%,
+    rgba(105, 105, 105, 0.6) 70%,
+    rgba(169, 169, 169, 0.4) 100%
+  );
+  animation: debris-explosion 2s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+  box-shadow: 0 0 3px rgba(139, 69, 19, 0.5);
+}
+
+@keyframes debris-explosion {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5) rotate(calc(var(--i) * 45deg));
+  }
+  30% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--i) * 180deg)) 
+               translateY(calc(-40px - var(--i) * 3px)) 
+               translateX(calc(cos(var(--i) * 0.8) * 60px));
+  }
+  70% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.8) rotate(calc(var(--i) * 360deg)) 
+               translateY(calc(-100px - var(--i) * 8px)) 
+               translateX(calc(sin(var(--i) * 0.8) * 100px));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(calc(var(--i) * 540deg)) 
+               translateY(calc(-180px - var(--i) * 15px)) 
+               translateX(calc(cos(var(--i) * 1.2) * 140px));
+  }
+}
+
+/* Shockwave Effects */
+.shockwave {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  animation: shockwave-expand 0.8s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+.shockwave-delayed {
+  animation-delay: 0.2s;
+  border-color: rgba(255, 215, 0, 0.6);
+  border-width: 2px;
+}
+
+@keyframes shockwave-expand {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+    border-width: 4px;
+  }
+  30% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(2);
+    border-width: 3px;
+  }
+  70% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(6);
+    border-width: 2px;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(12);
+    border-width: 1px;
+  }
+}
+
+/* Bet Controls and UI */
+.bet-controls-area {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bet-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.bet-input:focus {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+}
+
+.quick-bet-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.quick-bet-buttons button {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.quick-bet-buttons button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Crash Game Buttons */
+.crash-btn {
+  width: 100%;
+  height: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.crash-btn.place-bet {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: white;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.crash-btn.place-bet:hover {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+  transform: translateY(-2px);
+}
+
+.crash-btn.cashout {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  animation: cashout-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes cashout-pulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  }
+  100% {
+    box-shadow: 0 6px 25px rgba(243, 156, 18, 0.6);
+  }
+}
+
+.crash-btn.cashout:hover {
+  background: linear-gradient(135deg, #e67e22, #f39c12);
+  transform: translateY(-2px);
+}
+
+.crash-btn.placed, .crash-btn.cashed-out {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  cursor: default;
+}
+
+.crash-btn.crashed {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  cursor: default;
+}
+
+/* Bets List */
+.bets-list-container {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+.bet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bet-row.my-bet-row {
+  background: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.player-address {
+  font-family: monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bet-amount {
+  font-weight: bold;
+  color: #f39c12;
+}
+
+/* Tabs Styling */
+.game-history-tabs .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.game-history-tabs .ant-tabs-tab-active {
+  color: white !important;
+}
+
+.game-history-tabs .ant-tabs-ink-bar {
+  background: #2ecc71 !important;
+}
+
+/* Mobile Responsive */
+.mobile-tabs-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .crash-game-area {
+    flex-direction: column;
+    padding: 10px;
+  }
+  
+  .crash-chart-container {
+    height: 300px;
+  }
+  
+  .multiplier-overlay {
+    font-size: 36px;
+  }
+  
+  .controls-container {
+    gap: 10px;
+  }
+  
+  .quick-bet-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .crash-btn {
+    height: 45px;
+    font-size: 14px;
+  }
+}
+
+/* Additional Explosion Enhancements */
+.explosion-container::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 215, 0, 0.05) 30%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: explosion-glow 0.8s ease-out;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+@keyframes explosion-glow {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3);
+  }
+}
+
+/* Heat Distortion Effect */
+.explosion-container::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 69, 0, 0.1) 50%, 
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: heat-distortion 1.2s ease-out;
+  transform: translate(-50%, -50%);
+  filter: blur(2px);
+}
+
+@keyframes heat-distortion {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+  }
+  70% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(2) rotate(360deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3) rotate(540deg);
+  }
+}
