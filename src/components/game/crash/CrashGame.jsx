@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { FaPlane } from 'react-icons/fa';
+import { FaPlane, FaUsers, FaHistory } from 'react-icons/fa';
 import { Table, Tabs, Input, Button, Spin, Tag, Empty, Card, Grid, message, Switch } from 'antd';
 import { getCrashHistoryForUser } from '../../../services/api';
 import './CrashGame.css';
-import { FaUsers, FaHistory } from 'react-icons/fa'; // Icons were used but not all imported
 
 const { useBreakpoint } = Grid;
 
 const ChartIcon = () => <FaPlane size={24} className="plane-icon" />;
 
-// ====================================================================================
-// REVISED CRASH ANIMATION COMPONENT
-// ====================================================================================
+// The CrashAnimation component is correct from the previous version.
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
     const [planeStyle, setPlaneStyle] = useState({ bottom: '10%', left: '5%', opacity: 0 });
@@ -24,9 +21,8 @@ const CrashAnimation = ({ gameState }) => {
     useEffect(() => {
         const bar = countdownRef.current;
         if (phase === 'WAITING' && bar) {
-            // Reset animations and states for the new round
             bar.classList.remove('animate');
-            void bar.offsetWidth; // Force reflow to restart animation
+            void bar.offsetWidth;
             bar.classList.add('animate');
             setIsExploding(false);
             setTrailPoints([]);
@@ -34,12 +30,10 @@ const CrashAnimation = ({ gameState }) => {
 
         if (phase === 'RUNNING') {
             setIsExploding(false);
-
-            // A more pronounced and smoother curve calculation
-            const progress = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(19)); // Normalize progress towards a goal of 20x
-            const x = 5 + progress * 85; // Moves from 5% to 90% horizontally
-            const y = 10 + Math.pow(progress, 0.7) * 75; // Creates a nice upward curve
-            const rotation = Math.max(-45, 15 - progress * 40); // Plane points up as it ascends
+            const progress = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(19));
+            const x = 5 + progress * 85;
+            const y = 10 + Math.pow(progress, 0.7) * 75;
+            const rotation = Math.max(-45, 15 - progress * 40);
 
             const newStyle = {
                 left: `${x}%`,
@@ -50,17 +44,15 @@ const CrashAnimation = ({ gameState }) => {
             };
             setPlaneStyle(newStyle);
 
-            // Add a point to the trail, throttled to prevent performance issues
             const now = Date.now();
             if (now - lastTrailPointTimeRef.current > 70) {
                 lastTrailPointTimeRef.current = now;
-                setTrailPoints(prev => [...prev, { left: newStyle.left, bottom: newStyle.bottom, id: now }].slice(-60)); // Keep max 60 trail points
+                setTrailPoints(prev => [...prev, { left: newStyle.left, bottom: newStyle.bottom, id: now }].slice(-60));
             }
         } else if (phase === 'CRASHED') {
             setPlaneStyle(prev => ({ ...prev, opacity: 0, transition: 'opacity 0.1s ease-out' }));
             setIsExploding(true);
         } else {
-            // Reset plane position for the waiting phase
             setIsExploding(false);
             setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: `rotate(-45deg) scale(0.8)`, transition: 'opacity 0.5s ease-out' });
         }
@@ -82,40 +74,26 @@ const CrashAnimation = ({ gameState }) => {
                 {displayMultiplier}x
                 {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
             </div>
-
-            {/* Render the trail */}
             <div className="trail-container">
                 {trailPoints.map(p => (
                     <div key={p.id} className="trail-point" style={{ left: p.left, bottom: p.bottom }} />
                 ))}
             </div>
-
             {!isExploding && <div className="rocket-container" style={planeStyle}><ChartIcon /></div>}
-
-            {/* Multi-layered explosion for maximum effect */}
             {isExploding &&
                 <div className="explosion-container" style={{ left: planeStyle.left, bottom: planeStyle.bottom }}>
                     <div className="shockwave" />
                     <div className="shockwave shockwave-delayed" />
                     <div className="explosion-flash" />
-                    {Array.from({ length: 25 }).map((_, i) => (
-                        <div key={`fire-${i}`} className="fire-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />
-                    ))}
-                    {Array.from({ length: 30 }).map((_, i) => (
-                        <div key={`smoke-${i}`} className="smoke-particle" style={{ '--i': i, '--delay': `${0.1 + Math.random() * 0.3}s` }} />
-                    ))}
-                    {Array.from({ length: 20 }).map((_, i) => (
-                        <div key={`debris-${i}`} className="debris-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />
-                    ))}
+                    {Array.from({ length: 25 }).map((_, i) => <div key={`fire-${i}`} className="fire-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />)}
+                    {Array.from({ length: 30 }).map((_, i) => <div key={`smoke-${i}`} className="smoke-particle" style={{ '--i': i, '--delay': `${0.1 + Math.random() * 0.3}s` }} />)}
+                    {Array.from({ length: 20 }).map((_, i) => <div key={`debris-${i}`} className="debris-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />)}
                 </div>
             }
         </div>
     );
 };
 
-
-// The rest of the components remain the same as they handle logic, not the core animation.
-// I'm including them as requested to provide the full file.
 
 const CurrentBetsList = ({ players, myWalletAddress }) => {
     if (!players || players.length === 0) return <Empty description="No players this round." image={Empty.PRESENTED_IMAGE_SIMPLE}/>;
@@ -152,6 +130,7 @@ const MyBetsHistory = ({ walletAddress }) => {
     return <Table columns={columns} dataSource={history} pagination={{ pageSize: 5 }} size="small" rowKey="id" />
 };
 
+// FINAL, REVISED CRASH GAME COMPONENT
 const CrashGame = () => {
     const screens = useBreakpoint();
     const isMobile = !screens.md;
@@ -169,6 +148,25 @@ const CrashGame = () => {
         if (!userWalletAddress || !gameState.players) return null;
         return gameState.players.find(p => p.user_wallet_address === userWalletAddress);
     }, [gameState.players, userWalletAddress]);
+    
+    // ================== FIX: REORDERED FUNCTIONS ==================
+    // Define functions BEFORE they are used in useEffect hooks.
+    const sendMessage = (type, payload) => {
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ type, payload }));
+        }
+    };
+    
+    const handlePlaceBet = () => {
+        if (!userWalletAddress) { tonConnectUI.openModal(); return; }
+        setPlacingBet(true);
+        sendMessage('PLACE_BET', { userWalletAddress, betAmountArix: parseFloat(betAmount) });
+    };
+    
+    const handleCashOut = useCallback(() => {
+        sendMessage('CASH_OUT', { userWalletAddress });
+    }, [userWalletAddress]); // Note: sendMessage is stable and doesn't need to be a dependency
+    // ==============================================================
     
     useEffect(() => {
         const { VITE_BACKEND_API_URL } = import.meta.env;
@@ -213,19 +211,12 @@ const CrashGame = () => {
         };
     }, [userWalletAddress]);
 
+    // This useEffect now correctly references handleCashOut which is defined above it.
     useEffect(() => {
         if(useAutoCashout && myCurrentBet?.status === 'placed' && gameState.phase === 'RUNNING' && gameState.multiplier >= parseFloat(autoCashout)) {
             handleCashOut();
         }
     }, [gameState.multiplier, useAutoCashout, autoCashout, myCurrentBet, handleCashOut]);
-
-    const sendMessage = (type, payload) => socketRef.current?.send(JSON.stringify({ type, payload }));
-    const handlePlaceBet = () => {
-        if (!userWalletAddress) { tonConnectUI.openModal(); return; }
-        setPlacingBet(true);
-        sendMessage('PLACE_BET', { userWalletAddress, betAmountArix: parseFloat(betAmount) });
-    };
-    const handleCashOut = useCallback(() => sendMessage('CASH_OUT', { userWalletAddress }), [userWalletAddress]);
 
     const renderButton = () => {
         const hasBet = !!myCurrentBet;
