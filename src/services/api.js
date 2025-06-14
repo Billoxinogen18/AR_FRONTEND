@@ -5,16 +5,12 @@ const VITE_BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 if (!VITE_BACKEND_API_URL) {
   const errorMsg = "FATAL: VITE_BACKEND_API_URL is not set in environment variables. Frontend cannot connect to backend.";
   console.error(errorMsg);
-  // You might want to display an error to the user here
 }
 
-// --- REVISION: CONSTRUCT THE CORRECT API URL WITH /api PREFIX ---
-// Your backend routes (in app.js) are all prefixed with /api.
-// This ensures that all requests from the frontend correctly target those routes.
 const API_URL = `${VITE_BACKEND_API_URL}/api`;
 
 const apiClient = axios.create({
-  baseURL: API_URL, // Use the new, corrected URL
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,30 +31,34 @@ export const requestArixRewardWithdrawal = (data) => apiClient.post('/earn/reque
 // Game endpoints
 export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
 export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
-// Note: Crash game API calls (place/cashout) are now in a separate gameService.js file
+// REVISION: Added the missing function export below
+export const getCrashHistoryForUser = (walletAddress) => apiClient.get(`/game/crash/history/${walletAddress}`);
+
 
 // Task endpoints
 export const getActiveTasks = (userWalletAddress) => {
     const params = userWalletAddress ? { userWalletAddress } : {};
-    return apiClient.get('/tasks/active', { params }); // CORRECTED PATH to match backend
+    return apiClient.get('/tasks/active', { params });
 };
-export const submitTaskCompletion = (taskId, data) => apiClient.post(`/tasks/${taskId}/submit`, data); // CORRECTED PATH to match backend
-export const getUserTaskHistory = (walletAddress) => apiClient.get(`/tasks/user/${walletAddress}`); // CORRECTED PATH to match backend
+export const submitTaskCompletion = (taskId, data) => apiClient.post(`/tasks/${taskId}/submit`, data);
+export const getUserTaskHistory = (walletAddress) => apiClient.get(`/tasks/user/${walletAddress}`);
+
 
 // Push/Announcement endpoints
 export const getAnnouncements = () => apiClient.get('/push/announcements');
 
+
 // User profile endpoint
 export const getUserProfile = (walletAddress, launchParams) => {
-  // CORRECTED PATH to match backend router: app.use('/api/users', userRoutes);
   return apiClient.get(`/users/profile/${walletAddress}`, { params: launchParams });
 };
+
 
 // Referral endpoints
 export const getUserReferralData = (walletAddress) => apiClient.get(`/referrals/data/${walletAddress}`);
 export const getReferralProgramDetails = () => apiClient.get('/referrals/program-details');
 
-// Interceptor for improved error logging
+
 apiClient.interceptors.response.use(
   response => response,
   error => {
