@@ -1,50 +1,66 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { FaPlane, FaUsers, FaHistory, FaStar } from 'react-icons/fa';
+import { FaPlane } from 'react-icons/fa';
 import { Table, Tabs, Input, Button, Spin, Tag, Empty, Card, Grid, message, Switch } from 'antd';
 import { getCrashHistoryForUser } from '../../../services/api';
 import './CrashGame.css';
+import { FaUsers, FaHistory } from 'react-icons/fa'; // Icons were used but not all imported
 
 const { useBreakpoint } = Grid;
 
 const ChartIcon = () => <FaPlane size={24} className="plane-icon" />;
 
-// The CrashAnimation, CurrentBetsList, and MyBetsHistory components from the previous response are correct.
-// For the sake of providing a single, complete file, their logic is assumed to be here.
-// I will rewrite them compactly for clarity but the logic is identical.
+// ====================================================================================
+// REVISED CRASH ANIMATION COMPONENT
+// ====================================================================================
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
-    const [planeStyle, setPlaneStyle] = useState({ bottom: '5%', left: '5%', opacity: 0 });
+    const [planeStyle, setPlaneStyle] = useState({ bottom: '10%', left: '5%', opacity: 0 });
     const [isExploding, setIsExploding] = useState(false);
+    const [trailPoints, setTrailPoints] = useState([]);
     const countdownRef = useRef(null);
+    const lastTrailPointTimeRef = useRef(0);
 
     useEffect(() => {
         const bar = countdownRef.current;
         if (phase === 'WAITING' && bar) {
+            // Reset animations and states for the new round
             bar.classList.remove('animate');
-            void bar.offsetWidth;
+            void bar.offsetWidth; // Force reflow to restart animation
             bar.classList.add('animate');
             setIsExploding(false);
+            setTrailPoints([]);
         }
 
         if (phase === 'RUNNING') {
             setIsExploding(false);
-            const logMultiplier = Math.log2(multiplier || 1);
-            const x = logMultiplier * 14; 
-            const y = 80 - Math.pow(logMultiplier, 2) * 2;
-            const rotation = Math.max(-45, 15 - logMultiplier * 8);
-            
-            setPlaneStyle({
-                left: `${Math.min(95, 5 + x)}%`,
-                bottom: `${Math.min(95, 15 + (80 - y))}%`,
+
+            // A more pronounced and smoother curve calculation
+            const progress = Math.min(1, Math.log1p(multiplier - 1) / Math.log1p(19)); // Normalize progress towards a goal of 20x
+            const x = 5 + progress * 85; // Moves from 5% to 90% horizontally
+            const y = 10 + Math.pow(progress, 0.7) * 75; // Creates a nice upward curve
+            const rotation = Math.max(-45, 15 - progress * 40); // Plane points up as it ascends
+
+            const newStyle = {
+                left: `${x}%`,
+                bottom: `${y}%`,
                 transform: `rotate(${rotation}deg) scale(1)`,
                 opacity: 1,
                 transition: 'all 0.1s linear',
-            });
+            };
+            setPlaneStyle(newStyle);
+
+            // Add a point to the trail, throttled to prevent performance issues
+            const now = Date.now();
+            if (now - lastTrailPointTimeRef.current > 70) {
+                lastTrailPointTimeRef.current = now;
+                setTrailPoints(prev => [...prev, { left: newStyle.left, bottom: newStyle.bottom, id: now }].slice(-60)); // Keep max 60 trail points
+            }
         } else if (phase === 'CRASHED') {
-            setPlaneStyle(prev => ({ ...prev, opacity: 0 }));
+            setPlaneStyle(prev => ({ ...prev, opacity: 0, transition: 'opacity 0.1s ease-out' }));
             setIsExploding(true);
         } else {
+            // Reset plane position for the waiting phase
             setIsExploding(false);
             setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: `rotate(-45deg) scale(0.8)`, transition: 'opacity 0.5s ease-out' });
         }
@@ -67,19 +83,41 @@ const CrashAnimation = ({ gameState }) => {
                 {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
             </div>
 
-            <div className="trail" style={{...planeStyle, opacity: phase === 'RUNNING' ? 1 : 0}} />
+            {/* Render the trail */}
+            <div className="trail-container">
+                {trailPoints.map(p => (
+                    <div key={p.id} className="trail-point" style={{ left: p.left, bottom: p.bottom }} />
+                ))}
+            </div>
+
             {!isExploding && <div className="rocket-container" style={planeStyle}><ChartIcon /></div>}
+
+            {/* Multi-layered explosion for maximum effect */}
             {isExploding &&
-                <div className="explosion-container" style={{left: planeStyle.left, bottom: planeStyle.bottom}}>
-                    {Array.from({ length: 20 }).map((_, i) => <div key={i} className="particle" style={{'--i': i}}/>)}
+                <div className="explosion-container" style={{ left: planeStyle.left, bottom: planeStyle.bottom }}>
+                    <div className="shockwave" />
+                    <div className="shockwave shockwave-delayed" />
+                    <div className="explosion-flash" />
+                    {Array.from({ length: 25 }).map((_, i) => (
+                        <div key={`fire-${i}`} className="fire-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />
+                    ))}
+                    {Array.from({ length: 30 }).map((_, i) => (
+                        <div key={`smoke-${i}`} className="smoke-particle" style={{ '--i': i, '--delay': `${0.1 + Math.random() * 0.3}s` }} />
+                    ))}
+                    {Array.from({ length: 20 }).map((_, i) => (
+                        <div key={`debris-${i}`} className="debris-particle" style={{ '--i': i, '--delay': `${Math.random() * 0.2}s` }} />
+                    ))}
                 </div>
             }
         </div>
     );
 };
 
+
+// The rest of the components remain the same as they handle logic, not the core animation.
+// I'm including them as requested to provide the full file.
+
 const CurrentBetsList = ({ players, myWalletAddress }) => {
-    // Correct logic
     if (!players || players.length === 0) return <Empty description="No players this round." image={Empty.PRESENTED_IMAGE_SIMPLE}/>;
     return(
         <div className="bets-list-container">
@@ -98,7 +136,6 @@ const CurrentBetsList = ({ players, myWalletAddress }) => {
 };
 
 const MyBetsHistory = ({ walletAddress }) => {
-    // Correct logic
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const fetchHistory = useCallback(() => {
@@ -115,7 +152,6 @@ const MyBetsHistory = ({ walletAddress }) => {
     return <Table columns={columns} dataSource={history} pagination={{ pageSize: 5 }} size="small" rowKey="id" />
 };
 
-// FINAL, REVISED CRASH GAME COMPONENT
 const CrashGame = () => {
     const screens = useBreakpoint();
     const isMobile = !screens.md;
@@ -144,85 +180,69 @@ const CrashGame = () => {
 
         let isMounted = true;
         const connect = () => {
-            if (!isMounted) return;
-            // FIX: Assign WebSocket instance directly to the ref's current property
+            if (!isMounted || (socketRef.current && socketRef.current.readyState < 2)) return;
             socketRef.current = new WebSocket(wsUrl);
-            
             socketRef.current.onopen = () => { if (isMounted) setGameState(prev => ({...prev, phase: 'WAITING'})); };
-            
             socketRef.current.onclose = () => {
                 if (isMounted) {
                     setGameState(prev => ({...prev, phase: 'CONNECTING'}));
                     setTimeout(connect, 3000);
                 }
             };
-            
             socketRef.current.onmessage = (event) => {
                 if(!isMounted) return;
                 try {
                     const { type, payload } = JSON.parse(event.data);
                     if (type === 'game_update' || type === 'full_state') {
                         setGameState(payload);
-                        if (payload.phase === 'WAITING') {
-                            setPlacingBet(false);
-                        }
-                    } else if (type === 'bet_success') {
-                        if (payload.userWalletAddress === userWalletAddress) { message.success('Bet placed!'); setPlacingBet(false); }
-                    } else if (type === 'bet_error') {
-                        if (payload.userWalletAddress === userWalletAddress) { message.error(payload.message, 3); setPlacingBet(false); }
-                    } else if (type === 'cashout_success') {
-                        if (payload.userWalletAddress === userWalletAddress) { message.success(`Cashed out for ${payload.payoutArix.toFixed(2)} ARIX!`); }
+                        if (payload.phase === 'WAITING') setPlacingBet(false);
+                    } else if (type === 'bet_success' && payload.userWalletAddress === userWalletAddress) {
+                         message.success('Bet placed!'); setPlacingBet(false); 
+                    } else if (type === 'bet_error' && payload.userWalletAddress === userWalletAddress) {
+                         message.error(payload.message, 3); setPlacingBet(false); 
+                    } else if (type === 'cashout_success' && payload.userWalletAddress === userWalletAddress) {
+                         message.success(`Cashed out for ${payload.payoutArix.toFixed(2)} ARIX!`);
                     }
                 } catch(e) { console.error("Error processing message:", e) }
             };
         }
         connect();
-
         return () => {
             isMounted = false;
             socketRef.current?.close();
         };
-    }, [userWalletAddress]); // Added userWalletAddress dependency
+    }, [userWalletAddress]);
 
-    // Automatically cash out if enabled
     useEffect(() => {
         if(useAutoCashout && myCurrentBet?.status === 'placed' && gameState.phase === 'RUNNING' && gameState.multiplier >= parseFloat(autoCashout)) {
             handleCashOut();
         }
-    }, [gameState.multiplier, useAutoCashout, autoCashout, myCurrentBet]);
-
+    }, [gameState.multiplier, useAutoCashout, autoCashout, myCurrentBet, handleCashOut]);
 
     const sendMessage = (type, payload) => socketRef.current?.send(JSON.stringify({ type, payload }));
-    
     const handlePlaceBet = () => {
         if (!userWalletAddress) { tonConnectUI.openModal(); return; }
         setPlacingBet(true);
         sendMessage('PLACE_BET', { userWalletAddress, betAmountArix: parseFloat(betAmount) });
     };
-    
-    const handleCashOut = () => sendMessage('CASH_OUT', { userWalletAddress });
+    const handleCashOut = useCallback(() => sendMessage('CASH_OUT', { userWalletAddress }), [userWalletAddress]);
 
     const renderButton = () => {
         const hasBet = !!myCurrentBet;
         const hasCashedOut = myCurrentBet?.status === 'cashed_out';
 
         if (gameState.phase === 'CONNECTING') return <Button className="crash-btn" loading disabled>CONNECTING</Button>;
-        
         if (hasCashedOut) return <Button disabled className="crash-btn cashed-out">Cashed Out @ {myCurrentBet.cash_out_multiplier.toFixed(2)}x</Button>;
-        
         if (gameState.phase === 'RUNNING') {
             if (hasBet) return <Button onClick={handleCashOut} className="crash-btn cashout">Cash Out @ {gameState.multiplier.toFixed(2)}x</Button>;
             return <Button disabled className="crash-btn">Bets Closed</Button>;
         }
-        
         if (gameState.phase === 'WAITING') {
             if (placingBet) return <Button loading className="crash-btn placed">Placing Bet...</Button>;
             if (hasBet) return <Button disabled className="crash-btn placed">Bet Placed</Button>;
             return <Button onClick={handlePlaceBet} className="crash-btn place-bet" disabled={!userWalletAddress}>Place Bet</Button>;
         }
-        
         if (gameState.phase === 'CRASHED' && hasBet) return <Button disabled className="crash-btn crashed">Crashed</Button>;
-        
         return <Button disabled className="crash-btn">Waiting For Next Round...</Button>;
     };
 
@@ -235,7 +255,7 @@ const CrashGame = () => {
         <div className="crash-game-page-container">
             <div className="history-bar">
                 {gameState.history.map((h, i) => (
-                    <span key={i} className={`history-item ${h.crash_multiplier < 2 ? 'red' : 'green'}`}>{h.crash_multiplier}x</span>
+                    <span key={i} className={`history-item ${h.crash_multiplier < 2 ? 'red' : 'green'}`}>{h.crash_multiplier.toFixed(2)}x</span>
                 ))}
             </div>
             <div className="crash-game-area">

@@ -2,10 +2,12 @@
 .crash-game-page-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh; /* Better for mobile */
+  height: 100vh; /* Fallback for desktop */
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
   color: white;
   font-family: 'Arial', sans-serif;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .history-bar {
@@ -16,6 +18,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
   scrollbar-width: none;
+  flex-shrink: 0;
 }
 
 .history-bar::-webkit-scrollbar {
@@ -28,7 +31,7 @@
   font-size: 12px;
   font-weight: bold;
   white-space: nowrap;
-  min-width: 40px;
+  min-width: 50px;
   text-align: center;
 }
 
@@ -46,19 +49,22 @@
 
 .crash-game-area {
   display: flex;
-  flex: 1;
+  flex: 1; /* Allow this area to grow */
   gap: 20px;
   padding: 20px;
-  overflow: hidden;
+  overflow: hidden; /* Hide overflow on desktop */
 }
 
 .bets-panel {
   width: 300px;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 20px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-and-controls-panel {
@@ -66,19 +72,19 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0; /* Fix flexbox overflow issue */
 }
 
 /* Crash Chart Container */
 .crash-chart-container {
   position: relative;
-  height: 400px;
+  flex: 1; /* Allow chart to grow */
+  min-height: 300px; /* Ensure a minimum height */
   background: radial-gradient(ellipse at center, rgba(22, 33, 62, 0.8) 0%, rgba(12, 12, 12, 0.9) 70%);
   border-radius: 15px;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    inset 0 0 30px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.05);
 }
 
 /* Countdown Styles */
@@ -113,11 +119,11 @@
   background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #0abde3);
   background-size: 400% 100%;
   border-radius: 3px;
-  transition: none;
 }
 
 .countdown-bar.animate {
-  animation: countdown-progress 5s linear forwards, countdown-shimmer 0.5s ease-in-out infinite alternate;
+  width: 0; /* Start from 0 to animate to 100% or vice versa depending on logic */
+  animation: countdown-progress 5s linear forwards;
 }
 
 @keyframes countdown-progress {
@@ -125,372 +131,246 @@
   to { width: 0%; }
 }
 
-@keyframes countdown-shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
 
 /* Multiplier Display */
 .multiplier-overlay {
   position: absolute;
-  top: 30px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  font-size: 48px;
+  transform: translate(-50%, -50%);
+  font-size: 5vw; /* Responsive font size */
   font-weight: bold;
   z-index: 5;
-  text-shadow: 
-    0 0 20px currentColor,
-    0 0 40px currentColor,
-    2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 2px 2px 4px rgba(0, 0, 0, 0.8);
   transition: all 0.3s ease;
   user-select: none;
 }
 
 .crashed-text {
   display: block;
-  font-size: 24px;
+  font-size: 2.5vw;
   color: #e74c3c;
   animation: crash-pulse 0.5s ease-in-out infinite alternate;
-  text-shadow: 
-    0 0 10px #e74c3c,
-    0 0 20px #e74c3c,
-    0 0 30px #e74c3c;
+  text-shadow: 0 0 10px #ff3c3c, 0 0 20px #e74c3c, 0 0 30px #c0392b;
 }
 
 @keyframes crash-pulse {
-  0% { opacity: 0.8; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.1); }
+  from { opacity: 0.8; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.1); }
 }
 
-/* Trail System */
+/* ================== NEW TRAIL SYSTEM ================== */
 .trail-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
   z-index: 2;
 }
 
 .trail-point {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: radial-gradient(circle, 
     rgba(255, 255, 255, 0.9) 0%,
     rgba(255, 215, 0, 0.8) 30%,
     rgba(255, 140, 0, 0.6) 60%,
-    rgba(255, 69, 0, 0.4) 80%,
-    transparent 100%
+    transparent 90%
   );
-  box-shadow: 
-    0 0 10px rgba(255, 215, 0, 0.8),
-    0 0 20px rgba(255, 140, 0, 0.4),
-    0 0 30px rgba(255, 69, 0, 0.2);
-  animation: trail-particle 2s ease-out forwards;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.4);
+  animation: trail-fade 1.5s ease-out forwards;
   transform-origin: center;
+  transform: translate(-50%, -50%);
 }
 
-@keyframes trail-particle {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
+@keyframes trail-fade {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
 }
+
 
 /* Rocket/Plane Styles */
 .rocket-container {
   position: absolute;
   z-index: 3;
   filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
-  transition: all 0.1s linear;
+  transition: all 0.1s linear; /* Keep this for smooth movement */
 }
 
 .plane-icon {
   color: #ffffff;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
   animation: plane-glow 1s ease-in-out infinite alternate;
 }
 
 @keyframes plane-glow {
-  0% { 
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-  }
-  100% { 
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 30px rgba(255, 140, 0, 0.6));
-  }
+  0% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)); }
+  100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 30px rgba(255, 140, 0, 0.6)); }
 }
 
-/* Explosion Effects */
+/* ================== NEW EXPLOSION EFFECTS ================== */
 .explosion-container {
   position: absolute;
+  width: 1px; height: 1px;
   z-index: 10;
-  transform: translate(-50%, 50%);
   pointer-events: none;
 }
 
+/* Layer 1: The Initial Bright Flash */
 .explosion-flash {
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 250px; height: 250px;
   border-radius: 50%;
   background: radial-gradient(circle, 
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 215, 0, 0.9) 20%,
-    rgba(255, 140, 0, 0.8) 40%,
-    rgba(255, 69, 0, 0.6) 60%,
-    rgba(220, 20, 60, 0.4) 80%,
+    white 0%,
+    rgba(255, 248, 220, 0.9) 20%,
+    rgba(255, 215, 0, 0.8) 40%,
+    rgba(255, 69, 0, 0.6) 70%,
     transparent 100%
   );
-  animation: explosion-flash 0.3s ease-out;
+  animation: explosion-flash-anim 0.4s ease-out forwards;
   transform: translate(-50%, -50%);
-  box-shadow: 
-    0 0 50px rgba(255, 255, 255, 0.8),
-    0 0 100px rgba(255, 215, 0, 0.6),
-    0 0 150px rgba(255, 69, 0, 0.4);
 }
 
-@keyframes explosion-flash {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0);
-    box-shadow: 
-      0 0 0px rgba(255, 255, 255, 0.8),
-      0 0 0px rgba(255, 215, 0, 0.6),
-      0 0 0px rgba(255, 69, 0, 0.4);
-  }
-  30% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
-    box-shadow: 
-      0 0 80px rgba(255, 255, 255, 1),
-      0 0 120px rgba(255, 215, 0, 0.8),
-      0 0 160px rgba(255, 69, 0, 0.6);
-  }
-  70% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1.8);
-    box-shadow: 
-      0 0 100px rgba(255, 255, 255, 0.6),
-      0 0 150px rgba(255, 215, 0, 0.4),
-      0 0 200px rgba(255, 69, 0, 0.3);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2.5);
-    box-shadow: 
-      0 0 50px rgba(255, 255, 255, 0.2),
-      0 0 80px rgba(255, 215, 0, 0.1),
-      0 0 100px rgba(255, 69, 0, 0.1);
-  }
+@keyframes explosion-flash-anim {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
 }
 
-/* Fire Particles */
+/* Layer 2: The Shockwave Rings */
+.shockwave {
+  position: absolute;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  animation: shockwave-anim 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+.shockwave.shockwave-delayed {
+  animation-delay: 0.2s;
+  border-color: rgba(255, 215, 0, 0.6);
+  border-width: 3px;
+}
+
+@keyframes shockwave-anim {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0); border-width: 4px; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(8); border-width: 1px; }
+}
+
+/* Layer 3: Fire Particles */
 .fire-particle {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 10px; height: 10px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 224, 1) 0%,
     rgba(255, 215, 0, 0.9) 30%,
     rgba(255, 69, 0, 0.8) 70%,
-    rgba(220, 20, 60, 0.6) 100%
+    rgba(220, 20, 60, 0) 100%
   );
-  animation: fire-explosion 1.5s ease-out forwards;
-  animation-delay: var(--delay, 0s);
-  transform: translate(-50%, -50%);
-  box-shadow: 
-    0 0 10px rgba(255, 215, 0, 0.8),
-    0 0 20px rgba(255, 69, 0, 0.6);
+  box-shadow: 0 0 15px rgba(255, 100, 0, 1);
+  animation: fire-anim 1.2s ease-out forwards;
+  animation-delay: var(--delay);
 }
 
-@keyframes fire-explosion {
+@keyframes fire-anim {
   0% {
+    transform: translate(0, 0) scale(1);
     opacity: 1;
-    transform: translate(-50%, -50%) scale(0) rotate(0deg);
-    box-shadow: 
-      0 0 5px rgba(255, 215, 0, 0.8),
-      0 0 10px rgba(255, 69, 0, 0.6);
-  }
-  20% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.5) rotate(calc(var(--i) * 36deg));
-    box-shadow: 
-      0 0 15px rgba(255, 215, 0, 1),
-      0 0 25px rgba(255, 69, 0, 0.8);
-  }
-  60% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--i) * 72deg)) 
-               translateY(calc(-50px - var(--i) * 5px)) 
-               translateX(calc(sin(var(--i) * 0.628) * 40px));
-    box-shadow: 
-      0 0 10px rgba(255, 215, 0, 0.6),
-      0 0 20px rgba(255, 69, 0, 0.4);
   }
   100% {
+    /* Move outwards in a circle and then fall down slightly */
+    transform: 
+      rotate(calc(var(--i) * 14.4deg)) 
+      translateY(calc(-120px - (var(--i) * 3px)))
+      scale(0);
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3) rotate(calc(var(--i) * 108deg)) 
-               translateY(calc(-120px - var(--i) * 15px)) 
-               translateX(calc(cos(var(--i) * 0.628) * 80px));
-    box-shadow: 
-      0 0 5px rgba(255, 215, 0, 0.2),
-      0 0 10px rgba(255, 69, 0, 0.1);
   }
 }
 
-/* Smoke Particles */
+/* Layer 4: Smoke Particles */
 .smoke-particle {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 25px; height: 25px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(100, 100, 100, 0.8) 0%,
-    rgba(60, 60, 60, 0.6) 50%,
-    rgba(30, 30, 30, 0.4) 80%,
-    transparent 100%
+    rgba(100, 100, 100, 0.7) 0%,
+    rgba(60, 60, 60, 0.5) 50%,
+    rgba(30, 30, 30, 0) 80%
   );
-  animation: smoke-explosion 2.5s ease-out forwards;
-  animation-delay: var(--delay, 0s);
-  transform: translate(-50%, -50%);
-  filter: blur(1px);
+  filter: blur(2px);
+  animation: smoke-anim 2.5s ease-out forwards;
+  animation-delay: var(--delay);
 }
 
-@keyframes smoke-explosion {
+@keyframes smoke-anim {
   0% {
+    transform: translate(0, 0) scale(0);
+    opacity: 1;
+  }
+  50% {
     opacity: 0.8;
-    transform: translate(-50%, -50%) scale(0) rotate(0deg);
-    filter: blur(1px);
-  }
-  15% {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1) rotate(calc(var(--i) * 25deg));
-    filter: blur(1px);
-  }
-  40% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(2) rotate(calc(var(--i) * 50deg)) 
-               translateY(calc(-30px - var(--i) * 8px)) 
-               translateX(calc(sin(var(--i) * 0.4) * 30px));
-    filter: blur(2px);
-  }
-  70% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(3.5) rotate(calc(var(--i) * 80deg)) 
-               translateY(calc(-80px - var(--i) * 12px)) 
-               translateX(calc(cos(var(--i) * 0.4) * 50px));
-    filter: blur(3px);
   }
   100% {
+    /* Rise up, expand, and fade away */
+    transform: 
+      rotate(calc(var(--i) * 12deg)) 
+      translateY(calc(-150px - (var(--i) * 5px)))
+      scale(4);
     opacity: 0;
-    transform: translate(-50%, -50%) scale(5) rotate(calc(var(--i) * 120deg)) 
-               translateY(calc(-150px - var(--i) * 20px)) 
-               translateX(calc(sin(var(--i) * 0.3) * 80px));
     filter: blur(5px);
   }
 }
 
-/* Debris Particles */
+/* Layer 5: Debris Particles */
 .debris-particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background: linear-gradient(45deg,
-    rgba(139, 69, 19, 1) 0%,
-    rgba(160, 82, 45, 0.8) 30%,
-    rgba(105, 105, 105, 0.6) 70%,
-    rgba(169, 169, 169, 0.4) 100%
-  );
-  animation: debris-explosion 2s ease-out forwards;
-  animation-delay: var(--delay, 0s);
-  transform: translate(-50%, -50%);
-  border-radius: 1px;
-  box-shadow: 0 0 3px rgba(139, 69, 19, 0.5);
+  width: 5px; height: 5px;
+  background: #555;
+  box-shadow: 0 0 5px #222;
+  animation: debris-anim 2s cubic-bezier(0.3, 0.5, 0.4, 1) forwards;
+  animation-delay: var(--delay);
 }
 
-@keyframes debris-explosion {
+@keyframes debris-anim {
   0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
     opacity: 1;
-    transform: translate(-50%, -50%) scale(0) rotate(0deg);
-  }
-  10% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.5) rotate(calc(var(--i) * 45deg));
-  }
-  30% {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--i) * 180deg)) 
-               translateY(calc(-40px - var(--i) * 3px)) 
-               translateX(calc(cos(var(--i) * 0.8) * 60px));
-  }
-  70% {
-    opacity: 0.5;
-    transform: translate(-50%, -50%) scale(0.8) rotate(calc(var(--i) * 360deg)) 
-               translateY(calc(-100px - var(--i) * 8px)) 
-               translateX(calc(sin(var(--i) * 0.8) * 100px));
   }
   100% {
+    /* A more chaotic trajectory using cubic-bezier */
+    transform: 
+      rotate(calc(var(--i) * 25deg)) 
+      translateY(calc(-80px - (var(--i) * 8px)))
+      translateX(calc(sin(var(--i)) * 40px)) /* Rough approximation of scatter */
+      rotate(calc(var(--i) * 180deg))
+      scale(0.5);
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3) rotate(calc(var(--i) * 540deg)) 
-               translateY(calc(-180px - var(--i) * 15px)) 
-               translateX(calc(cos(var(--i) * 1.2) * 140px));
   }
 }
 
-/* Shockwave Effects */
-.shockwave {
+
+/* Heat Distortion Effect */
+.explosion-container::after {
+  content: '';
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, transparent 50%, rgba(255, 100, 0, 0.1) 70%, transparent 80%);
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.8);
-  animation: shockwave-expand 0.8s ease-out forwards;
+  animation: heat-distortion-anim 1.5s ease-out forwards;
   transform: translate(-50%, -50%);
+  filter: blur(3px);
+  animation-delay: 0.1s;
 }
 
-.shockwave-delayed {
-  animation-delay: 0.2s;
-  border-color: rgba(255, 215, 0, 0.6);
-  border-width: 2px;
+@keyframes heat-distortion-anim {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
 }
 
-@keyframes shockwave-expand {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0);
-    border-width: 4px;
-  }
-  30% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(2);
-    border-width: 3px;
-  }
-  70% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(6);
-    border-width: 2px;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(12);
-    border-width: 1px;
-  }
-}
 
-/* Bet Controls and UI */
+/* ================== UI AND CONTROLS ================== */
 .bet-controls-area {
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -503,240 +383,84 @@
   gap: 15px;
 }
 
-.bet-input {
+.bet-input, .ant-input-group-addon {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   color: white !important;
 }
+.ant-input-group-addon { border-right: none !important; }
 
 .bet-input:focus {
   border-color: rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
 }
 
-.quick-bet-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
+.quick-bet-buttons { display: flex; gap: 10px; justify-content: center; }
+.quick-bet-buttons button { flex: 1; background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; }
+.quick-bet-buttons button:hover { background: rgba(255, 255, 255, 0.2) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
 
-.quick-bet-buttons button {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-}
-
-.quick-bet-buttons button:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Crash Game Buttons */
-.crash-btn {
-  width: 100%;
-  height: 50px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  border: none;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.crash-btn.place-bet {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: white;
-  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-}
-
-.crash-btn.place-bet:hover {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
-  transform: translateY(-2px);
-}
-
-.crash-btn.cashout {
-  background: linear-gradient(135deg, #f39c12, #e67e22);
-  color: white;
-  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-  animation: cashout-pulse 1s ease-in-out infinite alternate;
-}
-
-@keyframes cashout-pulse {
-  0% {
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-  }
-  100% {
-    box-shadow: 0 6px 25px rgba(243, 156, 18, 0.6);
-  }
-}
-
-.crash-btn.cashout:hover {
-  background: linear-gradient(135deg, #e67e22, #f39c12);
-  transform: translateY(-2px);
-}
-
-.crash-btn.placed, .crash-btn.cashed-out {
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-  cursor: default;
-}
-
-.crash-btn.crashed {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: white;
-  cursor: default;
-}
+.crash-btn { width: 100%; height: 50px; font-size: 16px; font-weight: bold; border-radius: 8px; transition: all 0.3s ease; border: none; text-transform: uppercase; letter-spacing: 1px; }
+.crash-btn.place-bet { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+.crash-btn.place-bet:hover { background: linear-gradient(135deg, #27ae60, #2ecc71); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
+.crash-btn.cashout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; animation: cashout-pulse 1s ease-in-out infinite alternate; }
+@keyframes cashout-pulse { from { box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); } to { box-shadow: 0 6px 25px rgba(243, 156, 18, 0.6); } }
+.crash-btn.cashout:hover { animation-play-state: paused; background: linear-gradient(135deg, #e67e22, #f39c12); transform: translateY(-2px); }
+.crash-btn.placed, .crash-btn.cashed-out { background: linear-gradient(135deg, #3498db, #2980b9); color: white; cursor: default; }
+.crash-btn.crashed { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; cursor: default; }
 
 /* Bets List */
 .bets-list-container {
-  max-height: 300px;
+  height: 100%;
   overflow-y: auto;
-  padding: 10px 0;
+  padding-right: 10px;
 }
 
-.bet-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.bet-row.my-bet-row {
-  background: rgba(46, 204, 113, 0.1);
-  border-color: rgba(46, 204, 113, 0.3);
-}
-
-.player-address {
-  font-family: monospace;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.bet-amount {
-  font-weight: bold;
-  color: #f39c12;
-}
+.bet-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+.bet-row.my-bet-row { background: rgba(46, 204, 113, 0.1); border-color: rgba(46, 204, 113, 0.3); }
+.player-address { font-family: monospace; font-size: 12px; color: rgba(255, 255, 255, 0.8); }
+.bet-amount { font-weight: bold; color: #f39c12; }
 
 /* Tabs Styling */
-.game-history-tabs .ant-tabs-tab {
-  color: rgba(255, 255, 255, 0.7) !important;
+.game-history-tabs .ant-tabs-nav { margin-bottom: 20px !important; }
+.game-history-tabs .ant-tabs-tab { color: rgba(255, 255, 255, 0.7) !important; }
+.game-history-tabs .ant-tabs-tab-active .ant-tabs-tab-btn { color: white !important; }
+.game-history-tabs .ant-tabs-ink-bar { background: #2ecc71 !important; }
+
+.game-history-tabs .ant-tabs-content-holder {
+    height: 100%;
+    overflow: hidden;
 }
 
-.game-history-tabs .ant-tabs-tab-active {
-  color: white !important;
-}
-
-.game-history-tabs .ant-tabs-ink-bar {
-  background: #2ecc71 !important;
-}
-
-/* Mobile Responsive */
+/* ================== MOBILE UI FIXES ================== */
 .mobile-tabs-panel {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px;
+  padding: 10px 10px 20px 10px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
+  .crash-game-page-container {
+    height: auto; /* Allow content to define height */
+  }
+
   .crash-game-area {
     flex-direction: column;
     padding: 10px;
+    overflow: visible; /* Allow content to flow */
   }
-  
+
   .crash-chart-container {
-    height: 300px;
+    min-height: 250px;
+    height: 40vh; /* Use viewport height for responsiveness */
+    flex: none; /* Do not allow it to grow/shrink in the column */
   }
-  
-  .multiplier-overlay {
-    font-size: 36px;
-  }
-  
-  .controls-container {
-    gap: 10px;
-  }
-  
-  .quick-bet-buttons {
-    flex-wrap: wrap;
-  }
-  
-  .crash-btn {
-    height: 45px;
-    font-size: 14px;
-  }
-}
 
-/* Additional Explosion Enhancements */
-.explosion-container::before {
-  content: '';
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 215, 0, 0.05) 30%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: explosion-glow 0.8s ease-out;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-}
+  .multiplier-overlay { font-size: 10vw; }
+  .crashed-text { font-size: 5vw; }
 
-@keyframes explosion-glow {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.5);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(3);
-  }
-}
-
-/* Heat Distortion Effect */
-.explosion-container::after {
-  content: '';
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  background: linear-gradient(45deg, 
-    transparent 30%, 
-    rgba(255, 69, 0, 0.1) 50%, 
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: heat-distortion 1.2s ease-out;
-  transform: translate(-50%, -50%);
-  filter: blur(2px);
-}
-
-@keyframes heat-distortion {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0) rotate(0deg);
-  }
-  30% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
-  }
-  70% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(2) rotate(360deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(3) rotate(540deg);
-  }
+  .controls-container { gap: 10px; }
+  .quick-bet-buttons { flex-wrap: wrap; }
+  .crash-btn { height: 45px; font-size: 14px; }
 }
