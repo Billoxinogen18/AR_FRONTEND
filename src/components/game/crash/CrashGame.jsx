@@ -48,20 +48,20 @@ const CircularCountdown = ({ duration }) => {
 };
 
 
-// REVISED CRASH ANIMATION COMPONENT
+// REVISED CRASH ANIMATION COMPONENT - Fixed to trace path progressively
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
     const [planeStyle, setPlaneStyle] = useState({ bottom: '0%', left: '0%', opacity: 0 });
     const [isExploding, setIsExploding] = useState(false);
     
-    // REVISED: SVG path for a prominent, stroked trail
-    const [trailPath, setTrailPath] = useState('');
+    // FIXED: Track the path points that have been traced so far
+    const [tracedPath, setTracedPath] = useState([]);
     const containerRef = useRef(null);
 
     useEffect(() => {
         if (phase === 'WAITING') {
             setIsExploding(false);
-            setTrailPath(''); // Clear the trail
+            setTracedPath([]); // Clear the traced path for new round
         }
 
         if (phase === 'RUNNING' && containerRef.current) {
@@ -70,7 +70,6 @@ const CrashAnimation = ({ gameState }) => {
             const containerWidth = containerRef.current.offsetWidth;
             const containerHeight = containerRef.current.offsetHeight;
 
-            // --- NEW: Bézier Curve Path Calculation ---
             // Define the curve's start, control (for the arc), and end points
             const p0 = { x: containerWidth * 0.05, y: containerHeight * 0.9 }; // Start Point (bottom-left)
             const p1 = { x: containerWidth * 0.45, y: containerHeight * 0.15 }; // Control Point (pulls the curve up)
@@ -83,14 +82,21 @@ const CrashAnimation = ({ gameState }) => {
             const currentX = (1 - t) ** 2 * p0.x + 2 * (1 - t) * t * p1.x + t ** 2 * p2.x;
             const currentY = (1 - t) ** 2 * p0.y + 2 * (1 - t) * t * p1.y + t ** 2 * p2.y;
 
-            // --- NEW: Correct Plane Orientation using Curve's Tangent ---
-            // Derivative of the Bézier formula: B'(t) = 2(1-t)(P1-P0) + 2t(P2-P1)
+            // Calculate plane orientation using curve's tangent
             const dx = 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
             const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
-            const angle = Math.atan2(dy, dx) * (180 / Math.PI); // Angle in degrees
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-            // Update the SVG trail path
-            setTrailPath(`M ${p0.x},${p0.y} Q ${p1.x},${p1.y} ${currentX},${currentY}`);
+            // FIXED: Build traced path progressively - only add points up to current position
+            const newTracedPath = [];
+            const segments = 50; // Number of segments to sample for smooth path
+            for (let i = 0; i <= segments; i++) {
+                const segmentT = (i / segments) * t; // Only go up to current t
+                const segmentX = (1 - segmentT) ** 2 * p0.x + 2 * (1 - segmentT) * segmentT * p1.x + segmentT ** 2 * p2.x;
+                const segmentY = (1 - segmentT) ** 2 * p0.y + 2 * (1 - segmentT) * segmentT * p1.y + segmentT ** 2 * p2.y;
+                newTracedPath.push({ x: segmentX, y: segmentY });
+            }
+            setTracedPath(newTracedPath);
 
             // Update plane's style
             const newStyle = {
@@ -110,6 +116,17 @@ const CrashAnimation = ({ gameState }) => {
             setPlaneStyle({ bottom: '10%', left: '5%', opacity: 0, transform: 'translate(-50%, -50%) rotate(15deg)', transition: 'opacity 0.5s ease-out' });
         }
     }, [phase, multiplier]);
+
+    // FIXED: Generate SVG path from traced points
+    const generatePathString = () => {
+        if (tracedPath.length < 2) return '';
+        
+        let pathString = `M ${tracedPath[0].x},${tracedPath[0].y}`;
+        for (let i = 1; i < tracedPath.length; i++) {
+            pathString += ` L ${tracedPath[i].x},${tracedPath[i].y}`;
+        }
+        return pathString;
+    };
 
     const finalMultiplier = (phase === 'CRASHED' && crashPoint) ? crashPoint : multiplier;
     const displayMultiplier = !isNaN(finalMultiplier) ? parseFloat(finalMultiplier).toFixed(2) : "1.00";
@@ -139,8 +156,9 @@ const CrashAnimation = ({ gameState }) => {
                 {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
             </div>
 
+            {/* FIXED: Only show the traced path behind the plane */}
             <svg className="trail-svg-container">
-                <path d={trailPath} className="trail-path-line" />
+                <path d={generatePathString()} className="trail-path-line" />
             </svg>
 
             {!isExploding && <div className="rocket-container" style={planeStyle}><ChartIcon /></div>}
@@ -159,7 +177,7 @@ const CrashAnimation = ({ gameState }) => {
     );
 };
 
-// ... (CurrentBetsList and MyBetsHistory components remain unchanged)
+// Current Bets List Component (unchanged)
 const CurrentBetsList = ({ players, myWalletAddress }) => {
     if (!players || players.length === 0) return <Empty description="No players this round." image={Empty.PRESENTED_IMAGE_SIMPLE}/>;
     return(
@@ -178,6 +196,7 @@ const CurrentBetsList = ({ players, myWalletAddress }) => {
     );
 };
 
+// My Bets History Component (unchanged)
 const MyBetsHistory = ({ walletAddress }) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
