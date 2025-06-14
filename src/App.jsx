@@ -304,6 +304,16 @@ function App() {
 
     return (
         <ConfigProvider theme={NEW_TELEGRAM_DARK_THEME}>
+            {/* NEW: SVG Gradient Definition for the trail */}
+            <svg width="0" height="0" style={{ position: 'absolute' }}>
+                <defs>
+                    <linearGradient id="trail-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style={{ stopColor: 'rgba(255, 140, 0, 0.6)', stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: 'rgba(255, 215, 0, 1)', stopOpacity: 1 }} />
+                    </linearGradient>
+                </defs>
+            </svg>
+            
             <Layout className="app-layout">
                 <Header className="app-header">
                     <div className="app-header-logo-area">

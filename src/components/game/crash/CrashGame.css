@@ -2,12 +2,12 @@
 .crash-game-page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Better for mobile */
-  height: 100vh; /* Fallback for desktop */
+  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
   color: white;
   font-family: 'Arial', sans-serif;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 .history-bar {
@@ -49,10 +49,10 @@
 
 .crash-game-area {
   display: flex;
-  flex: 1; /* Allow this area to grow */
+  flex: 1;
   gap: 20px;
   padding: 20px;
-  overflow: hidden; /* Hide overflow on desktop */
+  overflow: hidden;
 }
 
 .bets-panel {
@@ -72,14 +72,14 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-width: 0; /* Fix flexbox overflow issue */
+  min-width: 0;
 }
 
 /* Crash Chart Container */
 .crash-chart-container {
   position: relative;
-  flex: 1; /* Allow chart to grow */
-  min-height: 300px; /* Ensure a minimum height */
+  flex: 1;
+  min-height: 300px;
   background: radial-gradient(ellipse at center, rgba(22, 33, 62, 0.8) 0%, rgba(12, 12, 12, 0.9) 70%);
   border-radius: 15px;
   overflow: hidden;
@@ -122,7 +122,7 @@
 }
 
 .countdown-bar.animate {
-  width: 0; /* Start from 0 to animate to 100% or vice versa depending on logic */
+  width: 0;
   animation: countdown-progress 5s linear forwards;
 }
 
@@ -138,7 +138,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 5vw; /* Responsive font size */
+  font-size: 5vw;
   font-weight: bold;
   z-index: 5;
   text-shadow: 0 0 20px currentColor, 0 0 40px currentColor, 2px 2px 4px rgba(0, 0, 0, 0.8);
@@ -159,42 +159,30 @@
   to { opacity: 1; transform: scale(1.1); }
 }
 
-/* ================== NEW TRAIL SYSTEM ================== */
-.trail-container {
+/* ================== NEW PERSISTENT SVG TRAIL SYSTEM ================== */
+.trail-svg-container {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   pointer-events: none;
   z-index: 2;
 }
 
-.trail-point {
-  position: absolute;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, 
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 215, 0, 0.8) 30%,
-    rgba(255, 140, 0, 0.6) 60%,
-    transparent 90%
-  );
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.4);
-  animation: trail-fade 1.5s ease-out forwards;
-  transform-origin: center;
-  transform: translate(-50%, -50%);
+.trail-path {
+  fill: none;
+  stroke: url(#trail-gradient);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 10px rgba(255, 140, 0, 0.6));
 }
-
-@keyframes trail-fade {
-  0% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
-}
-
 
 /* Rocket/Plane Styles */
 .rocket-container {
   position: absolute;
   z-index: 3;
   filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
-  transition: all 0.1s linear; /* Keep this for smooth movement */
+  transition: all 0.1s linear;
 }
 
 .plane-icon {
@@ -207,198 +195,88 @@
   100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)) drop-shadow(0 0 30px rgba(255, 140, 0, 0.6)); }
 }
 
-/* ================== NEW EXPLOSION EFFECTS ================== */
+/* ================== CRAZY EXPLOSION EFFECTS (UNCHANGED) ================== */
 .explosion-container {
-  position: absolute;
-  width: 1px; height: 1px;
-  z-index: 10;
-  pointer-events: none;
+  position: absolute; width: 1px; height: 1px;
+  z-index: 10; pointer-events: none;
 }
-
-/* Layer 1: The Initial Bright Flash */
 .explosion-flash {
-  position: absolute;
-  width: 250px; height: 250px;
-  border-radius: 50%;
-  background: radial-gradient(circle, 
-    white 0%,
-    rgba(255, 248, 220, 0.9) 20%,
-    rgba(255, 215, 0, 0.8) 40%,
-    rgba(255, 69, 0, 0.6) 70%,
-    transparent 100%
-  );
+  position: absolute; width: 250px; height: 250px; border-radius: 50%;
+  background: radial-gradient(circle, white 0%, rgba(255, 248, 220, 0.9) 20%, rgba(255, 215, 0, 0.8) 40%, rgba(255, 69, 0, 0.6) 70%, transparent 100%);
   animation: explosion-flash-anim 0.4s ease-out forwards;
   transform: translate(-50%, -50%);
 }
-
 @keyframes explosion-flash-anim {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(0); }
   30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
 }
-
-/* Layer 2: The Shockwave Rings */
 .shockwave {
-  position: absolute;
-  width: 50px; height: 50px;
-  border-radius: 50%;
+  position: absolute; width: 50px; height: 50px; border-radius: 50%;
   border: 4px solid rgba(255, 255, 255, 0.8);
   animation: shockwave-anim 1s ease-out forwards;
   transform: translate(-50%, -50%);
 }
-.shockwave.shockwave-delayed {
-  animation-delay: 0.2s;
-  border-color: rgba(255, 215, 0, 0.6);
-  border-width: 3px;
-}
-
+.shockwave.shockwave-delayed { animation-delay: 0.2s; border-color: rgba(255, 215, 0, 0.6); border-width: 3px; }
 @keyframes shockwave-anim {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(0); border-width: 4px; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(8); border-width: 1px; }
 }
-
-/* Layer 3: Fire Particles */
 .fire-particle {
-  position: absolute;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(255, 255, 224, 1) 0%,
-    rgba(255, 215, 0, 0.9) 30%,
-    rgba(255, 69, 0, 0.8) 70%,
-    rgba(220, 20, 60, 0) 100%
-  );
+  position: absolute; width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 224, 1) 0%, rgba(255, 215, 0, 0.9) 30%, rgba(255, 69, 0, 0.8) 70%, rgba(220, 20, 60, 0) 100%);
   box-shadow: 0 0 15px rgba(255, 100, 0, 1);
   animation: fire-anim 1.2s ease-out forwards;
   animation-delay: var(--delay);
 }
-
 @keyframes fire-anim {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    /* Move outwards in a circle and then fall down slightly */
-    transform: 
-      rotate(calc(var(--i) * 14.4deg)) 
-      translateY(calc(-120px - (var(--i) * 3px)))
-      scale(0);
-    opacity: 0;
-  }
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: rotate(calc(var(--i) * 14.4deg)) translateY(calc(-120px - (var(--i) * 3px))) scale(0); opacity: 0; }
 }
-
-/* Layer 4: Smoke Particles */
 .smoke-particle {
-  position: absolute;
-  width: 25px; height: 25px;
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(100, 100, 100, 0.7) 0%,
-    rgba(60, 60, 60, 0.5) 50%,
-    rgba(30, 30, 30, 0) 80%
-  );
+  position: absolute; width: 25px; height: 25px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(100, 100, 100, 0.7) 0%, rgba(60, 60, 60, 0.5) 50%, rgba(30, 30, 30, 0) 80%);
   filter: blur(2px);
   animation: smoke-anim 2.5s ease-out forwards;
   animation-delay: var(--delay);
 }
-
 @keyframes smoke-anim {
-  0% {
-    transform: translate(0, 0) scale(0);
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  100% {
-    /* Rise up, expand, and fade away */
-    transform: 
-      rotate(calc(var(--i) * 12deg)) 
-      translateY(calc(-150px - (var(--i) * 5px)))
-      scale(4);
-    opacity: 0;
-    filter: blur(5px);
-  }
+  0% { transform: translate(0, 0) scale(0); opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { transform: rotate(calc(var(--i) * 12deg)) translateY(calc(-150px - (var(--i) * 5px))) scale(4); opacity: 0; filter: blur(5px); }
 }
-
-/* Layer 5: Debris Particles */
 .debris-particle {
-  position: absolute;
-  width: 5px; height: 5px;
-  background: #555;
-  box-shadow: 0 0 5px #222;
+  position: absolute; width: 5px; height: 5px; background: #555; box-shadow: 0 0 5px #222;
   animation: debris-anim 2s cubic-bezier(0.3, 0.5, 0.4, 1) forwards;
   animation-delay: var(--delay);
 }
-
 @keyframes debris-anim {
-  0% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    /* A more chaotic trajectory using cubic-bezier */
-    transform: 
-      rotate(calc(var(--i) * 25deg)) 
-      translateY(calc(-80px - (var(--i) * 8px)))
-      translateX(calc(sin(var(--i)) * 40px)) /* Rough approximation of scatter */
-      rotate(calc(var(--i) * 180deg))
-      scale(0.5);
-    opacity: 0;
-  }
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: rotate(calc(var(--i) * 25deg)) translateY(calc(-80px - (var(--i) * 8px))) translateX(calc(sin(var(--i)) * 40px)) rotate(calc(var(--i) * 180deg)) scale(0.5); opacity: 0; }
 }
-
-
-/* Heat Distortion Effect */
 .explosion-container::after {
-  content: '';
-  position: absolute;
-  width: 150px; height: 150px;
+  content: ''; position: absolute; width: 150px; height: 150px;
   background: radial-gradient(circle, transparent 50%, rgba(255, 100, 0, 0.1) 70%, transparent 80%);
-  border-radius: 50%;
-  animation: heat-distortion-anim 1.5s ease-out forwards;
-  transform: translate(-50%, -50%);
-  filter: blur(3px);
-  animation-delay: 0.1s;
+  border-radius: 50%; animation: heat-distortion-anim 1.5s ease-out forwards;
+  transform: translate(-50%, -50%); filter: blur(3px); animation-delay: 0.1s;
 }
-
 @keyframes heat-distortion-anim {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
   30% { opacity: 1; }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
 }
 
-
-/* ================== UI AND CONTROLS ================== */
+/* UI AND CONTROLS (Unchanged) */
 .bet-controls-area {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px);
 }
-
-.controls-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.bet-input, .ant-input-group-addon {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-}
+.controls-container { display: flex; flex-direction: column; gap: 15px; }
+.bet-input, .ant-input-group-addon { background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; }
 .ant-input-group-addon { border-right: none !important; }
-
-.bet-input:focus {
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
-}
-
+.bet-input:focus { border-color: rgba(255, 255, 255, 0.4) !important; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important; }
 .quick-bet-buttons { display: flex; gap: 10px; justify-content: center; }
 .quick-bet-buttons button { flex: 1; background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; }
 .quick-bet-buttons button:hover { background: rgba(255, 255, 255, 0.2) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
-
 .crash-btn { width: 100%; height: 50px; font-size: 16px; font-weight: bold; border-radius: 8px; transition: all 0.3s ease; border: none; text-transform: uppercase; letter-spacing: 1px; }
 .crash-btn.place-bet { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
 .crash-btn.place-bet:hover { background: linear-gradient(135deg, #27ae60, #2ecc71); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4); transform: translateY(-2px); }
@@ -407,59 +285,23 @@
 .crash-btn.cashout:hover { animation-play-state: paused; background: linear-gradient(135deg, #e67e22, #f39c12); transform: translateY(-2px); }
 .crash-btn.placed, .crash-btn.cashed-out { background: linear-gradient(135deg, #3498db, #2980b9); color: white; cursor: default; }
 .crash-btn.crashed { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; cursor: default; }
-
-/* Bets List */
-.bets-list-container {
-  height: 100%;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
+.bets-list-container { height: 100%; overflow-y: auto; padding-right: 10px; }
 .bet-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
 .bet-row.my-bet-row { background: rgba(46, 204, 113, 0.1); border-color: rgba(46, 204, 113, 0.3); }
 .player-address { font-family: monospace; font-size: 12px; color: rgba(255, 255, 255, 0.8); }
 .bet-amount { font-weight: bold; color: #f39c12; }
-
-/* Tabs Styling */
 .game-history-tabs .ant-tabs-nav { margin-bottom: 20px !important; }
 .game-history-tabs .ant-tabs-tab { color: rgba(255, 255, 255, 0.7) !important; }
 .game-history-tabs .ant-tabs-tab-active .ant-tabs-tab-btn { color: white !important; }
 .game-history-tabs .ant-tabs-ink-bar { background: #2ecc71 !important; }
-
-.game-history-tabs .ant-tabs-content-holder {
-    height: 100%;
-    overflow: hidden;
-}
-
-/* ================== MOBILE UI FIXES ================== */
-.mobile-tabs-panel {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 10px 20px 10px;
-  flex-shrink: 0;
-}
-
+.game-history-tabs .ant-tabs-content-holder { height: 100%; overflow: hidden; }
+.mobile-tabs-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 10px 20px 10px; flex-shrink: 0; }
 @media (max-width: 768px) {
-  .crash-game-page-container {
-    height: auto; /* Allow content to define height */
-  }
-
-  .crash-game-area {
-    flex-direction: column;
-    padding: 10px;
-    overflow: visible; /* Allow content to flow */
-  }
-
-  .crash-chart-container {
-    min-height: 250px;
-    height: 40vh; /* Use viewport height for responsiveness */
-    flex: none; /* Do not allow it to grow/shrink in the column */
-  }
-
+  .crash-game-page-container { height: auto; }
+  .crash-game-area { flex-direction: column; padding: 10px; overflow: visible; }
+  .crash-chart-container { min-height: 250px; height: 40vh; flex: none; }
   .multiplier-overlay { font-size: 10vw; }
   .crashed-text { font-size: 5vw; }
-
   .controls-container { gap: 10px; }
   .quick-bet-buttons { flex-wrap: wrap; }
   .crash-btn { height: 45px; font-size: 14px; }
