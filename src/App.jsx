@@ -1,3 +1,5 @@
+// AR_FRONTEND/src/App.jsx
+
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { TonConnectButton, TonConnectUIProvider, useTonConnectUI } from '@tonconnect/ui-react';
@@ -39,18 +41,19 @@ const menuConfig = [
 const DesktopMenu = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    let currentPath = location.pathname;
-    
-    // FIX: Moved useEffect hook outside of any conditional logic to adhere to Rules of Hooks.
-    // This was the primary cause of the "Minified React error #310" crash.
+
+    // --- REVISION: REACT HOOKS RULE FIX ---
+    // Moved this useEffect hook to the top-level of the component.
+    // Calling hooks inside conditions, loops, or nested functions violates the Rules of Hooks
+    // and was the likely cause of crashes like "Minified React error #310". This fixes it.
     useEffect(() => {
         const isValidPath = menuConfig.some(item => location.pathname.startsWith(item.key));
-        if (!isValidPath) {
+        if (!isValidPath && location.pathname !== '/') { // Avoid redirect loops on the root path
           navigate('/game', { replace: true });
         }
     }, [navigate, location.pathname]);
 
-
+    let currentPath = location.pathname;
     if (currentPath === '/') currentPath = '/game';
     if (currentPath.startsWith('/game/')) {
         currentPath = '/game';
