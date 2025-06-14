@@ -79,7 +79,7 @@
 }
 
 /* ================================================================ */
-/* NEW/REVISED CHART STYLES TO MATCH VIDEO AESTHETIC                */
+/* CHART STYLES                                                     */
 /* ================================================================ */
 
 .crash-chart-container {
@@ -93,7 +93,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.05);
 }
 
-/* NEW: Grid Overlay */
+/* Grid Overlay */
 .chart-grid-overlay {
   position: absolute;
   top: 0;
@@ -104,9 +104,11 @@
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
+  /* NEW: Add transition for blur effect */
+  transition: filter 0.5s ease-in-out;
 }
 
-/* NEW: Parallax Background Layers */
+/* Parallax Background Layers */
 .parallax-bg {
   position: absolute;
   bottom: 0;
@@ -117,6 +119,8 @@
   z-index: 0;
   opacity: 0.8;
   animation: slide-parallax linear infinite;
+  /* NEW: Add transition for blur effect */
+  transition: filter 0.5s ease-in-out;
 }
 .parallax-bg.layer-1 {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120"><path d="M0,80 C150,120 350,0 500,60 S650,100 800,40 V120 H0 Z" fill="%232d2d4f"/></svg>');
@@ -138,7 +142,14 @@
   to { transform: translateX(-50%); }
 }
 
-/* NEW: Circular Countdown Timer */
+/* NEW: Style to apply blur effect during countdown */
+.crash-chart-container.blur-effect-active .parallax-bg,
+.crash-chart-container.blur-effect-active .chart-grid-overlay {
+  filter: blur(8px);
+}
+
+
+/* Circular Countdown Timer */
 .game-countdown-container {
   position: absolute;
   top: 50%;
@@ -151,7 +162,22 @@
   justify-content: center;
   width: 130px;
   height: 130px;
+  /* NEW: Entrance animation */
+  animation: countdown-fade-in 0.5s ease-out forwards;
 }
+
+/* NEW: Keyframes for the countdown timer's appearance */
+@keyframes countdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 .game-countdown-svg {
   position: absolute;
   width: 100%;
@@ -191,7 +217,7 @@
   letter-spacing: 1px;
 }
 
-/* Multiplier Display (Adjusted for new layout) */
+/* Multiplier Display */
 .multiplier-overlay {
   position: absolute;
   top: 50%;
@@ -213,7 +239,7 @@
 }
 @keyframes crash-pulse { from { opacity: 0.8; transform: scale(1); } to { opacity: 1; transform: scale(1.1); } }
 
-/* REVISED: SVG Trail System for a prominent stroked path */
+/* SVG Trail System */
 .trail-svg-container {
   position: absolute;
   top: 0; left: 0;
@@ -224,27 +250,27 @@
 .trail-path-line {
   fill: none;
   stroke: url(#trail-stroke-gradient);
-  stroke-width: 5; /* Thicker line like in the video */
+  stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 8px #ffc107);
 }
 
 
-/* REVISED: Plane Icon */
+/* Plane Icon */
 .rocket-container {
   position: absolute;
   z-index: 3;
   transition: all 0.1s linear;
 }
-.plane-icon { /* Reverted to FontAwesome icon */
+.plane-icon {
   font-size: 24px;
   color: #fff;
   filter: drop-shadow(0 0 10px #ffc107) drop-shadow(0 0 20px #ffc107);
 }
 
 /* ================================================================ */
-/* EXPLOSION & PARTICLE EFFECTS (PRESERVED)                         */
+/* EXPLOSION & PARTICLE EFFECTS                                     */
 /* ================================================================ */
 
 .explosion-container { position: absolute; width: 1px; height: 1px; z-index: 10; pointer-events: none; }
@@ -263,7 +289,7 @@
 @keyframes heat-distortion-anim { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(3); } }
 
 /* ================================================================ */
-/* UI AND CONTROLS (PRESERVED & ENHANCED)                           */
+/* UI AND CONTROLS                                                  */
 /* ================================================================ */
 
 .bet-controls-area { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px); }
@@ -276,7 +302,6 @@
 .quick-bet-buttons button:hover { background: rgba(255, 255, 255, 0.2) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
 .crash-btn { width: 100%; height: 50px; font-size: 16px; font-weight: bold; border-radius: 8px; transition: all 0.3s ease; border: none; text-transform: uppercase; letter-spacing: 1px; }
 
-/* REVISED: Button colors to match theme variables */
 .crash-btn.place-bet { background: var(--app-button-primary-bg, "#A3AECF") !important; color: var(--app-button-primary-text, "#08090A") !important; box-shadow: 0 4px 15px rgba(163, 174, 207, 0.2); }
 .crash-btn.place-bet:hover { background: var(--app-button-primary-hover-bg, "#8D9AC3") !important; box-shadow: 0 6px 20px rgba(163, 174, 207, 0.3); transform: translateY(-2px); }
 .crash-btn.cashout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; animation: cashout-pulse 1s ease-in-out infinite alternate; }
@@ -285,7 +310,6 @@
 .crash-btn.placed, .crash-btn.cashed-out { background: linear-gradient(135deg, #3498db, #2980b9); color: white; cursor: default; }
 .crash-btn.crashed { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; cursor: default; }
 
-/* NEW: Auto-controls layout improvements */
 .auto-controls-container { padding: 10px 4px; }
 .auto-cashout-row { display: flex; align-items: center; gap: 12px; }
 .auto-cashout-row .ant-input-group-wrapper { flex-grow: 1; }

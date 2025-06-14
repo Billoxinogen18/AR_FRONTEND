@@ -10,7 +10,7 @@ const { useBreakpoint } = Grid;
 // Using the FontAwesome icon again for better rotation control
 const ChartIcon = () => <FaPlane size={24} className="plane-icon" />;
 
-// NEW: Circular Countdown Component to replicate the video's timer
+// Circular Countdown Component to replicate the video's timer
 const CircularCountdown = ({ duration }) => {
     const [timeLeft, setTimeLeft] = useState(duration);
 
@@ -48,13 +48,12 @@ const CircularCountdown = ({ duration }) => {
 };
 
 
-// REVISED CRASH ANIMATION COMPONENT - Fixed to trace path progressively
+// CRASH ANIMATION COMPONENT
 const CrashAnimation = ({ gameState }) => {
     const { phase, multiplier, crashPoint } = gameState;
     const [planeStyle, setPlaneStyle] = useState({ bottom: '0%', left: '0%', opacity: 0 });
     const [isExploding, setIsExploding] = useState(false);
     
-    // FIXED: Track the path points that have been traced so far
     const [tracedPath, setTracedPath] = useState([]);
     const containerRef = useRef(null);
 
@@ -87,7 +86,7 @@ const CrashAnimation = ({ gameState }) => {
             const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
             const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-            // FIXED: Build traced path progressively - only add points up to current position
+            // Build traced path progressively - only add points up to current position
             const newTracedPath = [];
             const segments = 50; // Number of segments to sample for smooth path
             for (let i = 0; i <= segments; i++) {
@@ -117,7 +116,7 @@ const CrashAnimation = ({ gameState }) => {
         }
     }, [phase, multiplier]);
 
-    // FIXED: Generate SVG path from traced points
+    // Generate SVG path from traced points
     const generatePathString = () => {
         if (tracedPath.length < 2) return '';
         
@@ -132,9 +131,12 @@ const CrashAnimation = ({ gameState }) => {
     const displayMultiplier = !isNaN(finalMultiplier) ? parseFloat(finalMultiplier).toFixed(2) : "1.00";
     const multiplierColor = phase === 'CRASHED' ? '#e74c3c' : (phase === 'RUNNING' ? '#2ecc71' : 'var(--app-primary-text-light)');
 
+    // MODIFIED: Dynamically add a class to the container during the countdown to trigger the blur effect
+    const containerClassName = `crash-chart-container ${phase === 'WAITING' ? 'blur-effect-active' : ''}`;
+
     return (
-        <div className="crash-chart-container" ref={containerRef}>
-            {/* SVG Gradient Definition is now self-contained here */}
+        <div className={containerClassName} ref={containerRef}>
+            {/* SVG Gradient Definition */}
             <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
                     <linearGradient id="trail-stroke-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -149,14 +151,17 @@ const CrashAnimation = ({ gameState }) => {
             <div className="parallax-bg layer-3"></div>
             <div className="chart-grid-overlay"></div>
 
+            {/* Display countdown timer only when waiting */}
             {phase === 'WAITING' && <CircularCountdown duration={5} />}
 
-            <div className="multiplier-overlay" style={{ color: multiplierColor }}>
-                {displayMultiplier}x
-                {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
-            </div>
+            {/* Do not show multiplier during countdown */}
+            {phase !== 'WAITING' && (
+                <div className="multiplier-overlay" style={{ color: multiplierColor }}>
+                    {displayMultiplier}x
+                    {phase === 'CRASHED' && <span className="crashed-text">CRASHED!</span>}
+                </div>
+            )}
 
-            {/* FIXED: Only show the traced path behind the plane */}
             <svg className="trail-svg-container">
                 <path d={generatePathString()} className="trail-path-line" />
             </svg>
@@ -214,7 +219,7 @@ const MyBetsHistory = ({ walletAddress }) => {
     return <Table columns={columns} dataSource={history} pagination={{ pageSize: 5 }} size="small" rowKey="id" />
 };
 
-// FINAL, REVISED CRASH GAME COMPONENT
+// MAIN CRASH GAME COMPONENT (unchanged)
 const CrashGame = () => {
     const screens = useBreakpoint();
     const isMobile = !screens.md;
@@ -225,7 +230,6 @@ const CrashGame = () => {
     const [gameState, setGameState] = useState({ phase: 'CONNECTING', multiplier: 1.00, history: [], players: [] });
     const [placingBet, setPlacingBet] = useState(false);
     
-    // Auto-betting state remains
     const [betAmount, setBetAmount] = useState("10");
     const [autoCashout, setAutoCashout] = useState("2.0");
     const [isAutoBetting, setIsAutoBetting] = useState(false);
@@ -236,7 +240,6 @@ const CrashGame = () => {
         return gameState.players.find(p => p.user_wallet_address === userWalletAddress);
     }, [gameState.players, userWalletAddress]);
     
-    // Function definitions remain the same
     const sendMessage = (type, payload) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({ type, payload }));
@@ -249,7 +252,6 @@ const CrashGame = () => {
     }, [userWalletAddress, betAmount, tonConnectUI]);
     const handleCashOut = useCallback(() => sendMessage('CASH_OUT', { userWalletAddress }), [userWalletAddress]);
     
-    // useEffect hooks for WebSocket and auto-betting logic remain the same
     useEffect(() => {
         const { VITE_BACKEND_API_URL } = import.meta.env;
         if (!VITE_BACKEND_API_URL) return;
