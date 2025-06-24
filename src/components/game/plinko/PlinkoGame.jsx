@@ -1,55 +1,66 @@
 // AR_FRONTEND/src/components/game/plinko/PlinkoGame.jsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { playPlinko } from '../../../services/gameService';
+import { useTonWallet } from '@tonconnect/ui-react';
+import { playPlinko } from '../../../services/api';
 import { PLINKO_MULTIPLIERS } from '../../../utils/constants';
+import { Spin, Button, message } from 'antd';
 import './PlinkoGame.css';
 
+// Using the Matter.js script loaded in index.html
 const Matter = window.Matter;
 
-const PlinkoGame = ({ user, onGameEnd }) => {
+const PlinkoGame = ({ user, setUser, loadingUser }) => {
     const canvasRef = useRef(null);
     const engineRef = useRef(null);
-    const runnerRef = useRef(null);
     const renderRef = useRef(null);
 
     const [betAmount, setBetAmount] = useState('10');
     const [risk, setRisk] = useState('medium');
     const [rows, setRows] = useState(12);
     const [isLoading, setIsLoading] = useState(false);
-    const [gameResult, setGameResult] = useState(null);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [floatingTexts, setFloatingTexts] = useState([]);
+    
+    const wallet = useTonWallet();
 
     const getBucketColor = useCallback((multiplier) => {
-        if (multiplier < 1) return '#ef4444'; // Red for losses
-        if (multiplier < 3) return '#34d399'; // Green
-        if (multiplier < 10) return '#6366f1'; // Blue/Indigo
-        return '#a855f7'; // Purple for highest
+        if (multiplier < 1) return '#F44336'; // Red
+        if (multiplier < 3) return '#FFC107'; // Orange/Gold
+        if (multiplier < 10) return '#4CAF50'; // Green
+        if (multiplier < 100) return '#6366f1'; // Blue
+        return '#a855f7'; // Purple
     }, []);
 
     const setupScene = useCallback(() => {
-        if (!canvasRef.current) return;
+        // --- CRASH FIX ---
+        // Ensure the canvas and its parent are actually rendered before we try to use them.
+        if (!canvasRef.current || !canvasRef.current.parentElement) {
+            return;
+        }
 
-        const canvas = canvasRef.current;
-        const parent = canvas.parentElement;
+        const parent = canvasRef.current.parentElement;
         const width = parent.offsetWidth;
         const height = parent.offsetHeight;
+        
+        // If width or height are 0, it means the element is not visible yet.
+        if (width === 0 || height === 0) return;
 
-        engineRef.current = Matter.Engine.create({ gravity: { y: 1.2 } });
-        renderRef.current = Matter.Render.create({
-            element: parent,
-            engine: engineRef.current,
-            canvas: canvas,
+        const engine = Matter.Engine.create({ gravity: { y: 1.2 } });
+        const render = Matter.Render.create({
+            element: parent, engine, canvas: canvasRef.current,
             options: { width, height, wireframes: false, background: 'transparent' }
         });
-        runnerRef.current = Matter.Runner.create();
+        const runner = Matter.Runner.create();
+        
+        engineRef.current = engine;
+        renderRef.current = render;
 
-        Matter.Render.run(renderRef.current);
-        Matter.Runner.run(runnerRef.current, engineRef.current);
+        Matter.Render.run(render);
+        Matter.Runner.run(runner, engine);
 
-        const world = engineRef.current.world;
-        const pegRadius = width / (rows * 4);
+        const world = engine.world;
+        const pegRadius = width / (rows * 5);
         const spacingX = width / (rows + 1);
-        const spacingY = (height * 0.7) / (rows + 1);
+        const spacingY = (height * 0.8) / (rows + 2);
 
         for (let row = 0; row < rows; row++) {
             const numPegs = row + 1;
@@ -57,31 +68,32 @@ const PlinkoGame = ({ user, onGameEnd }) => {
             for (let col = 0; col < numPegs; col++) {
                 const x = (width - (numPegs - 1) * spacingX) / 2 + col * spacingX;
                 const peg = Matter.Bodies.circle(x, y, pegRadius, {
-                    isStatic: true, restitution: 0.6, friction: 0.1, render: { fillStyle: '#a0a8c2' }
+                    isStatic: true, restitution: 0.6, friction: 0.1, render: { fillStyle: '#A3AECF' }
                 });
                 Matter.World.add(world, peg);
             }
         }
 
         const multipliers = PLINKO_MULTIPLIERS[rows]?.[risk] || [];
-        const bucketWidth = width / (rows + 1);
+        const bucketWidth = width / multipliers.length;
         const bucketHeight = 10;
-        const bucketY = height - bucketHeight / 2 - 20;
+        const bucketY = height - bucketHeight / 2 - 10;
 
         for (let i = 0; i < multipliers.length; i++) {
             const x = (bucketWidth / 2) + i * bucketWidth;
-            const bucket = Matter.Bodies.rectangle(x, bucketY, bucketWidth * 0.95, bucketHeight, {
-                isStatic: true, render: { fillStyle: getBucketColor(multipliers[i]) }, label: `bucket-${i}`
+            const bucketColor = getBucketColor(multipliers[i]);
+            const bucket = Matter.Bodies.rectangle(x, bucketY + 5, bucketWidth, bucketHeight, {
+                isStatic: true,
+                render: { fillStyle: bucketColor, opacity: 0.5 },
+                label: `bucket-${i}`
             });
-            const separatorY = bucketY - bucketHeight * 2;
-            const separator = Matter.Bodies.rectangle(x - bucketWidth/2, separatorY, 4, bucketHeight * 4, {
-                isStatic: true, render: { fillStyle: '#4b5563' }
+            const separatorY = bucketY - bucketHeight;
+            const separator = Matter.Bodies.rectangle(x - bucketWidth/2, separatorY, 2, bucketHeight * 3, {
+                isStatic: true, render: { fillStyle: '#2D3142' }
             });
             Matter.World.add(world, [bucket, separator]);
         }
-        Matter.World.add(world, Matter.Bodies.rectangle(width - bucketWidth/2, bucketY - bucketHeight * 2, 4, bucketHeight * 4, {
-            isStatic: true, render: { fillStyle: '#4b5563' }
-        }));
+        Matter.World.add(world, Matter.Bodies.rectangle(width - bucketWidth/2, bucketY - bucketHeight, 2, bucketHeight * 3, { isStatic: true, render: { fillStyle: '#2D3142' } }));
 
         const wallOptions = { isStatic: true, render: { visible: false } };
         Matter.World.add(world, [
@@ -89,124 +101,139 @@ const PlinkoGame = ({ user, onGameEnd }) => {
             Matter.Bodies.rectangle(0, height / 2, 10, height, wallOptions),
             Matter.Bodies.rectangle(width, height / 2, 10, height, wallOptions)
         ]);
-    }, [rows, risk, getBucketColor]);
 
-    const cleanupScene = () => {
+    }, [rows, risk, getBucketColor]);
+    
+    const cleanupScene = useCallback(() => {
         if (renderRef.current) {
             Matter.Render.stop(renderRef.current);
+            // Don't remove the canvas, just clear it
             if (renderRef.current.canvas) {
-                renderRef.current.canvas.remove();
+                 const context = renderRef.current.canvas.getContext('2d');
+                 context.clearRect(0, 0, renderRef.current.canvas.width, renderRef.current.canvas.height);
             }
-            renderRef.current.textures = {};
         }
-        if (runnerRef.current) Matter.Runner.stop(runnerRef.current);
         if (engineRef.current) Matter.Engine.clear(engineRef.current);
-    };
+    }, []);
 
     useEffect(() => {
-        cleanupScene();
+        // Run setup on initial mount and when settings change
         setupScene();
-        return cleanupScene;
+        // Add a resize listener to redraw the scene if window size changes
+        window.addEventListener('resize', setupScene);
+        return () => {
+            window.removeEventListener('resize', setupScene);
+            cleanupScene();
+        };
     }, [setupScene]);
-
+    
     const handlePlay = async () => {
-        if (isLoading || !user?.wallet_address) {
-            setErrorMessage("Please connect your wallet to play.");
+        if (isLoading || !wallet?.account?.address) {
+            message.error("Please connect your wallet to play.");
             return;
         }
         setIsLoading(true);
-        setGameResult(null);
-        setErrorMessage('');
 
         try {
-            const result = await playPlinko(user.wallet_address, betAmount, risk, rows);
-            const { payout, path, bucketIndex, user: updatedUser } = result;
-
-            onGameEnd(updatedUser); // Update user balance in parent immediately
-
-            const ballRadius = canvasRef.current.offsetWidth / (rows * 4);
-            const startX = canvasRef.current.offsetWidth / 2 + (Math.random() - 0.5) * 5;
-            const ball = Matter.Bodies.circle(startX, ballRadius, ballRadius, {
-                restitution: 0.8, friction: 0.05, render: { fillStyle: '#f59e0b' }
+            const { data: result } = await playPlinko({
+                userWalletAddress: wallet.account.address,
+                betAmount, risk, rows
             });
 
-            const bucketWidth = canvasRef.current.offsetWidth / (rows + 1);
-            const targetX = (bucketWidth / 2) + bucketIndex * bucketWidth;
-            const velocityX = ((targetX - startX) / (rows * 12)) * (risk === 'high' ? 1.2 : 1);
+            // --- STATE FIX ---
+            // Use setUser from props to update the global user state
+            setUser(result.user);
+
+            const parent = canvasRef.current.parentElement;
+            const width = parent.offsetWidth;
+
+            const ballRadius = width / (rows * 5);
+            const startX = width / 2 + (Math.random() - 0.5) * 10;
+            const ball = Matter.Bodies.circle(startX, ballRadius, ballRadius, {
+                restitution: 0.8, friction: 0.05,
+                render: { fillStyle: '#FFC107' }
+            });
+
+            const multipliers = PLINKO_MULTIPLIERS[rows][risk];
+            const bucketWidth = width / multipliers.length;
+            const targetX = (bucketWidth / 2) + result.bucketIndex * bucketWidth;
+            const velocityX = ((targetX - startX) / (rows * 12)) * (risk === 'high' ? 1.2 : 1.0);
             Matter.Body.setVelocity(ball, { x: velocityX, y: 0 });
 
             Matter.World.add(engineRef.current.world, ball);
 
             setTimeout(() => {
-                setGameResult({ payout: parseFloat(payout) });
+                setFloatingTexts(texts => [...texts.slice(-5), { id: Date.now(), text: `${result.multiplier}x`, x: targetX, color: getBucketColor(result.multiplier) }]);
                 setIsLoading(false);
-                if (ball && engineRef.current) {
-                    Matter.World.remove(engineRef.current.world, ball);
+                if (ball && engineRef.current?.world) {
+                   Matter.World.remove(engineRef.current.world, ball);
                 }
-            }, 4000);
+            }, 3500);
+
         } catch (error) {
-            const message = error.message || 'Could not play game. Please try again.';
-            console.error("Plinko game failed:", message);
-            setErrorMessage(message);
+            message.error(error.response?.data?.message || "An error occurred.");
             setIsLoading(false);
         }
     };
     
+    const handleBetChange = (amount) => {
+        setBetAmount(prev => {
+            const current = parseFloat(prev) || 0;
+            const newAmount = Math.max(0, current + amount);
+            return newAmount.toString();
+        });
+    };
+
     return (
-        <div className="plinko-game-container">
-            <div className="plinko-canvas-container">
-                <canvas ref={canvasRef} className="plinko-canvas"></canvas>
-                 {gameResult && (
-                    <div key={Date.now()} className="plinko-result-popup">
-                        {gameResult.payout > 0 ? `+${gameResult.payout.toFixed(2)}` : 'Better luck!'}
-                    </div>
-                )}
-            </div>
-
-            <div className="plinko-controls">
-                <div className="plinko-control-row">
-                    <label>Bet Amount (ARIX)</label>
-                    <input
-                        type="number"
-                        className="plinko-bet-input"
-                        value={betAmount}
-                        onChange={(e) => setBetAmount(e.target.value)}
-                        placeholder="0.00"
-                        disabled={isLoading}
-                    />
+        <div className="plinko-game-page">
+            <header className="plinko-header">
+                <div className="plinko-balance">
+                    {loadingUser ? <Spin size="small" /> : `${parseFloat(user?.balance || 0).toFixed(2)} ARIX`}
                 </div>
+            </header>
+            
+            <main className="plinko-game-container">
+                <div className="plinko-canvas-container">
+                    <canvas ref={canvasRef} />
+                    {floatingTexts.map(ft => (
+                        <div key={ft.id} className="multiplier-popup" style={{ left: `${ft.x}px`, color: ft.color, position: 'absolute', top: '50%' }}>
+                            {ft.text}
+                        </div>
+                    ))}
+                </div>
+            </main>
 
-                <div className="plinko-control-row">
-                    <label>Risk</label>
-                    <div className="plinko-toggle-group">
+            <footer className="plinko-controls-panel">
+                <div className="control-group">
+                    <div className="control-label">Risk</div>
+                    <div className="segmented-control">
                         {['low', 'medium', 'high'].map(r => (
-                            <button key={r} className={`plinko-toggle-button ${risk === r ? 'active' : ''}`} onClick={() => !isLoading && setRisk(r)} disabled={isLoading}>
-                                {r}
-                            </button>
+                            <button key={r} className={`segmented-button ${risk === r ? 'active' : ''}`} onClick={() => !isLoading && setRisk(r)} disabled={isLoading}>{r}</button>
                         ))}
                     </div>
                 </div>
-
-                <div className="plinko-control-row">
-                    <label>Rows</label>
-                    <div className="plinko-toggle-group">
+                 <div className="control-group">
+                    <div className="control-label">Rows</div>
+                    <div className="segmented-control">
                         {[8, 10, 12, 14, 16].map(r => (
-                            <button key={r} className={`plinko-toggle-button ${rows === r ? 'active' : ''}`} onClick={() => !isLoading && setRows(r)} disabled={isLoading}>
-                                {r}
-                            </button>
+                            <button key={r} className={`segmented-button ${rows === r ? 'active' : ''}`} onClick={() => !isLoading && setRows(r)} disabled={isLoading}>{r}</button>
                         ))}
                     </div>
                 </div>
-                
-                <div className="plinko-error-message">{errorMessage}</div>
-
-                <button className="play-plinko-button" onClick={handlePlay} disabled={isLoading}>
-                    {isLoading ? 'Dropping...' : 'Play'}
-                </button>
-            </div>
+                <div className="control-group">
+                    <div className="control-label">Bet Amount</div>
+                    <div className="bet-amount-control">
+                        <button className="bet-adjust-button minus" onClick={() => !isLoading && handleBetChange(-10)} disabled={isLoading}>-</button>
+                        <input className="bet-amount-input" type="number" value={betAmount} onChange={(e) => !isLoading && setBetAmount(e.target.value)} disabled={isLoading} />
+                        <button className="bet-adjust-button" onClick={() => !isLoading && handleBetChange(10)} disabled={isLoading}>+</button>
+                    </div>
+                </div>
+                <Button className="play-button" onClick={handlePlay} disabled={isLoading || loadingUser} loading={isLoading}>
+                    Play
+                </Button>
+            </footer>
         </div>
     );
 };
 
 export default PlinkoGame;
-
