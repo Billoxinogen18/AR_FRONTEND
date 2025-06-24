@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { List, Card, Button, Typography, Spin, message, Modal, Input, Empty, Tag, Tooltip, Row, Col, Grid, Alert } from 'antd';
-import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LinkOutlined, SendOutlined, RedoOutlined, WalletOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import { List, Card, Button, Typography, Spin, message, Modal, Input, Empty, Tag, Tooltip, Row, Col, Grid, Alert, Form } from 'antd';
+import { CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined, LinkOutlined, SendOutlined, RedoOutlined, ArrowDownOutlined, ArrowUpOutlined, CopyOutlined, CloseOutlined } from '@ant-design/icons';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
-import { getActiveTasks, submitTaskCompletion, getUserTaskHistory, getUserProfile } from '../services/api';
+import { getActiveTasks, submitTaskCompletion, getUserTaskHistory, getUserProfile, withdrawArix } from '../services/api';
 import { ARIX_DECIMALS } from '../utils/tonUtils';
 import { useNavigate } from 'react-router-dom';
 import './TaskPage.css';
@@ -11,39 +11,65 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
+// --- REUSABLE MODAL COMPONENTS ---
+const ArixPushIcon = () => (
+    <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = '/img/fallback-icon.png'; }} />
+);
+
+const HOT_WALLET_ADDRESS = import.meta.env.VITE_HOT_WALLET_ADDRESS;
+
+const copyToClipboard = (textToCopy, successMessage = 'Copied to clipboard!') => {
+    if (!textToCopy) {
+        message.error('Nothing to copy.');
+        return;
+    }
+    navigator.clipboard.writeText(textToCopy)
+        .then(() => message.success(successMessage))
+        .catch(err => {
+            console.error('Failed to copy: ', err);
+            message.error('Failed to copy.');
+        });
+};
+
 const TaskPage = () => {
     const [tasks, setTasks] = useState([]);
     const [userTaskHistory, setUserTaskHistory] = useState([]);
     const [loadingTasks, setLoadingTasks] = useState(true);
     const [loadingHistory, setLoadingHistory] = useState(false);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isSubmissionModalVisible, setIsSubmissionModalVisible] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [submissionInput, setSubmissionInput] = useState('');
     const [submitLoading, setSubmitLoading] = useState(false);
 
-    const [claimableArix, setClaimableArix] = useState('0');
-    const [loadingBalance, setLoadingBalance] = useState(false);
+    // --- STATE FOR TOP UP / CASHOUT ---
+    const [profile, setProfile] = useState(null);
+    const [showTopUpModal, setShowTopUpModal] = useState(false);
+    const [showCashoutModal, setShowCashoutModal] = useState(false);
+    const [cashoutForm] = Form.useForm();
+    const [cashoutLoading, setCashoutLoading] = useState(false);
 
     const userFriendlyAddress = useTonAddress();
     const rawAddress = useTonAddress(false);
     const [tonConnectUI] = useTonConnectUI();
     const navigate = useNavigate();
     const screens = useBreakpoint();
-    const isMobile = !screens.md; // Consider using this for responsive adjustments
+    const isMobile = !screens.md;
 
-    const fetchUserArixBalance = useCallback(async () => {
+    // --- FETCH USER DATA ---
+    const fetchUserData = useCallback(async () => {
         if (rawAddress) {
-            setLoadingBalance(true);
+            setLoadingTasks(true);
             try {
                 const profileRes = await getUserProfile(rawAddress);
-                setClaimableArix(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
+                setProfile(profileRes.data);
             } catch (error) {
-                // console.error("Error fetching ARIX balance for Task Page:", error);
+                console.error("Error fetching user data for Task Page:", error);
+                message.error("Could not load user data.");
             } finally {
-                setLoadingBalance(false);
+                setLoadingTasks(false);
             }
         } else {
-            setClaimableArix('0');
+            setProfile(null);
         }
     }, [rawAddress]);
 
@@ -77,17 +103,17 @@ const TaskPage = () => {
 
     useEffect(() => {
         fetchTasks();
-        fetchUserArixBalance();
+        fetchUserData();
         if (userFriendlyAddress) {
             fetchUserHistory();
         } else {
             setUserTaskHistory([]);
         }
-    }, [userFriendlyAddress, fetchTasks, fetchUserHistory, fetchUserArixBalance]);
+    }, [userFriendlyAddress, fetchTasks, fetchUserHistory, fetchUserData]);
 
     const handleRefreshAll = () => {
         fetchTasks();
-        fetchUserArixBalance();
+        fetchUserData();
         if (userFriendlyAddress) {
             fetchUserHistory();
         } else {
@@ -103,14 +129,14 @@ const TaskPage = () => {
         }
         setSelectedTask(task);
         if (task.validation_type === 'link_submission' || task.validation_type === 'text_submission') {
-            setIsModalVisible(true);
+            setIsSubmissionModalVisible(true);
         } else if (task.validation_type === 'auto_approve') {
             handleModalSubmit();
         } else if (task.action_url) {
             window.open(task.action_url, '_blank');
-            setIsModalVisible(true);
+            setIsSubmissionModalVisible(true);
         } else {
-             setIsModalVisible(true);
+             setIsSubmissionModalVisible(true);
         }
     };
 
@@ -139,16 +165,41 @@ const TaskPage = () => {
                 submissionData: Object.keys(submissionPayload).length > 0 ? submissionPayload : null,
             });
             message.success({ content: response.data.message || 'Task submitted successfully!', key: loadingMessageKey, duration: 4 });
-            setIsModalVisible(false);
+            setIsSubmissionModalVisible(false);
             setSubmissionInput('');
             setSelectedTask(null);
             fetchTasks();
             fetchUserHistory();
-            fetchUserArixBalance();
+            fetchUserData();
         } catch (error) {
             message.error({ content: error?.response?.data?.message || 'Task submission failed.', key: loadingMessageKey, duration: 4 });
         } finally {
             setSubmitLoading(false);
+        }
+    };
+
+    // --- CASHOUT HANDLER ---
+    const handleCashout = async (values) => {
+        const { amount } = values;
+        if (parseFloat(amount) > parseFloat(profile?.balance || 0)) {
+            message.error("Withdrawal amount cannot exceed your balance.");
+            return;
+        }
+        setCashoutLoading(true);
+        try {
+            await withdrawArix({
+                userWalletAddress: rawAddress,
+                amount: parseFloat(amount),
+                recipientAddress: userFriendlyAddress
+            });
+            message.success('Withdrawal initiated successfully!');
+            await fetchUserData();
+            setShowCashoutModal(false);
+            cashoutForm.resetFields();
+        } catch (error) {
+            message.error(error.response?.data?.error || "An error occurred during withdrawal.");
+        } finally {
+            setCashoutLoading(false);
         }
     };
 
@@ -248,6 +299,7 @@ const TaskPage = () => {
 
     return (
         <div className="task-page-container">
+            {/* HEADER SECTION */}
             <div className="page-header-section">
                 <div className="balance-display-box">
                     <div className="balance-amount-line">
@@ -255,14 +307,14 @@ const TaskPage = () => {
                             <span className="balance-icon-representation">♢</span>
                         </div>
                         <Text className="balance-amount-value">
-                            {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin"/> : claimableArix}
+                            {loadingTasks ? <Spin size="small"/> : parseFloat(profile?.balance || 0).toFixed(2)}
                         </Text>
                     </div>
-                    <Text className="balance-currency-label">ARIX</Text>
+                    <Text className="balance-currency-label">ARIX In-App Balance</Text>
                 </div>
                 <div className="topup-cashout-buttons">
-                    <Button icon={<ArrowDownOutlined />} onClick={() => message.info("Top up ARIX (Coming Soon)")}>Top up</Button>
-                    <Button icon={<ArrowUpOutlined />} onClick={() => message.info("Cash out ARIX (Coming Soon)")}>Cashout</Button>
+                    <Button icon={<ArrowDownOutlined />} onClick={() => setShowTopUpModal(true)}>Top up</Button>
+                    <Button icon={<ArrowUpOutlined />} onClick={() => setShowCashoutModal(true)}>Cashout</Button>
                 </div>
                 <div className="page-banner" onClick={() => navigate('/game')}>
                     <Text className="page-banner-text">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
@@ -319,11 +371,12 @@ const TaskPage = () => {
                 </div>
             )}
 
+            {/* TASK SUBMISSION MODAL */}
             <Modal
                 title={<Text className="task-modal-title">Submit Task: {selectedTask?.title}</Text>}
-                open={isModalVisible}
+                open={isSubmissionModalVisible}
                 onOk={handleModalSubmit}
-                onCancel={() => { setIsModalVisible(false); setSubmissionInput(''); setSelectedTask(null); }}
+                onCancel={() => { setIsSubmissionModalVisible(false); setSubmissionInput(''); setSelectedTask(null); }}
                 confirmLoading={submitLoading}
                 okText="Submit"
                 destroyOnClose
@@ -362,6 +415,130 @@ const TaskPage = () => {
                         )}
                     </>
                 )}
+            </Modal>
+
+            {/* TOP UP MODAL */}
+            <Modal 
+                open={showTopUpModal} 
+                onCancel={() => setShowTopUpModal(false)} 
+                footer={null} 
+                className="push-topup-modal" 
+                centered
+            >
+                <div className="push-topup-content">
+                    <Button 
+                        shape="circle" 
+                        icon={<CloseOutlined />} 
+                        className="close-topup-button" 
+                        onClick={() => setShowTopUpModal(false)} 
+                    />
+                    <div className="topup-modal-header">
+                        <ArixPushIcon />
+                        <Text className="topup-modal-title">Top Up Balance</Text>
+                    </div>
+                    <Alert message="Send only ARIX to this address" type="warning" showIcon />
+                    <Paragraph className="address-label" style={{marginTop: '16px'}}>
+                        1. DEPOSIT ADDRESS
+                    </Paragraph>
+                    <div className="address-display-box">
+                        <Text 
+                            className="deposit-address-text" 
+                            ellipsis={{ tooltip: HOT_WALLET_ADDRESS }}
+                        >
+                            {HOT_WALLET_ADDRESS}
+                        </Text>
+                        <Button 
+                            icon={<CopyOutlined />} 
+                            onClick={() => copyToClipboard(HOT_WALLET_ADDRESS)} 
+                        />
+                    </div>
+                    <Paragraph className="address-label" style={{ marginTop: '16px' }}>
+                        2. REQUIRED MEMO / COMMENT
+                    </Paragraph>
+                    <Alert 
+                        message="YOUR WALLET ADDRESS IS THE MEMO" 
+                        description="You MUST put your personal wallet address in the transaction's memo/comment field to be credited." 
+                        type="error" 
+                        showIcon 
+                    />
+                    <div className="address-display-box">
+                        <Text 
+                            className="deposit-address-text" 
+                            ellipsis={{ tooltip: userFriendlyAddress }}
+                        >
+                            {userFriendlyAddress || "Connect wallet to see your address"}
+                        </Text>
+                        <Button 
+                            icon={<CopyOutlined />} 
+                            onClick={() => copyToClipboard(userFriendlyAddress)} 
+                        />
+                    </div>
+                </div>
+            </Modal>
+
+            {/* CASHOUT MODAL */}
+            <Modal 
+                open={showCashoutModal} 
+                onCancel={() => setShowCashoutModal(false)} 
+                footer={null} 
+                className="push-cashout-modal" 
+                centered
+            >
+                <div className="push-cashout-content">
+                    <Button 
+                        shape="circle" 
+                        icon={<CloseOutlined />} 
+                        className="close-cashout-button" 
+                        onClick={() => setShowCashoutModal(false)} 
+                    />
+                    <div className="cashout-modal-header">
+                        <ArixPushIcon />
+                        <Text className="cashout-modal-title">Cashout Balance</Text>
+                    </div>
+                    <div className='cashout-balance-info'>
+                        <Text>Available to withdraw:</Text>
+                        <Text strong>
+                            {loadingTasks ? <Spin size="small" /> : `${parseFloat(profile?.balance || 0).toFixed(2)} ARIX`}
+                        </Text>
+                    </div>
+                    <Form 
+                        form={cashoutForm} 
+                        onFinish={handleCashout} 
+                        layout="vertical" 
+                        disabled={cashoutLoading}
+                    >
+                        <Form.Item 
+                            name="amount" 
+                            label="Amount to Withdraw" 
+                            rules={[
+                                { required: true, message: 'Please input an amount!' }, 
+                                { 
+                                    validator: (_, value) => 
+                                        (!value || parseFloat(value) <= 0) ? 
+                                        Promise.reject(new Error('Amount must be positive')) : 
+                                        (profile && parseFloat(value) > parseFloat(profile.balance)) ? 
+                                        Promise.reject(new Error('Amount exceeds balance')) : 
+                                        Promise.resolve() 
+                                }
+                            ]}
+                        >
+                            <Input type="number" placeholder="e.g., 100" />
+                        </Form.Item>
+                        <Form.Item label="Withdrawal Address">
+                            <Input value={userFriendlyAddress} disabled />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button 
+                                type="primary" 
+                                htmlType="submit" 
+                                block 
+                                loading={cashoutLoading}
+                            >
+                                Withdraw ARIX
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </div>
             </Modal>
         </div>
     );

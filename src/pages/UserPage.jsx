@@ -1,81 +1,99 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Tabs, message, Spin, Button, Grid, Card, Modal, Alert, Empty, Select, Divider, Row, Col, Descriptions, List, Tooltip, Radio, Statistic as AntdStatistic } from 'antd';
+import {
+    Typography, Tabs, message, Spin, Button, Grid, Card, Modal, Alert, Empty, Select,
+    Divider, Row, Col, Descriptions, List, Tooltip, Radio, Statistic as AntdStatistic, Form, Input
+} from 'antd';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { useNavigate } from 'react-router-dom';
 import {
     UserOutlined, WalletOutlined, LinkOutlined, HistoryOutlined, ExperimentOutlined, RedoOutlined,
     ArrowDownOutlined, ArrowUpOutlined, CopyOutlined, ShareAltOutlined, UsergroupAddOutlined,
     DollarCircleOutlined, RiseOutlined, SettingOutlined, GlobalOutlined, SoundOutlined,
-    TeamOutlined, InfoCircleOutlined, LogoutOutlined, PaperClipOutlined, SendOutlined as InviteIcon, UserSwitchOutlined
+    TeamOutlined, InfoCircleOutlined, LogoutOutlined, PaperClipOutlined, SendOutlined as InviteIcon,
+    UserSwitchOutlined, CloseOutlined
 } from '@ant-design/icons';
 
 import UserProfileCard from '../components/user/UserProfileCard';
 import TransactionList, { renderStakeHistoryItem, renderCoinflipHistoryItem } from '../components/user/TransactionList';
 import {
     getUserProfile, getUserStakesAndRewards, getCoinflipHistoryForUser, getUserReferralData,
-    getReferralProgramDetails, initiateArixUnstake, confirmArixUnstake
+    getReferralProgramDetails, initiateArixUnstake, confirmArixUnstake, withdrawArix
 } from '../services/api';
 import { getArxUsdtPriceFromBackend } from '../services/priceServiceFrontend';
 import { toNano, Cell } from '@ton/core';
 import { waitForTransactionConfirmation, REFERRAL_LINK_BASE, USDT_DECIMALS, ARIX_DECIMALS } from '../utils/tonUtils';
-import './UserPage.css'; // Ensure this is imported
+import './UserPage.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 
+// --- REUSABLE COMPONENTS & UTILITIES ---
+
+const ArixPushIcon = () => (
+    <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = '/img/fallback-icon.png'; }} />
+);
+
+const HOT_WALLET_ADDRESS = import.meta.env.VITE_HOT_WALLET_ADDRESS;
+
+const copyToClipboard = (textToCopy, successMessage = 'Copied to clipboard!') => {
+    if (!textToCopy) {
+        message.error('Nothing to copy.');
+        return;
+    }
+    navigator.clipboard.writeText(textToCopy)
+        .then(() => message.success(successMessage))
+        .catch(err => {
+            console.error('Failed to copy: ', err);
+            message.error('Failed to copy.');
+        });
+};
+
+
 const UserPage = () => {
+    // --- STATE MANAGEMENT ---
     const userFriendlyAddress = useTonAddress();
     const rawAddress = useTonAddress(false);
     const [tonConnectUI] = useTonConnectUI();
     const navigate = useNavigate();
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
 
+    // Data State
     const [userProfile, setUserProfile] = useState(null);
-    const [referralData, setReferralData] = useState(null); // Merged from ReferralPage
-    const [programDetails, setProgramDetails] = useState({ message: '', plans: [] }); // Merged
+    const [referralData, setReferralData] = useState(null);
+    const [programDetails, setProgramDetails] = useState({ message: '', plans: [] });
     const [stakesAndRewards, setStakesAndRewards] = useState({ stakes: [], totalClaimableUsdt: '0.00', totalClaimableArix: '0.00' });
     const [coinflipHistory, setCoinflipHistory] = useState([]);
+    const [currentArxPrice, setCurrentArxPrice] = useState(null);
 
+    // Loading State
     const [loadingProfile, setLoadingProfile] = useState(true);
-    const [loadingReferral, setLoadingReferral] = useState(true); // Was loadingData
-    const [loadingProgramDetails, setLoadingProgramDetails] = useState(true); // Was loadingDetails
+    const [loadingReferral, setLoadingReferral] = useState(true);
+    const [loadingProgramDetails, setLoadingProgramDetails] = useState(true);
     const [loadingStakes, setLoadingStakes] = useState(true);
     const [loadingGames, setLoadingGames] = useState(true);
 
+    // UI/Interaction State
     const [activeTabKey, setActiveTabKey] = useState('referral_stats');
-    const [currentArxPrice, setCurrentArxPrice] = useState(null);
-    const [claimableArixPageBalance, setClaimableArixPageBalance] = useState('0'); // For page header
-    const [loadingArixPageBalance, setLoadingArixPageBalance] = useState(false); // For page header
+    const [language, setLanguage] = useState('en');
+    const [colorTheme, setColorTheme] = useState('terminal');
+    const [sound, setSound] = useState('on');
 
+    // Unstake Modal State
     const [isUnstakeModalVisible, setIsUnstakeModalVisible] = useState(false);
     const [selectedStakeForUnstake, setSelectedStakeForUnstake] = useState(null);
     const [unstakePrepDetails, setUnstakePrepDetails] = useState(null);
     const [isUnstakeActionLoading, setIsUnstakeActionLoading] = useState(false);
     const [stakeToSelectForUnstakeId, setStakeToSelectForUnstakeId] = useState(undefined);
 
-    const [language, setLanguage] = useState('en');
-    const [colorTheme, setColorTheme] = useState('terminal');
-    const [sound, setSound] = useState('on');
+    // TopUp/Cashout Modal State
+    const [showTopUpModal, setShowTopUpModal] = useState(false);
+    const [showCashoutModal, setShowCashoutModal] = useState(false);
+    const [cashoutForm] = Form.useForm();
+    const [cashoutLoading, setCashoutLoading] = useState(false);
 
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
-
-    const fetchPageArixBalance = useCallback(async () => {
-         if (rawAddress) {
-            setLoadingArixPageBalance(true);
-            try {
-                const profileRes = await getUserProfile(rawAddress);
-                setClaimableArixPageBalance(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
-            } catch (error) {
-                // console.error("Error fetching ARIX balance for User Page header:", error);
-            } finally {
-                setLoadingArixPageBalance(false);
-            }
-        } else {
-            setClaimableArixPageBalance('0');
-        }
-    },[rawAddress]);
-
+    // --- DATA FETCHING ---
     const fetchAllUserData = useCallback(async (showMessages = false) => {
         if (!rawAddress) {
             setUserProfile(null); setReferralData(null); setProgramDetails({ message: '', plans: [] });
@@ -100,8 +118,8 @@ const UserPage = () => {
                 username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username,
                 referrer: refCodeFromUrl
             });
-            const referralPromise = getUserReferralData(rawAddress); // from ReferralPage
-            const programDetailsPromise = getReferralProgramDetails(); // from ReferralPage
+            const referralPromise = getUserReferralData(rawAddress);
+            const programDetailsPromise = getReferralProgramDetails();
             const stakesPromise = getUserStakesAndRewards(rawAddress);
             const gamesPromise = getCoinflipHistoryForUser(rawAddress);
             const pricePromise = getArxUsdtPriceFromBackend();
@@ -135,22 +153,35 @@ const UserPage = () => {
 
     useEffect(() => {
         fetchAllUserData();
-        fetchPageArixBalance();
-    }, [fetchAllUserData, fetchPageArixBalance]);
+    }, [fetchAllUserData]);
 
     const handleRefreshAllData = () => {
         fetchAllUserData(true);
-        fetchPageArixBalance();
     };
 
-    const copyReferralLinkToClipboard = (textToCopy, successMessage = 'Referral link copied!') => {
-        if (!textToCopy) {
-            message.error('Nothing to copy.');
+    // --- EVENT HANDLERS ---
+    const handleCashout = async (values) => {
+        const { amount } = values;
+        if (parseFloat(amount) > parseFloat(userProfile?.balance || 0)) {
+            message.error("Withdrawal amount cannot exceed your balance.");
             return;
         }
-        navigator.clipboard.writeText(textToCopy)
-            .then(() => message.success(successMessage))
-            .catch(err => message.error('Failed to copy.'));
+        setCashoutLoading(true);
+        try {
+            await withdrawArix({
+                userWalletAddress: rawAddress,
+                amount: parseFloat(amount),
+                recipientAddress: userFriendlyAddress // The API sends it back to the connected wallet
+            });
+            message.success('Withdrawal initiated successfully!');
+            await fetchAllUserData(true); // Refresh all data
+            setShowCashoutModal(false);
+            cashoutForm.resetFields();
+        } catch (error) {
+            message.error(error.response?.data?.error || "An error occurred during withdrawal.");
+        } finally {
+            setCashoutLoading(false);
+        }
     };
 
     const shareUserReferralLink = () => {
@@ -164,16 +195,15 @@ const UserPage = () => {
                 title: 'Join ARIX Terminal!',
                 text: `Join me on ARIX Terminal to stake ARIX, earn USDT rewards, and play games! Use my referral link: ${linkToShare}`,
                 url: linkToShare,
-            }).catch(() => copyReferralLinkToClipboard(linkToShare, 'Link copied for manual sharing.'));
+            }).catch(() => copyToClipboard(linkToShare, 'Link copied for manual sharing.'));
         } else {
-            copyReferralLinkToClipboard(linkToShare, 'Referral link copied! Share it with your friends.');
+            copyToClipboard(linkToShare, 'Referral link copied! Share it with your friends.');
         }
     };
 
-    const referralLinkToDisplay = referralData?.referralLink || (referralData?.referralCode ? `${REFERRAL_LINK_BASE}?ref=${referralData.referralCode}` : (rawAddress ? `${REFERRAL_LINK_BASE}?ref=${rawAddress}` : ''));
-    const referralCodeForBoxes = (referralData?.referralCode || rawAddress || "--------").slice(-8).toUpperCase();
-
     const handleTabChange = (key) => setActiveTabKey(key);
+    
+    // --- UNSTAKE LOGIC ---
     const activeUserStakes = stakesAndRewards.stakes.filter(s => s.status === 'active');
 
     const initiateUnstakeProcessFromCardOrList = (stakeToUnstake = null) => {
@@ -226,7 +256,7 @@ const UserPage = () => {
             await confirmArixUnstake({ userWalletAddress: rawAddress, stakeId: selectedStakeForUnstake.id, unstakeTransactionBoc: result.boc, unstakeTransactionHash: txHash });
             message.success({ content: "ARIX unstake submitted!", key: 'confirmUnstakeUser', duration: 7 });
             setIsUnstakeModalVisible(false); setSelectedStakeForUnstake(null); setUnstakePrepDetails(null); setStakeToSelectForUnstakeId(undefined);
-            fetchAllUserData(false); fetchPageArixBalance();
+            fetchAllUserData(false);
         } catch (err) {
             message.error({ content: err?.response?.data?.message || err?.message || 'ARIX unstake failed.', key: 'confirmUnstakeUser', duration: 6 });
         } finally {
@@ -234,24 +264,25 @@ const UserPage = () => {
         }
     };
 
-    const combinedLoadingOverall = loadingProfile || loadingReferral || loadingProgramDetails || loadingStakes || loadingGames || loadingArixPageBalance;
-
+    // --- RENDER LOGIC ---
+    const combinedLoadingOverall = loadingProfile || loadingReferral || loadingProgramDetails || loadingStakes || loadingGames;
+    
     if (!userFriendlyAddress && !combinedLoadingOverall) {
         return (
             <div className="user-page-container">
                 <div className="page-header-section">
-                    <div className="balance-display-box">
+                     <div className="balance-display-box">
                         <div className="balance-amount-line">
                             <div className="balance-icon-wrapper"><span className="balance-icon-representation">♢</span></div>
                             <Text className="balance-amount-value"><Spin size="small" wrapperClassName="balance-spin"/></Text>
                         </div>
-                        <Text className="balance-currency-label">ARIX</Text>
+                        <Text className="balance-currency-label">ARIX In-App Balance</Text>
                     </div>
                      <div className="topup-cashout-buttons">
                         <Button icon={<ArrowDownOutlined />} disabled>Top up</Button>
                         <Button icon={<ArrowUpOutlined />} disabled>Cashout</Button>
                     </div>
-                    <div className="page-banner">
+                    <div className="page-banner" onClick={() => navigate('/game')}>
                         <Text className="page-banner-text">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
                     </div>
                 </div>
@@ -268,6 +299,9 @@ const UserPage = () => {
             </div>
         );
     }
+    
+    const referralLinkToDisplay = referralData?.referralLink || (referralData?.referralCode ? `${REFERRAL_LINK_BASE}?ref=${referralData.referralCode}` : (rawAddress ? `${REFERRAL_LINK_BASE}?ref=${rawAddress}` : ''));
+    const referralCodeForBoxes = (referralData?.referralCode || rawAddress || "--------").slice(-8).toUpperCase();
 
     const tabItems = [
         {
@@ -337,25 +371,27 @@ const UserPage = () => {
     return (
         <Spin spinning={combinedLoadingOverall && !userFriendlyAddress} tip="Loading user data...">
             <div className="user-page-container">
+                {/* --- HEADER --- */}
                 <div className="page-header-section">
                     <div className="balance-display-box">
                         <div className="balance-amount-line">
                             <div className="balance-icon-wrapper"><span className="balance-icon-representation">♢</span></div>
                             <Text className="balance-amount-value">
-                                {loadingArixPageBalance ? <Spin size="small" wrapperClassName="balance-spin"/> : claimableArixPageBalance}
+                                {loadingProfile ? <Spin size="small"/> : parseFloat(userProfile?.balance || 0).toFixed(2)}
                             </Text>
                         </div>
-                        <Text className="balance-currency-label">ARIX</Text>
+                        <Text className="balance-currency-label">ARIX In-App Balance</Text>
                     </div>
                     <div className="topup-cashout-buttons">
-                        <Button icon={<ArrowDownOutlined />} onClick={() => message.info("Top up ARIX (Coming Soon)")}>Top up</Button>
-                        <Button icon={<ArrowUpOutlined />} onClick={() => message.info("Cash out ARIX (Coming Soon)")}>Cashout</Button>
+                        <Button icon={<ArrowDownOutlined />} onClick={() => setShowTopUpModal(true)}>Top up</Button>
+                        <Button icon={<ArrowUpOutlined />} onClick={() => setShowCashoutModal(true)}>Cashout</Button>
                     </div>
                     <div className="page-banner" onClick={() => navigate('/game')}>
                         <Text className="page-banner-text">X2 or maybe x256? Play Coinflip and try your luck! →</Text>
                     </div>
                 </div>
 
+                {/* --- REFERRAL SECTION --- */}
                 <div className="referral-link-section">
                     <Title level={5} className="referral-section-title">Your Unique Referral Link</Title>
                     <div className="referral-code-boxes">
@@ -363,18 +399,9 @@ const UserPage = () => {
                             <div key={index} className="referral-code-box">{char}</div>
                         ))}
                     </div>
-                     <Paragraph className="referral-link-display" style={{ textAlign: 'center', width: '100%', maxWidth: 'calc(100% - 32px)', wordBreak: 'break-all', marginBottom: 12}}>
+                     <Paragraph className="referral-link-display">
                         <Text
                             className="referral-link-text"
-                            style={{
-                                background: 'var(--app-bg-dark-container)',
-                                padding: '8px 12px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--app-border-color)',
-                                display: 'inline-block',
-                                color: 'var(--app-primary-text-light)',
-                                opacity: referralLinkToDisplay ? 1 : 0.5
-                            }}
                             copyable={referralLinkToDisplay ? { text: referralLinkToDisplay, tooltips: ['Copy Link', 'Copied!'], icon: <CopyOutlined style={{ marginLeft: 8 }} /> } : false}
                         >
                             {referralLinkToDisplay || 'Connect wallet for link'}
@@ -384,7 +411,7 @@ const UserPage = () => {
                         <Tooltip title="Copy Full Referral Code">
                             <Button
                                 icon={<PaperClipOutlined />}
-                                onClick={() => copyReferralLinkToClipboard(referralData?.referralCode || rawAddress, "Referral code copied!")}
+                                onClick={() => copyToClipboard(referralData?.referralCode || rawAddress, "Referral code copied!")}
                                 className="referral-copy-button"
                                 disabled={!(referralData?.referralCode || rawAddress)}
                             />
@@ -406,7 +433,8 @@ const UserPage = () => {
                         </Button>
                     </div>
                 </div>
-
+                
+                {/* --- SETTINGS SECTION --- */}
                 <div className="settings-section-wrapper">
                     <div className="settings-section">
                         <Title level={5} className="settings-section-title">Language</Title>
@@ -434,18 +462,24 @@ const UserPage = () => {
 
                 <Button icon={<RedoOutlined />} onClick={handleRefreshAllData} loading={combinedLoadingOverall} block style={{marginTop: 0}}>Refresh All Data</Button>
 
+                {/* --- PROFILE CARD --- */}
                 <UserProfileCard
                     userProfileData={userProfile}
                     activeStakes={activeUserStakes}
                     currentArxPrice={currentArxPrice}
-                    onRefreshAllData={fetchAllUserData} // Pass the main refresh
-                    isDataLoading={loadingProfile || loadingStakes} // Pass relevant loading states
+                    onRefreshAllData={fetchAllUserData}
+                    isDataLoading={loadingProfile || loadingStakes}
                     onInitiateUnstakeProcess={initiateUnstakeProcessFromCardOrList}
                 />
 
                 <Divider className="user-page-divider"><Text className="divider-text">ACTIVITY & REFERRAL DETAILS</Text></Divider>
+                
+                {/* --- TABS --- */}
                 <Tabs activeKey={activeTabKey} items={tabItems} onChange={handleTabChange} centered className="dark-theme-tabs user-history-tabs" size={isMobile ? 'small' : 'middle'}/>
 
+                {/* --- MODALS --- */}
+
+                {/* Unstake Modal */}
                 <Modal
                     title={<Text className="modal-title-text">{selectedStakeForUnstake && unstakePrepDetails ? 'Confirm ARIX Unstake' : 'Select Stake to Unstake'}</Text>}
                     open={isUnstakeModalVisible}
@@ -481,6 +515,67 @@ const UserPage = () => {
                         <div style={{textAlign: 'center', padding: '20px'}}><Spin tip="Loading unstake details..."/></div>
                     ) : null}
                 </Modal>
+                
+                {/* Top Up Modal */}
+                <Modal open={showTopUpModal} onCancel={() => setShowTopUpModal(false)} footer={null} className="push-topup-modal" centered>
+                    <div className="push-topup-content">
+                        <Button shape="circle" icon={<CloseOutlined />} className="close-push-modal-button" onClick={() => setShowTopUpModal(false)} />
+                        <div className="push-modal-header"><ArixPushIcon /><Text className="push-modal-title">Top Up Balance</Text></div>
+                        <Alert message="Send only ARIX to this address" type="warning" showIcon />
+                        <Paragraph className="address-label" style={{marginTop: '16px'}}>1. DEPOSIT ADDRESS</Paragraph>
+                        <div className="address-display-box">
+                            <Text className="deposit-address-text" ellipsis={{ tooltip: HOT_WALLET_ADDRESS }}>{HOT_WALLET_ADDRESS}</Text>
+                            <Button icon={<CopyOutlined />} onClick={() => copyToClipboard(HOT_WALLET_ADDRESS)} />
+                        </div>
+                        <Paragraph className="address-label" style={{ marginTop: '16px' }}>2. REQUIRED MEMO / COMMENT</Paragraph>
+                        <Alert message="YOUR WALLET ADDRESS IS THE MEMO" description="You MUST put your personal wallet address in the transaction's memo/comment field to be credited." type="error" showIcon />
+                        <div className="address-display-box">
+                            <Text className="deposit-address-text" ellipsis={{ tooltip: userFriendlyAddress }}>{userFriendlyAddress || "Connect wallet to see your address"}</Text>
+                            <Button icon={<CopyOutlined />} onClick={() => copyToClipboard(userFriendlyAddress)} />
+                        </div>
+                    </div>
+                </Modal>
+
+                {/* Cashout Modal */}
+                <Modal open={showCashoutModal} onCancel={() => setShowCashoutModal(false)} footer={null} className="push-cashout-modal" centered>
+                    <div className="push-cashout-content">
+                        <Button shape="circle" icon={<CloseOutlined />} className="close-push-modal-button" onClick={() => setShowCashoutModal(false)} />
+                        <div className="push-modal-header"><ArixPushIcon /><Text className="push-modal-title">Cashout Balance</Text></div>
+                        <div className='cashout-balance-info'>
+                            <Text>Available to withdraw:</Text>
+                            <Text strong>{loadingProfile ? <Spin size="small" /> : `${parseFloat(userProfile?.balance || 0).toFixed(2)} ARIX`}</Text>
+                        </div>
+                        <Form form={cashoutForm} onFinish={handleCashout} layout="vertical" disabled={cashoutLoading}>
+                            <Form.Item 
+                                name="amount" 
+                                label="Amount to Withdraw" 
+                                rules={[
+                                    { required: true, message: 'Please input an amount!' },
+                                    { 
+                                        validator: (_, value) => {
+                                            if (!value || parseFloat(value) <= 0) {
+                                                return Promise.reject(new Error('Amount must be positive'));
+                                            }
+                                            if (userProfile && parseFloat(value) > parseFloat(userProfile.balance)) {
+                                                return Promise.reject(new Error('Amount exceeds balance'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <Input type="number" placeholder="e.g., 100" />
+                            </Form.Item>
+                            <Form.Item label="Withdrawal Address (Your Wallet)">
+                                <Input value={userFriendlyAddress} disabled />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit" block loading={cashoutLoading}>Withdraw ARIX</Button>
+                            </Form.Item>
+                        </Form>
+                    </div>
+                </Modal>
+
             </div>
         </Spin>
     );
