@@ -1,35 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useTonWallet } from '@tonconnect/ui-react';
-// These would be your actual imports
-// import { playPlinko } from '../../../services/api';
-// import { PLINKO_MULTIPLIERS } from '../../../utils/constants';
+import { playPlinko } from '../../../services/api';
+import { PLINKO_MULTIPLIERS } from '../../../utils/constants';
 import { Spin, message } from 'antd';
 import './PlinkoGame.css'; // Using the new, revised CSS file
-
-// --- MOCK DATA FOR STANDALONE DEMO ---
-// In a real scenario, you would import these from your utils/constants file.
-const PLINKO_MULTIPLIERS = {
-    8: { low: [5.6, 2.1, 1.2, 1, 0.5, 1, 1.2, 2.1, 5.6], medium: [8, 3, 1.5, 0.4, 0.2, 0.4, 1.5, 3, 8], high: [12, 5, 2, 0.3, 0.1, 0.3, 2, 5, 12] },
-    10: { low: [8, 3, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 3, 8], medium: [12, 4, 2, 1.5, 0.4, 0.2, 0.4, 1.5, 2, 4, 12], high: [25, 10, 3, 1, 0.3, 0.1, 0.3, 1, 3, 10, 25] },
-    12: { low: [10, 4, 2, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 2, 4, 10], medium: [15, 6, 3, 1.5, 0.5, 0.3, 0.2, 0.3, 0.5, 1.5, 3, 6, 15], high: [50, 15, 5, 2, 0.4, 0.2, 0.1, 0.2, 0.4, 2, 5, 15, 50] },
-    14: { low: [12, 5, 3, 1.5, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.5, 3, 5, 12], medium: [20, 8, 4, 2, 1, 0.5, 0.3, 0.2, 0.3, 0.5, 1, 2, 4, 8, 20], high: [150, 30, 10, 4, 1, 0.3, 0.1, 0.0, 0.1, 0.3, 1, 4, 10, 30, 150] },
-    16: { low: [16, 9, 2, 1.5, 1.2, 1.1, 1, 0.5, 0.2, 0.5, 1, 1.1, 1.2, 1.5, 2, 9, 16], medium: [35, 15, 8, 4, 2, 1, 0.5, 0.3, 0.2, 0.3, 0.5, 1, 2, 4, 8, 15, 35], high: [1000, 130, 26, 9, 4, 2, 0.3, 0.2, 0.1, 0.2, 0.3, 2, 4, 9, 26, 130, 1000] }
-};
-// Mock API call
-const playPlinko = async (params) => {
-    console.log("Playing with params:", params);
-    const multipliers = PLINKO_MULTIPLIERS[params.rows][params.risk];
-    const bucketIndex = Math.floor(Math.random() * multipliers.length);
-    const multiplier = multipliers[bucketIndex];
-    return new Promise(resolve => setTimeout(() => resolve({
-        data: {
-            user: { balance: (Math.random() * 1000).toFixed(2) },
-            bucketIndex,
-            multiplier
-        }
-    }), 500));
-};
-// --- END MOCK DATA ---
 
 // Using the Matter.js script loaded in index.html, if available
 const Matter = window.Matter;
@@ -47,8 +21,7 @@ const PlinkoGame = ({ user, setUser, loadingUser }) => {
     const [floatingTexts, setFloatingTexts] = useState([]);
     const [currentMultipliers, setCurrentMultipliers] = useState([]);
     
-    // Mock wallet for demo purposes
-    const wallet = { account: { address: 'mock-wallet-address' } };
+    const wallet = useTonWallet();
 
     const getBucketColor = useCallback((multiplier) => {
         if (multiplier < 1) return 'var(--plinko-red)';
@@ -60,11 +33,13 @@ const PlinkoGame = ({ user, setUser, loadingUser }) => {
 
     // Effect to update the visible multiplier bar when settings change
     useEffect(() => {
-        setCurrentMultipliers(PLINKO_MULTIPLIERS[rows]?.[risk] || []);
+        if (PLINKO_MULTIPLIERS) {
+            setCurrentMultipliers(PLINKO_MULTIPLIERS[rows]?.[risk] || []);
+        }
     }, [rows, risk]);
 
     const setupScene = useCallback(() => {
-        if (!Matter || !canvasRef.current || !sceneContainerRef.current) return;
+        if (!Matter || !canvasRef.current || !sceneContainerRef.current || !PLINKO_MULTIPLIERS) return;
 
         const container = sceneContainerRef.current;
         const width = container.clientWidth;
@@ -182,7 +157,6 @@ const PlinkoGame = ({ user, setUser, loadingUser }) => {
                 betAmount, risk, rows
             });
             
-            // In a real app, setUser would be passed down as a prop
             if(setUser) setUser(result.user);
 
             const container = sceneContainerRef.current;
@@ -240,7 +214,7 @@ const PlinkoGame = ({ user, setUser, loadingUser }) => {
         <div className="plinko-galaxy-container">
             <div className="plinko-header">
                 <span className="balance-display">
-                    {loadingUser ? <Spin size="small" /> : `${parseFloat(user?.balance || 77754).toFixed(2)} ARIX`}
+                    {loadingUser ? <Spin size="small" /> : `${parseFloat(user?.balance || 0).toFixed(2)} ARIX`}
                 </span>
             </div>
             
