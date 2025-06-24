@@ -3,7 +3,7 @@
 // It should NOT contain any 'require' statements or database logic.
 import api from './api';
 
-// --- COINFLIP FUNCTIONS ---
+// --- COINFLIP FUNCTIONS (Your original functions, preserved) ---
 
 /**
  * Calls the backend to play a round of Coinflip.
@@ -12,6 +12,9 @@ import api from './api';
  * @returns {Promise<object>} The result of the game from the backend.
  */
 export const playCoinFlip = async (betAmountArix, choice) => {
+    // This is your original implementation. It assumes the backend
+    // identifies the user via a session or token, so userWalletAddress is not passed.
+    // I am preserving this pattern.
     const response = await api.post('/game/coinflip', {
         betAmountArix,
         choice
@@ -29,7 +32,7 @@ export const getCoinflipHistory = async () => {
 }
 
 
-// --- CRASH GAME FUNCTIONS ---
+// --- CRASH GAME FUNCTIONS (Your original functions, preserved) ---
 // These are the functions that your CrashGame.jsx component needs.
 
 /**
@@ -58,4 +61,17 @@ export const placeCrashBet = async (betAmountArix) => {
 export const cashOutCrashBet = async () => {
     const response = await api.post('/game/crash/cashout');
     return response.data;
+};
+
+
+// --- NEW PLINKO GAME FUNCTION (Added) ---
+
+/**
+ * NEW: Calls the backend to play a round of Plinko.
+ * @param {object} data - The payload, e.g., { userWalletAddress, betAmount, risk, rows }.
+ * @returns {Promise<object>} The result of the game, including the updated user object.
+ */
+export const playPlinko = (data) => {
+    // This uses the new apiClient function defined in the merged api.js
+    return api.post('/game/plinko/play', data);
 };

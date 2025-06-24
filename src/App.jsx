@@ -1,8 +1,8 @@
 // AR_FRONTEND/src/App.jsx
 
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useEffect, Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { TonConnectButton, TonConnectUIProvider, useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, TonConnectUIProvider, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { Layout, Menu, ConfigProvider, theme as antdTheme, Typography, Grid, Spin } from 'antd';
 import {
     CheckSquareFilled,
@@ -10,10 +10,12 @@ import {
     PushpinFilled,
     CreditCardFilled,
     UserOutlined as UserFilled,
+    SwapOutlined, // New Icon
 } from '@ant-design/icons';
 import './App.css';
 import ResponsiveMobileNav from './components/ResponsiveMobileNav';
 import { TONCONNECT_MANIFEST_URL } from './utils/constants';
+import { getUserProfile } from './services/api'; // New API import
 
 // --- Page Imports (Lazy Loaded) ---
 const EarnPage = lazy(() => import('./pages/EarnPage'));
@@ -21,6 +23,8 @@ const GamePage = lazy(() => import('./pages/GamePage'));
 const UserPage = lazy(() => import('./pages/UserPage'));
 const TaskPage = lazy(() => import('./pages/TaskPage'));
 const PushPage = lazy(() => import('./pages/PushPage'));
+const SwapPage = lazy(() => import('./pages/SwapPage')); // NEW: Lazy load the new SwapPage
+
 // --- Game Component Imports ---
 import CoinflipGame from './components/game/CoinFlipGame';
 import CrashGame from './components/game/crash/CrashGame';
@@ -30,11 +34,13 @@ const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
+// MODIFIED: Added Wallet/Swap to the menu configuration
 const menuConfig = [
     { key: '/tasks', icon: <CheckSquareFilled />, labelText: "TASK" },
     { key: '/game', icon: <PlaySquareFilled />, labelText: "GAME" },
     { key: '/push', icon: <PushpinFilled />, labelText: "PUSH" },
     { key: '/earn', icon: <CreditCardFilled />, labelText: "EARN" },
+    { key: '/swap', icon: <SwapOutlined />, labelText: "WALLET" }, // NEW ENTRY
     { key: '/user', icon: <UserFilled />, labelText: "USER" },
 ];
 
@@ -100,6 +106,11 @@ function App() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    // NEW: Central state for user data
+    const [user, setUser] = useState(null);
+    const [loadingUser, setLoadingUser] = useState(false);
+    const wallet = useTonWallet();
+
      useEffect(() => {
         if (location.pathname === '/') {
             navigate('/game', { replace: true });
@@ -121,6 +132,34 @@ function App() {
             tg.setBackgroundColor('#000000');
         }
     }, [setOptions]);
+
+    // NEW: Effect to fetch user data when wallet connects
+    useEffect(() => {
+        const onAuth = async () => {
+            if (wallet?.account?.address) {
+                setLoadingUser(true);
+                try {
+                    // Use your existing launch param logic if needed
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const launchParams = {
+                        telegram_id: urlParams.get('telegram_id'),
+                        username: urlParams.get('username'),
+                        referrer: localStorage.getItem('arixReferralCode'),
+                    };
+                    const profile = await getUserProfile(wallet.account.address, launchParams);
+                    setUser(profile);
+                } catch (error) {
+                    console.error("Failed to fetch user profile:", error);
+                    setUser(null);
+                } finally {
+                    setLoadingUser(false);
+                }
+            } else {
+                setUser(null);
+            }
+        };
+        onAuth();
+    }, [wallet?.account?.address]);
 
     const APP_PRIMARY_COLOR = '#A3AECF';
     const APP_BG_DARK_ELEMENT = '#08090A';
@@ -302,6 +341,9 @@ function App() {
         </div>
     );
 
+    // NEW: Propagate user state to pages
+    const pageProps = { user, setUser, loadingUser };
+
     return (
         <ConfigProvider theme={NEW_TELEGRAM_DARK_THEME}>
             <Layout className="app-layout">
@@ -320,16 +362,19 @@ function App() {
                         <Content className="app-content">
                             <Suspense fallback={loadingSpinner}>
                                 <Routes>
-                                    <Route path="/" element={<GamePage />} /> 
-                                    <Route path="/tasks" element={<TaskPage />} />
-                                    <Route path="/earn" element={<EarnPage />} />
-                                    <Route path="/game" element={<GamePage />} />
-                                    <Route path="/push" element={<PushPage />} />
-                                    <Route path="/user" element={<UserPage />} />
+                                    <Route path="/" element={<GamePage {...pageProps} />} /> 
+                                    <Route path="/tasks" element={<TaskPage {...pageProps} />} />
+                                    <Route path="/earn" element={<EarnPage {...pageProps} />} />
+                                    <Route path="/game" element={<GamePage {...pageProps} />} />
+                                    <Route path="/push" element={<PushPage {...pageProps} />} />
+                                    <Route path="/user" element={<UserPage {...pageProps} />} />
                                     
                                     {/* --- Game Specific Routes --- */}
-                                    <Route path="/game/coinflip" element={<CoinflipGame />} />
-                                    <Route path="/game/crash" element={<CrashGame />} />
+                                    <Route path="/game/coinflip" element={<CoinflipGame {...pageProps} />} />
+                                    <Route path="/game/crash" element={<CrashGame {...pageProps} />} />
+                                    
+                                    {/* NEW: Route for the new SwapPage */}
+                                    <Route path="/swap" element={<SwapPage {...pageProps} />} />
                                 </Routes>
                             </Suspense>
                         </Content>

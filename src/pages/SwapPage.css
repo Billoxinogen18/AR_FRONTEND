@@ -1,0 +1,193 @@
+/* AR_FRONTEND/src/pages/SwapPage.css */
+.swap-page-container {
+    padding: 1rem;
+    max-width: 600px;
+    margin: auto;
+    color: white;
+}
+
+.wallet-overview {
+    background-color: #242746;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.wallet-overview h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    text-align: center;
+    color: #a0a8c2;
+}
+
+.balances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.balance-card {
+    background-color: #1a1c2e;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.balance-card .currency-logo {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.balance-card .currency-name {
+    font-size: 1rem;
+    color: #a0a8c2;
+    margin-bottom: 0.5rem;
+}
+
+.balance-card .currency-amount {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #fff;
+    word-wrap: break-word;
+}
+
+.swap-container {
+    background-color: #242746;
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.swap-container h3 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #a0a8c2;
+}
+
+.swap-box {
+    background-color: #1a1c2e;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.swap-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.swap-input-row input {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    width: 60%;
+    outline: none;
+    -moz-appearance: textfield; /* Firefox */
+}
+.swap-input-row input::-webkit-outer-spin-button,
+.swap-input-row input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.currency-selector {
+    background-color: #3c4172;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.swap-label {
+    font-size: 0.9rem;
+    color: #a0a8c2;
+    padding-left: 0.2rem;
+}
+
+.swap-icon-container {
+    display: flex;
+    justify-content: center;
+    margin: -0.5rem 0;
+    z-index: 10;
+}
+
+.swap-icon {
+    background-color: #3c4172;
+    border: 4px solid #242746;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.swap-icon:hover {
+    transform: rotate(180deg);
+}
+
+.swap-info {
+    text-align: center;
+    color: #a0a8c2;
+    font-size: 0.9rem;
+    min-height: 20px;
+    margin-top: 1rem;
+}
+
+.swap-message {
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 20px;
+    font-weight: bold;
+}
+
+.swap-message.success {
+    color: #34d399;
+}
+
+.swap-message.error {
+    color: #f87171;
+}
+
+.swap-button {
+    width: 100%;
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.swap-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.swap-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.transaction-history-container {
+    margin-top: 2rem;
+}
+
+.transaction-history-container h3 {
+     text-align: center;
+     margin-bottom: 1rem;
+     color: #a0a8c2;
+}

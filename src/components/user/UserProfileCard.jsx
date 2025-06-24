@@ -39,9 +39,14 @@ const UserProfileCard = ({
   const [localClaimableArix, setLocalClaimableArix] = useState('0');
   const [loadingLocalClaimableArix, setLoadingLocalClaimableArix] = useState(false);
 
-
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+
+  // Helper function for consistent formatting (from Gemini's enhancement)
+  const formatBalance = (amount, precision) => {
+    const number = parseFloat(amount);
+    return isNaN(number) ? '0.00' : number.toFixed(precision);
+  };
 
   const fetchArixWalletBalance = useCallback(async (showMsg = false) => {
     if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) {
@@ -82,7 +87,6 @@ const UserProfileCard = ({
         }
     }, [rawAddress]);
 
-
   useEffect(() => {
     if (rawAddress) {
       fetchArixWalletBalance();
@@ -98,7 +102,6 @@ const UserProfileCard = ({
         setLocalClaimableArix(Math.floor(parseFloat(userProfileData.claimableArixRewards)).toString());
       }
     }, [userProfileData?.claimableArixRewards]);
-
 
   const handleRefreshLocalCardData = () => {
       if(userFriendlyAddress) {
@@ -194,6 +197,24 @@ const UserProfileCard = ({
               </Paragraph>
               <AntdStatistic title="ARIX Wallet Balance" value={arixWalletBalance.toFixed(ARIX_DECIMALS)} suffix=" ARIX" className="dashboard-statistic"/>
               {currentArxPrice != null && (<Text className="dashboard-value-equivalent">~${(arixWalletBalance * currentArxPrice).toFixed(USDT_DECIMALS)} USD</Text>)}
+              
+              {/* NEW: Enhanced Game/Swap Balance displays from Gemini */}
+              <div style={{ marginTop: 16, padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                <Title level={6} style={{ margin: 0, marginBottom: 8, color: '#1890ff' }}>Game/Swap Balances</Title>
+                <div className="balance-item" style={{ marginBottom: 8 }}>
+                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>ARIX Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>{formatBalance(userProfileData?.balance, 4)} ARIX</Text>
+                </div>
+                <div className="balance-item" style={{ marginBottom: 8 }}>
+                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>USDT Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>${formatBalance(userProfileData?.usdt_balance, 2)}</Text>
+                </div>
+                <div className="balance-item">
+                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>TON Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>{formatBalance(userProfileData?.ton_balance, 6)} TON</Text>
+                </div>
+              </div>
+              
               <AntdStatistic title="Current ARIX Price" value={currentArxPrice ? `$${currentArxPrice.toFixed(4)}` : 'Loading...'} valueStyle={{color: '#58D6FF'}} className="dashboard-statistic"/>
             </Col>
 
@@ -201,15 +222,30 @@ const UserProfileCard = ({
               <Title level={5} className="dashboard-column-title">Staking & Rewards</Title>
               <AntdStatistic title="Total Staked ARIX" value={totalStakedArix.toFixed(ARIX_DECIMALS)} suffix=" ARIX" className="dashboard-statistic"/>
               {currentArxPrice != null && totalStakedArix > 0 && (<Text className="dashboard-value-equivalent">~${totalStakedUsdtEquivalent.toFixed(USDT_DECIMALS)} USD</Text>)}
-              <AntdStatistic title="Accumulated Reward (USDT)" value={`$${claimableUsdtNum.toFixed(USDT_DECIMALS)}`} valueStyle={{ color: '#4CAF50' }} className="dashboard-statistic" />
-              <Button type="primary" icon={<DollarCircleOutlined />} onClick={handleWithdrawUsdt} disabled={claimableUsdtNum < MIN_USDT_WITHDRAWAL_USD_VALUE || isWithdrawUsdtLoading || !userFriendlyAddress} loading={isWithdrawUsdtLoading} block className="dashboard-button withdraw-usdt-button" size="middle">Withdraw USDT Reward</Button>
-              {claimableUsdtNum > 0 && claimableUsdtNum < MIN_USDT_WITHDRAWAL_USD_VALUE && <Alert message={`Min. USDT: $${MIN_USDT_WITHDRAWAL_USD_VALUE.toFixed(USDT_DECIMALS)}`} type="warning" showIcon className="mini-alert"/>}
+              
+              {/* Enhanced Claimable displays with Gemini's formatting */}
+              <div style={{ marginTop: 16 }}>
+                <AntdStatistic 
+                  title="Claimable USDT (from Staking)" 
+                  value={`$${formatBalance(userProfileData?.claimable_usdt_balance, 2)}`} 
+                  valueStyle={{ color: '#4CAF50' }} 
+                  className="dashboard-statistic claimable" 
+                />
+                <Button type="primary" icon={<DollarCircleOutlined />} onClick={handleWithdrawUsdt} disabled={claimableUsdtNum < MIN_USDT_WITHDRAWAL_USD_VALUE || isWithdrawUsdtLoading || !userFriendlyAddress} loading={isWithdrawUsdtLoading} block className="dashboard-button withdraw-usdt-button" size="middle">Withdraw USDT Reward</Button>
+                {claimableUsdtNum > 0 && claimableUsdtNum < MIN_USDT_WITHDRAWAL_USD_VALUE && <Alert message={`Min. USDT: $${MIN_USDT_WITHDRAWAL_USD_VALUE.toFixed(USDT_DECIMALS)}`} type="warning" showIcon className="mini-alert"/>}
+              </div>
 
               <div style={{marginTop: 16}}>
-                <AntdStatistic title="Claimable ARIX (Games/Tasks)" value={`${effectiveClaimableArixNum.toFixed(ARIX_DECIMALS)} ARIX`} valueStyle={{color: '#FFC107'}} className="dashboard-statistic"/>
+                <AntdStatistic 
+                  title="Claimable ARIX (from Staking)" 
+                  value={`${formatBalance(effectiveClaimableArixNum, ARIX_DECIMALS)} ARIX`} 
+                  valueStyle={{color: '#FFC107'}} 
+                  className="dashboard-statistic claimable"
+                />
                 <Button onClick={handleWithdrawArix} disabled={!currentArxPrice || effectiveClaimableArixNum < minArixForWithdrawal || isWithdrawArixLoading || !userFriendlyAddress} loading={isWithdrawArixLoading} block className="dashboard-button withdraw-arix-button" size="middle">Withdraw ARIX Rewards</Button>
                 {currentArxPrice && effectiveClaimableArixNum > 0 && effectiveClaimableArixNum < minArixForWithdrawal && <Alert message={`Min. ARIX ~ $${MIN_USDT_WITHDRAWAL_USD_VALUE.toFixed(USDT_DECIMALS)}`} type="warning" showIcon className="mini-alert"/>}
               </div>
+              
               <Button danger icon={<LogoutOutlined />} onClick={onInitiateUnstakeProcess} disabled={totalStakedArix <= 0 || !userFriendlyAddress} block className="dashboard-button unstake-button" size="middle">Unstake ARIX Now</Button>
               {totalStakedArix > 0 && <Tooltip title="Early unstake penalty applies. USDT rewards unaffected."><Paragraph className="dashboard-note"><InfoCircleOutlined style={{marginRight: 4}} /> Early unstake penalty applies.</Paragraph></Tooltip>}
             </Col>
@@ -219,7 +255,23 @@ const UserProfileCard = ({
                  <AntdStatistic title="Total ARIX Holdings (Wallet + Staked)" value={(arixWalletBalance + totalStakedArix).toFixed(ARIX_DECIMALS)} suffix=" ARIX" className="dashboard-statistic" />
                  {currentArxPrice != null && <Text className="dashboard-value-equivalent">~${((arixWalletBalance + totalStakedArix) * currentArxPrice).toFixed(USDT_DECIMALS)} USD</Text>}
                  <AntdStatistic title="Total Claimable Value (USDT + ARIX Rewards)" value={`~$${(claimableUsdtNum + (currentArxPrice ? effectiveClaimableArixNum * currentArxPrice : 0)).toFixed(USDT_DECIMALS)}`} valueStyle={{color: '#A3AECF', fontWeight:'bold'}} className="dashboard-statistic"/>
-                  <Button icon={<RedoOutlined />} onClick={handleRefreshLocalCardData} loading={isDataLoading || loadingArixWalletBalance || loadingLocalClaimableArix} block className="dashboard-button refresh-button" size="middle" style={{marginTop: 20}}>Refresh Balances</Button>
+                 
+                 {/* Enhanced Total Game/Swap Value Summary */}
+                 <div style={{ marginTop: 16, padding: '12px', backgroundColor: '#f0f8ff', borderRadius: '8px' }}>
+                   <Title level={6} style={{ margin: 0, marginBottom: 8, color: '#1890ff' }}>Game/Swap Summary</Title>
+                   <AntdStatistic 
+                     title="Total Game/Swap Value" 
+                     value={`~$${(
+                       parseFloat(userProfileData?.balance || 0) * (currentArxPrice || 0) +
+                       parseFloat(userProfileData?.usdt_balance || 0) +
+                       parseFloat(userProfileData?.ton_balance || 0) * 5 // Rough TON price estimate
+                     ).toFixed(2)}`}
+                     valueStyle={{color: '#52c41a', fontSize: '16px'}} 
+                     className="dashboard-statistic"
+                   />
+                 </div>
+                 
+                 <Button icon={<RedoOutlined />} onClick={handleRefreshLocalCardData} loading={isDataLoading || loadingArixWalletBalance || loadingLocalClaimableArix} block className="dashboard-button refresh-button" size="middle" style={{marginTop: 20}}>Refresh Balances</Button>
             </Col>
           </Row>
         </Spin>

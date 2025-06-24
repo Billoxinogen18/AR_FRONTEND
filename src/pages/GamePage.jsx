@@ -7,44 +7,18 @@ import './GamePage.css';
 
 const { Title, Text, Paragraph } = Typography;
 
-const GamePage = () => {
+// MODIFIED: This page now receives the user object as a prop from App.jsx
+// to avoid making a separate API call and ensure data consistency.
+const GamePage = ({ user, loadingUser }) => {
     const navigate = useNavigate();
-    const rawAddress = useTonAddress(false);
-    const [claimableArix, setClaimableArix] = useState('0');
-    const [loadingBalance, setLoadingBalance] = useState(false);
 
-    const fetchUserArixBalance = useCallback(async () => {
-        if (rawAddress) {
-            setLoadingBalance(true);
-            try {
-                const profileRes = await getUserProfile(rawAddress);
-                setClaimableArix(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
-            } catch (error) {
-                console.error("Error fetching ARIX balance for Game Page:", error);
-                setClaimableArix('0');
-            } finally {
-                setLoadingBalance(false);
-            }
-        } else {
-            setClaimableArix('0');
-        }
-    }, [rawAddress]);
+    // The user object now comes from props, so we can display the balance directly.
+    // We show the internal `balance` for games, not the claimable rewards.
+    const gameArixBalance = user ? parseFloat(user.balance || 0).toFixed(2) : '0.00';
 
-    useEffect(() => {
-        fetchUserArixBalance();
-    }, [fetchUserArixBalance]);
-
-
-    // Simplified navigation handlers
-    const handlePlayCoinflip = () => {
-        navigate('/game/coinflip');
+    const handleNavigate = (path) => {
+        navigate(path);
     };
-    
-    // NEW: Navigation handler for Crash Game
-    const handlePlayCrash = () => {
-        navigate('/game/crash');
-    };
-
 
     return (
         <div className="game-page-container">
@@ -56,7 +30,7 @@ const GamePage = () => {
                                 <span className="balance-icon-representation">♢</span>
                             </div>
                             <Text className="push-balance-amount">
-                                {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : claimableArix}
+                                {loadingUser ? <Spin size="small" wrapperClassName="balance-spin" /> : gameArixBalance}
                             </Text>
                         </div>
                         <Text className="push-balance-currency">ARIX</Text>
@@ -65,7 +39,7 @@ const GamePage = () => {
             </div>
 
             <div className="game-page-top-banner">
-                <Text className="game-page-top-banner-text">X2 or may be x256? Play Coinflip and try your luck! →</Text>
+                <Text className="game-page-top-banner-text">X2 or maybe x1000? Play Plinko and try your luck! →</Text>
             </div>
 
             <Title level={1} className="game-page-title">Games</Title>
@@ -74,8 +48,32 @@ const GamePage = () => {
             </Paragraph>
 
             <div className="game-card-list">
-                {/* --- CoinFlip Card --- */}
-                <Card className="game-card" hoverable onClick={handlePlayCoinflip}>
+                {/* --- Plinko Game Card (NEW) --- */}
+                <Card className="game-card" hoverable onClick={() => handleNavigate('/game/plinko')}>
+                    <div className="game-card-row">
+                        <div className="game-card-image-section">
+                            <img 
+                                src="/img/plinko-card-visual.png" // You'll need to add this image
+                                alt="Plinko Game Visual"
+                                onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Plinko'; }}
+                            />
+                        </div>
+                        <div className="game-card-content-section">
+                            <Title level={4} className="game-card-title">Plinko Galaxy</Title>
+                            <Paragraph className="game-card-description">
+                                Drop the ball and watch it bounce to multipliers up to 1000x!
+                            </Paragraph>
+                            <Button className="game-card-button">
+                                <span className="button-icon-circle"></span>
+                                Find your fortune
+                                <span className="button-arrow">→</span>
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* --- CoinFlip Card (Your original card) --- */}
+                <Card className="game-card" hoverable onClick={() => handleNavigate('/game/coinflip')}>
                     <div className="game-card-row">
                         <div className="game-card-image-section">
                             <img 
@@ -98,14 +96,13 @@ const GamePage = () => {
                     </div>
                 </Card>
 
-                {/* --- NEW: Crash Game Card --- */}
-                <Card className="game-card" hoverable onClick={handlePlayCrash}>
+                {/* --- Crash Game Card (Your original card) --- */}
+                <Card className="game-card" hoverable onClick={() => handleNavigate('/game/crash')}>
                     <div className="game-card-row">
                         <div className="game-card-image-section">
                             <img 
-                                src="/img/crash-card-visual.png" // You'll need to add this image
+                                src="/img/crash-card-visual.png"
                                 alt="Crash Game Visual"
-                                // Placeholder image if the primary one fails
                                 onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Crash'; }}
                             />
                         </div>

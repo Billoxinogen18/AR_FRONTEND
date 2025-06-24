@@ -17,48 +17,47 @@ const apiClient = axios.create({
   timeout: 30000, 
 });
 
-// Staking/Earn endpoints
+// --- YOUR ORIGINAL ENDPOINTS (PRESERVED) ---
 export const getStakingConfig = () => apiClient.get('/earn/config');
 export const recordUserStake = (data) => apiClient.post('/earn/stake', data);
 export const initiateArixUnstake = (data) => apiClient.post('/earn/initiate-arix-unstake', data);
 export const confirmArixUnstake = (data) => apiClient.post('/earn/confirm-arix-unstake', data);
 export const getUserStakesAndRewards = (walletAddress) => apiClient.get(`/earn/stakes/${walletAddress}`);
-
-// Withdrawal endpoints
 export const requestUsdtWithdrawal = (data) => apiClient.post('/earn/request-usdt-withdrawal', data); 
 export const requestArixRewardWithdrawal = (data) => apiClient.post('/earn/request-arix-withdrawal', data);
-
-// Game endpoints
-export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
-export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
-// REVISION: Added the missing function export below
-export const getCrashHistoryForUser = (walletAddress) => apiClient.get(`/game/crash/history/${walletAddress}`);
-
-
-// Task endpoints
 export const getActiveTasks = (userWalletAddress) => {
     const params = userWalletAddress ? { userWalletAddress } : {};
     return apiClient.get('/tasks/active', { params });
 };
 export const submitTaskCompletion = (taskId, data) => apiClient.post(`/tasks/${taskId}/submit`, data);
 export const getUserTaskHistory = (walletAddress) => apiClient.get(`/tasks/user/${walletAddress}`);
-
-
-// Push/Announcement endpoints
 export const getAnnouncements = () => apiClient.get('/push/announcements');
+export const getUserReferralData = (walletAddress) => apiClient.get(`/referrals/data/${walletAddress}`);
+export const getReferralProgramDetails = () => apiClient.get('/referrals/program-details');
+export const getCoinflipHistoryForUser = (walletAddress) => apiClient.get(`/game/coinflip/history/${walletAddress}`);
+export const getCrashHistoryForUser = (walletAddress) => apiClient.get(`/game/crash/history/${walletAddress}`);
+export const placeCoinflipBet = (data) => apiClient.post('/game/coinflip/bet', data);
 
-
-// User profile endpoint
+// --- USER PROFILE ENDPOINT (PRESERVED) ---
 export const getUserProfile = (walletAddress, launchParams) => {
   return apiClient.get(`/users/profile/${walletAddress}`, { params: launchParams });
 };
 
+// --- NEW ENDPOINTS (ADDED) ---
+// NEW Game Endpoints
+export const playPlinko = (data) => apiClient.post('/game/plinko/play', data);
+export const getCrashState = () => apiClient.get('/game/crash/state');
+export const placeCrashBet = (data) => apiClient.post('/game/crash/bet', data);
+export const cashOutCrash = (data) => apiClient.post('/game/crash/cashout', data);
 
-// Referral endpoints
-export const getUserReferralData = (walletAddress) => apiClient.get(`/referrals/data/${walletAddress}`);
-export const getReferralProgramDetails = () => apiClient.get('/referrals/program-details');
+// NEW Swap Endpoints
+export const getSwapQuote = (from, to) => apiClient.get('/swap/quote', { params: { from, to } });
+export const performSwap = (data) => apiClient.post('/swap/execute', data);
 
+// NEW Transactions Endpoint
+export const getUserTransactions = (walletAddress) => apiClient.get(`/users/transactions/${walletAddress}`);
 
+// YOUR ORIGINAL INTERCEPTOR (PRESERVED)
 apiClient.interceptors.response.use(
   response => response,
   error => {
