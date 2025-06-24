@@ -127,3 +127,4 @@ export const performSwap = (data) => apiClient.post('/swap/execute', data);
 export const getAnnouncements = () => apiClient.get('/push/announcements');
 
 // Note: No default export is used to maintain consistency with named exports.
+export default apiClient;
