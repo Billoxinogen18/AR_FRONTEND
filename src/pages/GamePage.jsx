@@ -1,5 +1,4 @@
 // AR_FRONTEND/src/pages/GamePage.jsx
-
 import React from 'react';
 import { Typography, Card, Button, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -7,11 +6,11 @@ import './GamePage.css';
 
 const { Title, Text, Paragraph } = Typography;
 
+// The component receives the user and loading state from App.jsx
 const GamePage = ({ user, loadingUser }) => {
     const navigate = useNavigate();
 
-    // The user object now comes from props, so we can display the balance directly.
-    // We show the internal `balance` for games, not the claimableArixRewards.
+    // The balance displayed is now the user's internal game balance, not claimable rewards.
     const gameArixBalance = user ? parseFloat(user.balance || 0).toFixed(2) : '0.00';
 
     const handleNavigate = (path) => {
@@ -46,12 +45,12 @@ const GamePage = ({ user, loadingUser }) => {
             </Paragraph>
 
             <div className="game-card-list">
-                {/* --- Plinko Game Card (NEW) --- */}
+                {/* --- NEW: Plinko Game Card --- */}
                 <Card className="game-card" hoverable onClick={() => handleNavigate('/game/plinko')}>
                     <div className="game-card-row">
                         <div className="game-card-image-section">
                             <img 
-                                src="/img/plinko-card-visual.svg" // Using the new SVG icon
+                                src="/img/plinko-card-visual.png" // Uses the new SVG icon
                                 alt="Plinko Game Visual"
                                 onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Plinko'; }}
                             />

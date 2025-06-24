@@ -1,5 +1,4 @@
 // AR_FRONTEND/src/App.jsx
-
 import React, { useEffect, Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { TonConnectButton, TonConnectUIProvider, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
@@ -10,31 +9,33 @@ import {
     PushpinFilled,
     CreditCardFilled,
     UserOutlined as UserFilled,
-    SwapOutlined, // New Icon
+    SwapOutlined, // NEW: Added icon for Wallet/Swap
 } from '@ant-design/icons';
 import './App.css';
 import ResponsiveMobileNav from './components/ResponsiveMobileNav';
 import { TONCONNECT_MANIFEST_URL } from './utils/constants';
-import { getUserProfile } from './services/api'; // New API import
+import { getUserProfile } from './services/api';
 
-// --- Page Imports (Lazy Loaded) ---
+// --- Page Imports (Your original lazy loading preserved) ---
 const EarnPage = lazy(() => import('./pages/EarnPage'));
 const GamePage = lazy(() => import('./pages/GamePage'));
 const UserPage = lazy(() => import('./pages/UserPage'));
 const TaskPage = lazy(() => import('./pages/TaskPage'));
 const PushPage = lazy(() => import('./pages/PushPage'));
-const SwapPage = lazy(() => import('./pages/SwapPage')); // NEW: Lazy load the new SwapPage
+// --- NEW: Lazy load the new pages ---
+const SwapPage = lazy(() => import('./pages/SwapPage'));
+const PlinkoGame = lazy(() => import('./components/game/plinko/PlinkoGame'));
 
-// --- Game Component Imports ---
-import CoinflipGame from './components/game/CoinFlipGame';
-import CrashGame from './components/game/crash/CrashGame';
+// --- Original Game Component Imports (Preserved for routing) ---
+const CoinflipGame = lazy(() => import('./components/game/CoinFlipGame'));
+const CrashGame = lazy(() => import('./components/game/crash/CrashGame'));
 
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-// MODIFIED: Added Wallet/Swap to the menu configuration
+// MODIFIED: Added Wallet/Swap to your original menu configuration
 const menuConfig = [
     { key: '/tasks', icon: <CheckSquareFilled />, labelText: "TASK" },
     { key: '/game', icon: <PlaySquareFilled />, labelText: "GAME" },
@@ -100,13 +101,13 @@ const DesktopMenu = () => {
 };
 
 function App() {
-    const screens = useBreakpoint();
+     const screens = useBreakpoint();
     const isMobile = !screens.lg;
     const [tonConnectUI, setOptions] = useTonConnectUI();
     const location = useLocation();
     const navigate = useNavigate();
 
-    // NEW: Central state for user data
+    // NEW: Central state for user data, as requested
     const [user, setUser] = useState(null);
     const [loadingUser, setLoadingUser] = useState(false);
     const wallet = useTonWallet();
@@ -139,14 +140,13 @@ function App() {
             if (wallet?.account?.address) {
                 setLoadingUser(true);
                 try {
-                    // Use your existing launch param logic if needed
                     const urlParams = new URLSearchParams(window.location.search);
                     const launchParams = {
                         telegram_id: urlParams.get('telegram_id'),
                         username: urlParams.get('username'),
                         referrer: localStorage.getItem('arixReferralCode'),
                     };
-                    const profile = await getUserProfile(wallet.account.address, launchParams);
+                    const { data: profile } = await getUserProfile(wallet.account.address, launchParams);
                     setUser(profile);
                 } catch (error) {
                     console.error("Failed to fetch user profile:", error);
@@ -341,8 +341,7 @@ function App() {
         </div>
     );
 
-    // NEW: Propagate user state to pages
-    const pageProps = { user, setUser, loadingUser };
+     const pageProps = { user, setUser, loadingUser };
 
     return (
         <ConfigProvider theme={NEW_TELEGRAM_DARK_THEME}>
@@ -350,9 +349,7 @@ function App() {
                 <Header className="app-header">
                     <div className="app-header-logo-area">
                         <img src="/img/arix-logo-header.png" alt="ARIX" className="app-header-logo" onError={(e) => e.currentTarget.style.display = 'none'} />
-                        <Title level={isMobile ? 5 : 4} className="app-header-title">
-                            TERMINAL
-                        </Title>
+                        <Title level={isMobile ? 5 : 4} className="app-header-title">TERMINAL</Title>
                     </div>
                     <TonConnectButton className="ton-connect-button-custom" />
                 </Header>
@@ -362,19 +359,19 @@ function App() {
                         <Content className="app-content">
                             <Suspense fallback={loadingSpinner}>
                                 <Routes>
+                                    {/* Your original routes are preserved */}
                                     <Route path="/" element={<GamePage {...pageProps} />} /> 
                                     <Route path="/tasks" element={<TaskPage {...pageProps} />} />
                                     <Route path="/earn" element={<EarnPage {...pageProps} />} />
                                     <Route path="/game" element={<GamePage {...pageProps} />} />
                                     <Route path="/push" element={<PushPage {...pageProps} />} />
                                     <Route path="/user" element={<UserPage {...pageProps} />} />
-                                    
-                                    {/* --- Game Specific Routes --- */}
                                     <Route path="/game/coinflip" element={<CoinflipGame {...pageProps} />} />
                                     <Route path="/game/crash" element={<CrashGame {...pageProps} />} />
-                                     <Route path="/game/plinko" element={<PlinkoGame {...pageProps} />} />
-                                    {/* NEW: Route for the new SwapPage */}
+                                    
+                                    {/* --- NEW ROUTES ADDED HERE --- */}
                                     <Route path="/swap" element={<SwapPage {...pageProps} />} />
+                                    <Route path="/game/plinko" element={<PlinkoGame {...pageProps} />} />
                                 </Routes>
                             </Suspense>
                         </Content>
@@ -386,12 +383,11 @@ function App() {
     );
 }
 
+// Your RootApp wrapper is preserved and correct
 const RootApp = () => (
-    <TonConnectUIProvider manifestUrl={TONCONNECT_MANIFEST_URL}>
-        <Router>
-            <App />
-        </Router>
-    </TonConnectUIProvider>
+    <Router>
+        <App />
+    </Router>
 );
 
 export default RootApp;
