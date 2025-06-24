@@ -372,7 +372,7 @@ function App() {
                                     {/* --- Game Specific Routes --- */}
                                     <Route path="/game/coinflip" element={<CoinflipGame {...pageProps} />} />
                                     <Route path="/game/crash" element={<CrashGame {...pageProps} />} />
-                                    
+                                     <Route path="/game/plinko" element={<PlinkoGame {...pageProps} />} />
                                     {/* NEW: Route for the new SwapPage */}
                                     <Route path="/swap" element={<SwapPage {...pageProps} />} />
                                 </Routes>

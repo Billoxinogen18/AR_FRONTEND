@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// AR_FRONTEND/src/pages/GamePage.jsx
+
+import React from 'react';
 import { Typography, Card, Button, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useTonAddress } from '@tonconnect/ui-react';
-import { getUserProfile } from '../services/api';
 import './GamePage.css';
 
 const { Title, Text, Paragraph } = Typography;
 
-// MODIFIED: This page now receives the user object as a prop from App.jsx
-// to avoid making a separate API call and ensure data consistency.
 const GamePage = ({ user, loadingUser }) => {
     const navigate = useNavigate();
 
     // The user object now comes from props, so we can display the balance directly.
-    // We show the internal `balance` for games, not the claimable rewards.
+    // We show the internal `balance` for games, not the claimableArixRewards.
     const gameArixBalance = user ? parseFloat(user.balance || 0).toFixed(2) : '0.00';
 
     const handleNavigate = (path) => {
@@ -39,7 +37,7 @@ const GamePage = ({ user, loadingUser }) => {
             </div>
 
             <div className="game-page-top-banner">
-                <Text className="game-page-top-banner-text">X2 or maybe x1000? Play Plinko and try your luck! →</Text>
+                <Text className="game-page-top-banner-text">Up to 1000x? Play Plinko Galaxy and find your fortune! →</Text>
             </div>
 
             <Title level={1} className="game-page-title">Games</Title>
@@ -53,7 +51,7 @@ const GamePage = ({ user, loadingUser }) => {
                     <div className="game-card-row">
                         <div className="game-card-image-section">
                             <img 
-                                src="/img/plinko-card-visual.png" // You'll need to add this image
+                                src="/img/plinko-card-visual.svg" // Using the new SVG icon
                                 alt="Plinko Game Visual"
                                 onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/1a1a2e/ffffff?text=Plinko'; }}
                             />
@@ -125,3 +123,4 @@ const GamePage = ({ user, loadingUser }) => {
 };
 
 export default GamePage;
+
