@@ -1,5 +1,22 @@
+/**
+ * AR_FRONTEND/src/pages/PushPage.jsx
+ *
+ * This is the fully merged component, combining the original UI and animations
+ * with the new, functional deposit and withdrawal logic.
+ *
+ * REVISIONS:
+ * - The original file structure, state management (wheelState, etc.), and UI components have been fully restored.
+ * - The data fetching logic now retrieves the entire user profile to get both the in-app `balance` for withdrawals
+ * and the user's `walletAddress` for the deposit memo.
+ * - The placeholder Top Up Modal content has been replaced with the functional version, showing the deposit
+ * address and the required user-specific memo.
+ * - The placeholder Cashout Modal content has been replaced with a functional Ant Design form for submitting
+ * withdrawals, including validation and loading states.
+ * - The header now correctly displays the `balance` (the in-app funds) instead of the `claimableArixRewards`.
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Button, Modal, Alert, Spin, message } from 'antd';
+import { Typography, Button, Modal, Alert, Spin, message, Input, Form } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowDownOutlined,
@@ -11,7 +28,7 @@ import {
     FireOutlined
 } from '@ant-design/icons';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { getUserProfile } from '../services/api';
+import { getUserProfile, withdrawArix } from '../services/api';
 
 import './PushPage.css';
 
@@ -21,47 +38,61 @@ const ArixPushIcon = () => (
     <img src="/img/arix-diamond.png" alt="ARIX" className="push-page-arix-icon" onError={(e) => { e.currentTarget.src = '/img/fallback-icon.png'; }} />
 );
 
-const PROJECT_ARIX_DEPOSIT_ADDRESS = "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWEK9wfDd";
+// Hot wallet address from environment variables
+const HOT_WALLET_ADDRESS = import.meta.env.VITE_HOT_WALLET_ADDRESS || "EQCLU6KIPjZJbhyYlRfENc3nQck2DWulsUq2gJPyWEK9wfDd";
 
 const PushPage = () => {
     const navigate = useNavigate();
-    const rawAddress = useTonAddress(false);
+    const userWalletAddress = useTonAddress(); // This gives the connected user's address
+    const rawAddress = useTonAddress(false); // Non-bounceable version for API calls
 
+    // Original wheel animation state
     const [wheelState, setWheelState] = useState('IDLE_LIT');
     const [showMainBottomSheet, setShowMainBottomSheet] = useState(false);
     const [animatingWheelCenter, setAnimatingWheelCenter] = useState(false);
 
+    // Modal states
     const [showTopUpModal, setShowTopUpModal] = useState(false);
     const [showCashoutModal, setShowCashoutModal] = useState(false);
 
-    const [claimableArix, setClaimableArix] = useState('0');
+    // User data and loading states
+    const [profile, setProfile] = useState(null);
     const [loadingBalance, setLoadingBalance] = useState(false);
 
+    // Cashout form and loading
+    const [cashoutForm] = Form.useForm();
+    const [cashoutLoading, setCashoutLoading] = useState(false);
+
+    // Original animation constants
     const numberOfLines = 72;
     const transitionAnimationDuration = 1200;
     const dialogAppearDelay = 40;
 
-    const fetchUserArixBalance = useCallback(async () => {
+    // Fetch user profile data
+    const fetchUserProfile = useCallback(async () => {
         if (rawAddress) {
             setLoadingBalance(true);
             try {
                 const profileRes = await getUserProfile(rawAddress);
-                setClaimableArix(Math.floor(parseFloat(profileRes.data?.claimableArixRewards || 0)).toString());
+                setProfile(profileRes.data);
             } catch (error) {
-                console.error("Error fetching ARIX balance for Push Page:", error);
-                setClaimableArix('0');
+                console.error("Error fetching user profile for Push Page:", error);
+                message.error("Could not load user data.");
+                setProfile(null);
             } finally {
                 setLoadingBalance(false);
             }
         } else {
-            setClaimableArix('0');
+            setProfile(null);
+            setLoadingBalance(false);
         }
     }, [rawAddress]);
 
     useEffect(() => {
-        fetchUserArixBalance();
-    }, [fetchUserArixBalance]);
+        fetchUserProfile();
+    }, [fetchUserProfile]);
 
+    // Original wheel press handler
     const handleWheelPress = () => {
         if (wheelState === 'IDLE_LIT') {
             setWheelState('UNFILLING');
@@ -75,6 +106,7 @@ const PushPage = () => {
         }
     };
 
+    // Original bottom sheet close handler
     const handleCloseMainBottomSheet = (playCoinflip = false) => {
         setShowMainBottomSheet(false);
         if (wheelState === 'IDLE_DIM') {
@@ -89,10 +121,11 @@ const PushPage = () => {
                 }
             }, transitionAnimationDuration);
         } else if (playCoinflip) {
-             navigate('/game');
+            navigate('/game');
         }
     };
 
+    // Copy to clipboard utility
     const copyToClipboard = (textToCopy) => {
         if (!textToCopy || textToCopy === "YOUR_PROJECT_ARIX_DEPOSIT_WALLET_ADDRESS_HERE") {
             message.error('Deposit address not configured.');
@@ -106,17 +139,47 @@ const PushPage = () => {
             });
     };
 
+    // Handle cashout form submission
+    const handleCashout = async (values) => {
+        const { amount } = values;
+        const recipientAddress = userWalletAddress; // Withdraw to the connected wallet
+        
+        if (parseFloat(amount) > parseFloat(profile?.balance || 0)) {
+            message.error("Withdrawal amount cannot exceed your balance.");
+            return;
+        }
+
+        setCashoutLoading(true);
+        try {
+            const result = await withdrawArix({
+                userWalletAddress: rawAddress,
+                amount: parseFloat(amount),
+                recipientAddress
+            });
+            message.success('Withdrawal initiated successfully!');
+            // Refresh user data to show new balance
+            await fetchUserProfile();
+            setShowCashoutModal(false);
+            cashoutForm.resetFields();
+        } catch (error) {
+            const errorMessage = error.response?.data?.error || "An error occurred during withdrawal.";
+            message.error(errorMessage);
+            console.error("Cashout failed:", error);
+        } finally {
+            setCashoutLoading(false);
+        }
+    };
+
+    // Original wheel container classes logic
     let wheelContainerClasses = "push-wheel-container";
     if (animatingWheelCenter) wheelContainerClasses += " animating-center-pulse";
-    
     wheelContainerClasses += ` state-${wheelState.toLowerCase()}`;
-
 
     return (
         <div className="push-page-container" style={{
             '--number-of-lines': numberOfLines,
             '--transition-animation-duration': `${transitionAnimationDuration}ms`
-         }}>
+        }}>
             <div className="header-content-wrapper">
                 <div className="push-balance-section">
                     <div className="balance-info-box">
@@ -125,7 +188,7 @@ const PushPage = () => {
                                 <span className="balance-icon-representation">♢</span>
                             </div>
                             <Text className="push-balance-amount">
-                                {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : claimableArix}
+                                {loadingBalance ? <Spin size="small" wrapperClassName="balance-spin" /> : parseFloat(profile?.balance || 0).toFixed(2)}
                             </Text>
                         </div>
                         <Text className="push-balance-currency">ARIX</Text>
@@ -191,6 +254,8 @@ const PushPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Main Bottom Sheet Modal */}
             <Modal
                 open={showMainBottomSheet}
                 onCancel={() => handleCloseMainBottomSheet(false)}
@@ -237,6 +302,7 @@ const PushPage = () => {
                 </div>
             </Modal>
 
+            {/* Top Up Modal */}
             <Modal
                 open={showTopUpModal}
                 onCancel={() => setShowTopUpModal(false)}
@@ -278,17 +344,32 @@ const PushPage = () => {
                         className="topup-warning-alert"
                     />
                     <div className="topup-instructions">
-                        <Text className="instruction-link" onClick={() => message.info("How it works: Coming soon!")}>How it works</Text>
-                        <Text className="instruction-link" onClick={() => message.info("Instructions: Coming soon!")}>Instruction</Text>
+                        <Text className="instruction-link" onClick={() => message.info("How it works: Send ARIX to the address below with your wallet address as memo.")}>How it works</Text>
+                        <Text className="instruction-link" onClick={() => message.info("Instructions: 1. Copy deposit address 2. Copy your memo 3. Send ARIX with memo")}>Instruction</Text>
                     </div>
-                    <Paragraph className="address-label">ADDRESS</Paragraph>
+                    <Paragraph className="address-label">DEPOSIT ADDRESS</Paragraph>
                     <div className="address-display-box">
-                        <Text className="deposit-address-text" copyable={{ text: PROJECT_ARIX_DEPOSIT_ADDRESS, tooltips: ['Copy', 'Copied!'] }}>
-                            {PROJECT_ARIX_DEPOSIT_ADDRESS}
+                        <Text className="deposit-address-text" copyable={{ text: HOT_WALLET_ADDRESS, tooltips: ['Copy', 'Copied!'] }}>
+                            {HOT_WALLET_ADDRESS}
                         </Text>
                     </div>
+                    
+                    <Paragraph className="address-label" style={{ marginTop: '16px' }}>REQUIRED MEMO / COMMENT</Paragraph>
+                    <Alert 
+                        message="MEMO IS REQUIRED" 
+                        description="You MUST put your wallet address in the transaction's memo/comment field to be credited." 
+                        type="error" 
+                        showIcon 
+                        className="topup-warning-alert" 
+                    />
+                    <div className="address-display-box">
+                        <Text className="deposit-address-text" copyable={{ text: userWalletAddress, tooltips: ['Copy', 'Copied!'] }}>
+                            {userWalletAddress || "Connect wallet to see your address"}
+                        </Text>
+                    </div>
+
                     <Paragraph className="fee-info-text">
-                        A fee of <Text strong>0.05 ARIX</Text> is applied to all deposits. <Text strong>MEMO is not required</Text>
+                        A fee of <Text strong>0.05 ARIX</Text> is applied to all deposits. <Text strong>MEMO is required</Text>
                     </Paragraph>
                     <Paragraph className="min-deposit-info">
                         <InfoCircleOutlined /> Deposit minimum <Text strong>1 ARIX</Text>
@@ -298,13 +379,14 @@ const PushPage = () => {
                         block
                         icon={<CopyOutlined />}
                         className="copy-address-button"
-                        onClick={() => copyToClipboard(PROJECT_ARIX_DEPOSIT_ADDRESS)}
+                        onClick={() => copyToClipboard(HOT_WALLET_ADDRESS)}
                     >
                         Copy address
                     </Button>
                 </div>
             </Modal>
 
+            {/* Cashout Modal */}
             <Modal
                 open={showCashoutModal}
                 onCancel={() => setShowCashoutModal(false)}
@@ -337,18 +419,43 @@ const PushPage = () => {
                             <ArrowUpOutlined /> Cashout
                         </Button>
                     </div>
-                    <Alert
-                        message="ARIX withdrawal is only possible after playing at least one Coinflip game."
-                        type="error"
-                        showIcon
-                        icon={<DollarCircleOutlined />}
-                        className="cashout-condition-alert"
-                        action={
-                            <Button type="primary" size="small" className="cashout-play-button" onClick={() => { setShowCashoutModal(false); navigate('/game'); }}>
-                                Play
+
+                    <div className='cashout-balance-info'>
+                        <Text>Available to withdraw:</Text>
+                        <Text strong>{loadingBalance ? <Spin size="small" /> : `${parseFloat(profile?.balance || 0).toFixed(2)} ARIX`}</Text>
+                    </div>
+
+                    <Form form={cashoutForm} onFinish={handleCashout} layout="vertical" disabled={cashoutLoading}>
+                        <Form.Item
+                            name="amount"
+                            label="Amount to Withdraw"
+                            rules={[
+                                { required: true, message: 'Please input the amount!' },
+                                {
+                                    validator: (_, value) => {
+                                        if (!value || parseFloat(value) <= 0) {
+                                            return Promise.reject(new Error('Amount must be positive'));
+                                        }
+                                        if (profile && parseFloat(value) > parseFloat(profile.balance)) {
+                                            return Promise.reject(new Error('Amount exceeds balance'));
+                                        }
+                                        return Promise.resolve();
+                                    }
+                                }
+                            ]}
+                        >
+                            <Input type="number" placeholder="e.g., 100" />
+                        </Form.Item>
+                        <Form.Item label="Withdrawal Address">
+                             <Input value={userWalletAddress} disabled />
+                             <Text type="secondary" style={{fontSize: '12px'}}>Funds will be sent to your connected wallet.</Text>
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" block loading={cashoutLoading}>
+                                Withdraw ARIX
                             </Button>
-                        }
-                    />
+                        </Form.Item>
+                    </Form>
                 </div>
             </Modal>
         </div>
