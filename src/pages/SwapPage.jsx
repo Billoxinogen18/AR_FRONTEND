@@ -104,73 +104,81 @@ const SwapPage = ({ user, setUser }) => {
             default: return '0.00';
         }
     }
+
+    const getCurrencyIcon = (currency) => {
+        switch(currency) {
+            case 'ARIX': return '💎';
+            case 'USDT': return '💵';
+            case 'TON': return '🔵';
+            default: return '❔';
+        }
+    }
     
     return (
         <div className="swap-page-container">
-            <div className="wallet-overview">
-                <h2>My Wallet</h2>
-                <div className="balances-grid">
-                    <div className="balance-card">
-                        <div className="currency-logo">💎</div>
-                        <div className="currency-name">ARIX</div>
-                        <div className="currency-amount">{getBalance('ARIX')}</div>
-                    </div>
-                     <div className="balance-card">
-                        <div className="currency-logo">💵</div>
-                        <div className="currency-name">USDT</div>
-                        <div className="currency-amount">{getBalance('USDT')}</div>
-                    </div>
-                     <div className="balance-card">
-                        <div className="currency-logo">🔵</div>
-                        <div className="currency-name">TON</div>
-                        <div className="currency-amount">{getBalance('TON')}</div>
-                    </div>
+            {/* Header with Balances */}
+            <div className="swap-header">
+                <div className="token-balance-item">
+                    <span className="icon">💎</span>
+                    <span>{getBalance('ARIX')}</span>
+                </div>
+                 <div className="token-balance-item">
+                    <span className="icon">💵</span>
+                    <span>{getBalance('USDT')}</span>
+                </div>
+                 <div className="token-balance-item">
+                    <span className="icon">🔵</span>
+                    <span>{getBalance('TON')}</span>
                 </div>
             </div>
 
-            <div className="swap-container">
-                <h3>Swap Tokens</h3>
-                <div className="swap-box">
-                    <div className="swap-label">You Pay</div>
+            {/* Main Swap Card */}
+            <div className="swap-card">
+                <div className="swap-input-container">
                     <div className="swap-input-row">
-                        <input type="number" value={fromAmount} onChange={(e) => setFromAmount(e.target.value)} placeholder="0.0" disabled={isLoading}/>
-                        <select className="currency-selector" value={fromCurrency} onChange={e => setFromCurrency(e.target.value)}>
-                            {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                        <input className="swap-input" type="number" value={fromAmount} onChange={(e) => setFromAmount(e.target.value)} placeholder="0.0" disabled={isLoading}/>
+                        <div className="currency-selector-wrapper">
+                            <span className="icon">{getCurrencyIcon(fromCurrency)}</span>
+                            <select className="currency-selector" value={fromCurrency} onChange={e => setFromCurrency(e.target.value)}>
+                                {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
                     </div>
-                     <div className="swap-label">
-                         Balance: {getBalance(fromCurrency)}
-                         <button onClick={handleMax} className="max-button">MAX</button>
-                     </div>
+                    <div className="balance-info">
+                        Balance: {getBalance(fromCurrency)}
+                        <button onClick={handleMax} className="max-button">MAX</button>
+                    </div>
                 </div>
 
                 <div className="swap-icon-container">
                     <div className="swap-icon" onClick={handleFlip}>&#x21c5;</div>
                 </div>
-
-                <div className="swap-box">
-                    <div className="swap-label">You Receive (est.)</div>
-                    <div className="swap-input-row">
-                        <input type="number" value={toAmount} readOnly placeholder="0.0" />
-                         <select className="currency-selector" value={toCurrency} onChange={e => setToCurrency(e.target.value)}>
-                            {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                
+                <div className="swap-input-container">
+                     <div className="swap-input-row">
+                        <input className="swap-input" type="number" value={toAmount} readOnly placeholder="0.0" />
+                        <div className="currency-selector-wrapper">
+                             <span className="icon">{getCurrencyIcon(toCurrency)}</span>
+                             <select className="currency-selector" value={toCurrency} onChange={e => setToCurrency(e.target.value)}>
+                                {availableCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
                     </div>
-                    <div className="swap-label">Balance: {getBalance(toCurrency)}</div>
+                    <div className="balance-info">Balance: {getBalance(toCurrency)}</div>
                 </div>
-
-                <div className="swap-info">
-                    {rate && fromCurrency !== toCurrency && `1 ${fromCurrency} ≈ ${parseFloat(rate).toFixed(6)} ${toCurrency}`}
-                </div>
-                <div className={`swap-message ${message.type}`}>{message.text}</div>
-
-                <button className="swap-button" onClick={handleSwap} disabled={isLoading || !fromAmount || parseFloat(fromAmount) <= 0 || fromCurrency === toCurrency}>
-                    {isLoading ? 'Swapping...' : 'Swap'}
-                </button>
             </div>
             
-            <div className="transaction-history-container">
-                <h3>Recent Swaps</h3>
+            <div className="swap-info">
+                {rate && fromCurrency !== toCurrency && `1 ${fromCurrency} ≈ ${parseFloat(rate).toFixed(6)} ${toCurrency}`}
+            </div>
+            <div className={`swap-message ${message.type}`}>{message.text}</div>
+
+            <button className="swap-button" onClick={handleSwap} disabled={isLoading || !fromAmount || parseFloat(fromAmount) <= 0 || fromCurrency === toCurrency}>
+                {isLoading ? 'Swapping...' : 'Swap'}
+            </button>
+            
+            <div className="history-section">
+                <h3>Swap History</h3>
                 <TransactionList transactions={transactions} />
             </div>
         </div>

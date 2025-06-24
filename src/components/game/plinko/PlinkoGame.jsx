@@ -80,7 +80,8 @@ const PlinkoGame = ({ user, setUser, loadingUser }) => {
         // Create Pegs
         for (let row = 0; row < rows; row++) {
             const numPegs = row + 2;
-            const y = spacingY * (row + 1.5);
+            // The vertical offset (row + 1.0) is reduced to move the pyramid up
+            const y = spacingY * (row + 1.0);
             for (let i = 0; i < numPegs; i++) {
                 const x = (width - (numPegs - 1) * spacingX) / 2 + i * spacingX;
                 Matter.World.add(world, Matter.Bodies.circle(x, y, pegRadius, {
