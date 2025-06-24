@@ -212,18 +212,19 @@
 /* UserProfileCard styles (mostly .dashboard-*) */
 .profile-dashboard-card {
     margin-bottom: 24px !important;
+    background-color: var(--app-bg-dark-element) !important;
+    border: 1px solid var(--app-border-color) !important;
+    border-radius: 12px !important;
     /* padding from card theme */
     /* box-shadow from card theme */
-    /* background-color from card theme */
-    /* border from card theme */
 }
 
 .profile-dashboard-card .ant-card-body {
-    padding: 16px !important; /* Override if needed */
+    padding: 0 !important; /* Override for column structure */
 }
 
 .dashboard-column {
-    padding: 12px;
+    padding: 16px;
 }
 .dashboard-column:not(:last-child) {
    border-right: 1px solid var(--app-border-color, #2D3142);
@@ -233,13 +234,13 @@
     .dashboard-column {
         border-right: none !important;
         border-bottom: 1px solid var(--app-border-color, #2D3142);
-        padding-bottom: 20px;
-        margin-bottom: 20px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
     }
     .dashboard-column:last-child {
         border-bottom: none;
         margin-bottom: 0;
-        padding-bottom: 0;
+        padding-bottom: 16px;
     }
 }
 
@@ -305,8 +306,13 @@
 }
 
 
-.dashboard-statistic .ant-statistic-title { /* Uses Statistic theme */ }
-.dashboard-statistic .ant-statistic-content { /* Uses Statistic theme */ }
+.dashboard-statistic .ant-statistic-title { 
+    color: var(--app-primary-text-light) !important;
+    opacity: 0.7 !important;
+}
+.dashboard-statistic .ant-statistic-content { 
+    color: var(--app-primary-text-light) !important;
+}
 .dashboard-statistic .ant-statistic-content .ant-statistic-content-suffix {
     opacity: 0.7;
 }
@@ -393,7 +399,9 @@
 }
 
 
-.transaction-list-card { /* Card theme from ConfigProvider */
+.transaction-list-card { 
+    background-color: var(--app-bg-dark-element) !important;
+    border: 1px solid var(--app-border-color) !important;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
     border-top: none !important;
@@ -408,7 +416,7 @@
 
 .transaction-list-item-wrapper.ant-list-item {
     padding: 16px 0px !important;
-    /* border-bottom from List theme (colorSplit) */
+    border-bottom: 1px solid var(--app-border-color) !important;
 }
 .transaction-list-item-wrapper.ant-list-item:last-child {
     border-bottom: none !important;
@@ -508,4 +516,3 @@
 }
 
 .copy-tx-button.ant-btn-text:hover { opacity: 1; background-color: transparent !important; }
-
