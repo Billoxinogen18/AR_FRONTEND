@@ -115,8 +115,9 @@ export const getTonClient = async () => {
                         timeout: REQUEST_TIMEOUT_MS
                     });
                     
-                    // Test the connection
-                    await client.getWorkchain();
+                    // Test the connection with a simple call instead of getWorkchain()
+                    // Use getMasterchainInfo() which is available in TonClient
+                    await client.getMasterchainInfo();
                     logWithTimestamp('info', `Successfully connected to: ${endpoint.replace(/api_key=[^&]*/, 'api_key=***')}`);
                     break;
                     
@@ -215,8 +216,8 @@ export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAdd
 
             logWithTimestamp('info', 'Calling get_wallet_address method...');
             
-            // Use callGetMethod for TonClient (not runMethod which is for TonClient4)
-            const result = await client.callGetMethod(
+            // Use runMethod for TonClient from @ton/ton
+            const result = await client.runMethod(
                 jettonMasterAddress,
                 'get_wallet_address',
                 [{ type: 'slice', cell: beginCell().storeAddress(ownerAddress).endCell() }]
@@ -264,8 +265,8 @@ export const getJettonBalance = async (jettonWalletAddressString) => {
 
             logWithTimestamp('info', 'Contract is active. Calling get_wallet_data method...');
             
-            // Use callGetMethod for TonClient (not runMethod which is for TonClient4)
-            const result = await client.callGetMethod(jettonWalletAddress, 'get_wallet_data');
+            // Use runMethod for TonClient from @ton/ton
+            const result = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
             const balance = result.stack.readBigNumber();
             
             logWithTimestamp('info', 'Successfully fetched balance', { 
@@ -455,8 +456,8 @@ export const testConnection = async () => {
     try {
         logWithTimestamp('info', 'Testing TON client connection...');
         const client = await getTonClient();
-        const workchain = await client.getWorkchain();
-        logWithTimestamp('info', 'Connection test successful', { workchain });
+        const masterchainInfo = await client.getMasterchainInfo();
+        logWithTimestamp('info', 'Connection test successful', { masterchainInfo });
         return true;
     } catch (error) {
         logWithTimestamp('error', 'Connection test failed', { error: error.message });
