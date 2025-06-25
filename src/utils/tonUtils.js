@@ -86,12 +86,14 @@ export const fromUsdtSmallestUnits = (amountInSmallestUnits) => {
     return fromSmallestUnits(amountInSmallestUnits, USDT_DECIMALS);
 };
 
-
 export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAddressString) => {
-    // FIX: Added validation to prevent errors when the owner address is not yet available or invalid.
-    // This stops the 500 Internal Server Error from the logs.
+    console.log(`[tonUtils.js] getJettonWalletAddress called with owner: ${ownerAddressString}, master: ${jettonMasterAddressString}`);
     if (!ownerAddressString || typeof ownerAddressString !== 'string' || !ownerAddressString.includes(':')) {
-        console.warn(`[tonUtils.js] Invalid or missing ownerAddressString provided: ${ownerAddressString}. Cannot fetch Jetton wallet address.`);
+        console.warn(`[tonUtils.js] ABORTING: Invalid ownerAddressString provided: ${ownerAddressString}.`);
+        return null;
+    }
+    if (!jettonMasterAddressString) {
+        console.warn(`[tonUtils.js] ABORTING: Missing jettonMasterAddressString.`);
         return null;
     }
 
@@ -102,41 +104,51 @@ export const getJettonWalletAddress = async (ownerAddressString, jettonMasterAdd
         const ownerAddress = Address.parse(ownerAddressString);
         const jettonMasterAddress = Address.parse(jettonMasterAddressString);
 
+        console.log("[tonUtils.js] Running client.runMethod 'get_wallet_address'...");
         const result = await client.runMethod(
             jettonMasterAddress,
             'get_wallet_address',
             [{ type: 'slice', cell: beginCell().storeAddress(ownerAddress).endCell() }]
         );
         
-        return result.stack.readAddress().toString({bounceable: true, testOnly: TON_NETWORK === 'testnet'});
+        const jettonWalletAddr = result.stack.readAddress().toString({bounceable: true, testOnly: TON_NETWORK === 'testnet'});
+        console.log("[tonUtils.js] SUCCESS: Derived Jetton Wallet Address:", jettonWalletAddr);
+        return jettonWalletAddr;
+
     } catch (error) {
-        console.error(`[tonUtils.js] Error getting Jetton wallet address for owner ${ownerAddressString} and master ${jettonMasterAddressString}:`, error.message);
+        console.error(`[tonUtils.js] CRITICAL ERROR in getJettonWalletAddress:`, error.message);
         return null;
     }
 };
 
 export const getJettonBalance = async (jettonWalletAddressString) => {
+    console.log(`[tonUtils.js] getJettonBalance called for: ${jettonWalletAddressString}`);
     try {
         const client = await getTonClient();
         if (!client) throw new Error("TonClient not available in getJettonBalance");
 
         const jettonWalletAddress = Address.parse(jettonWalletAddressString);
         
+        console.log("[tonUtils.js] Getting contract state...");
         const contractState = await client.getContractState(jettonWalletAddress);
+
         if (contractState.state.type !== 'active') {
             console.warn(`[tonUtils.js] Jetton wallet ${jettonWalletAddressString} is not active (not deployed or frozen). Assuming 0 balance.`);
             return BigInt(0);
         }
 
+        console.log("[tonUtils.js] Contract is active. Running runMethod 'get_wallet_data'...");
         const result = await client.runMethod(jettonWalletAddress, 'get_wallet_data');
-        return result.stack.readBigNumber(); 
+        const balance = result.stack.readBigNumber();
+        console.log("[tonUtils.js] SUCCESS: Fetched balance (smallest units):", balance.toString());
+        return balance;
+
     } catch (error) {
-        
+        console.error(`[tonUtils.js] CRITICAL ERROR in getJettonBalance:`, error.message);
         if (error.message && (error.message.includes('exit_code: -256') || error.message.includes('Unable to query contract state'))) {
-            console.warn(`[tonUtils.js] Jetton wallet ${jettonWalletAddressString} likely not initialized or found. Error: ${error.message}. Assuming 0 balance.`);
+            console.warn(`[tonUtils.js] Jetton wallet ${jettonWalletAddressString} likely not initialized. Assuming 0 balance.`);
             return BigInt(0);
         }
-        console.error(`[tonUtils.js] Error getting Jetton balance for ${jettonWalletAddressString}:`, error.message);
         return BigInt(0); 
     }
 };
@@ -170,9 +182,6 @@ export const createJettonTransferMessage = (
     return bodyBuilder.endCell();
 };
 
-
-
-
 export const createStakeForwardPayload = (params) => {
     return beginCell()
         .storeUint(0xf010c513, 32) 
@@ -183,7 +192,6 @@ export const createStakeForwardPayload = (params) => {
         .storeUint(params.arix_lock_penalty_bps, 16)
         .endCell();
 };
-
 
 export const waitForTransactionConfirmation = async (walletAddressString, sentMessageCellBoc, timeoutMs = 180000, intervalMs = 5000) => {
     const client = await getTonClient();
@@ -221,9 +229,7 @@ export const waitForTransactionConfirmation = async (walletAddressString, sentMe
             }
 
         } catch (error) {
-            
             if (error.message.includes("Unable to query contract state") && Date.now() - startTime < 15000) {
-                
                 console.warn("[tonUtils.js] Wallet state not queryable yet, retrying...");
             } else {
                 console.warn("[tonUtils.js] Error polling for transactions:", error.message);

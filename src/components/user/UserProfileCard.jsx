@@ -10,7 +10,7 @@ import {
   getJettonWalletAddress, getJettonBalance, fromArixSmallestUnits,
   ARIX_DECIMALS, USDT_DECIMALS, MIN_USDT_WITHDRAWAL_USD_VALUE, TON_EXPLORER_URL
 } from '../../utils/tonUtils';
-import { requestUsdtWithdrawal, requestArixRewardWithdrawal, getUserProfile } from '../../services/api'; // Added getUserProfile
+import { requestUsdtWithdrawal, requestArixRewardWithdrawal, getUserProfile } from '../../services/api';
 
 const { Text, Paragraph, Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -18,11 +18,11 @@ const { useBreakpoint } = Grid;
 const ARIX_JETTON_MASTER_ADDRESS = import.meta.env.VITE_ARIX_TOKEN_MASTER_ADDRESS;
 
 const UserProfileCard = ({
-                           userProfileData, // Main profile data from UserPage
+                           userProfileData,
                            activeStakes,
                            currentArxPrice,
-                           onRefreshAllData, // UserPage's main refresh
-                           isDataLoading, // UserPage's combined loading for this card
+                           onRefreshAllData,
+                           isDataLoading,
                            onInitiateUnstakeProcess,
                          }) => {
   const userFriendlyAddress = useTonAddress();
@@ -35,35 +35,51 @@ const UserProfileCard = ({
   const [isWithdrawUsdtLoading, setIsWithdrawUsdtLoading] = useState(false);
   const [isWithdrawArixLoading, setIsWithdrawArixLoading] = useState(false);
   
-  // Local state for claimable ARIX if userProfileData isn't immediately available or for focused refresh
   const [localClaimableArix, setLocalClaimableArix] = useState('0');
   const [loadingLocalClaimableArix, setLoadingLocalClaimableArix] = useState(false);
 
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  // Helper function for consistent formatting (from Gemini's enhancement)
   const formatBalance = (amount, precision) => {
     const number = parseFloat(amount);
     return isNaN(number) ? '0.00' : number.toFixed(precision);
   };
 
   const fetchArixWalletBalance = useCallback(async (showMsg = false) => {
+    console.log("[UserProfileCard] 1. Starting fetchArixWalletBalance. rawAddress:", rawAddress);
+
     if (!rawAddress || !ARIX_JETTON_MASTER_ADDRESS) {
+      console.log("[UserProfileCard] 2. Aborting: Missing rawAddress or ARIX_JETTON_MASTER_ADDRESS.");
+      console.log(`   - rawAddress found: ${!!rawAddress}`);
+      console.log(`   - ARIX_JETTON_MASTER_ADDRESS found: ${!!ARIX_JETTON_MASTER_ADDRESS} (Value: ${ARIX_JETTON_MASTER_ADDRESS})`);
       setArixWalletBalance(0);
       return;
     }
+
     setLoadingArixWalletBalance(true);
+    console.log("[UserProfileCard] 3. Calling getJettonWalletAddress...");
     try {
       const userArixJettonWallet = await getJettonWalletAddress(rawAddress, ARIX_JETTON_MASTER_ADDRESS);
+      
+      console.log("[UserProfileCard] 4. Received jetton wallet address:", userArixJettonWallet);
+
       if (userArixJettonWallet) {
+        console.log("[UserProfileCard] 5. Calling getJettonBalance for address:", userArixJettonWallet);
         const balanceSmallestUnits = await getJettonBalance(userArixJettonWallet);
-        setArixWalletBalance(fromArixSmallestUnits(balanceSmallestUnits));
+        console.log("[UserProfileCard] 6. Received balance (smallest units):", balanceSmallestUnits.toString());
+        
+        const finalBalance = fromArixSmallestUnits(balanceSmallestUnits);
+        console.log("[UserProfileCard] 7. Final formatted balance:", finalBalance);
+        setArixWalletBalance(finalBalance);
+
         if (showMsg) message.success("ARIX wallet balance refreshed!");
       } else {
+        console.log("[UserProfileCard] 5b. Jetton wallet address was null or empty. Setting balance to 0.");
         setArixWalletBalance(0);
       }
     } catch (err) {
+      console.error("[UserProfileCard] 8. CRITICAL ERROR in fetchArixWalletBalance:", err);
       setArixWalletBalance(0);
       if (showMsg) message.error("Could not refresh ARIX wallet balance.");
     } finally {
@@ -97,7 +113,7 @@ const UserProfileCard = ({
     }
   }, [rawAddress, fetchArixWalletBalance, fetchLocalClaimableArixBalance]);
   
-   useEffect(() => { // Sync with prop if available
+   useEffect(() => {
       if (userProfileData?.claimableArixRewards) {
         setLocalClaimableArix(Math.floor(parseFloat(userProfileData.claimableArixRewards)).toString());
       }
@@ -106,9 +122,9 @@ const UserProfileCard = ({
   const handleRefreshLocalCardData = () => {
       if(userFriendlyAddress) {
           fetchArixWalletBalance(true);
-          fetchLocalClaimableArixBalance(); // Refresh local ARIX as well
+          fetchLocalClaimableArixBalance();
       }
-      if(onRefreshAllData) onRefreshAllData(true); // Trigger UserPage's main refresh
+      if(onRefreshAllData) onRefreshAllData(true);
   };
 
   const handleWithdrawUsdt = async () => {
@@ -123,8 +139,8 @@ const UserProfileCard = ({
     try {
       const response = await requestUsdtWithdrawal({ userWalletAddress: rawAddress, amountUsdt: claimableUsdt });
       message.success({ content: response.data.message || "USDT Withdrawal submitted!", key: 'usdtWithdrawCard', duration: 5 });
-      if (onRefreshAllData) onRefreshAllData(false); // Refresh main UserPage data
-      fetchLocalClaimableArixBalance(); // Refresh local ARIX after any withdrawal
+      if (onRefreshAllData) onRefreshAllData(false);
+      fetchLocalClaimableArixBalance();
     } catch (error) {
       message.error({ content: error?.response?.data?.message || "USDT Withdrawal failed.", key: 'usdtWithdrawCard', duration: 5 });
     } finally {
@@ -134,7 +150,7 @@ const UserProfileCard = ({
 
   const handleWithdrawArix = async () => {
     if (!rawAddress || !userProfileData || !currentArxPrice || currentArxPrice <= 0) return;
-    const claimableArixToWithdraw = parseFloat(localClaimableArix || userProfileData.claimableArixRewards || 0); // Prioritize local state
+    const claimableArixToWithdraw = parseFloat(localClaimableArix || userProfileData.claimableArixRewards || 0);
     const minArixForWithdrawal = MIN_USDT_WITHDRAWAL_USD_VALUE / currentArxPrice;
 
     if (claimableArixToWithdraw < minArixForWithdrawal) {
@@ -146,8 +162,8 @@ const UserProfileCard = ({
     try {
       const response = await requestArixRewardWithdrawal({ userWalletAddress: rawAddress, amountArix: claimableArixToWithdraw });
       message.success({ content: response.data.message || "ARIX Withdrawal submitted!", key: 'arixWithdrawCard', duration: 5 });
-      if (onRefreshAllData) onRefreshAllData(false); // Refresh main UserPage data
-      fetchLocalClaimableArixBalance(); // Refresh local ARIX
+      if (onRefreshAllData) onRefreshAllData(false);
+      fetchLocalClaimableArixBalance();
     } catch (error) {
       message.error({ content: error?.response?.data?.message || "ARIX Withdrawal failed.", key: 'arixWithdrawCard', duration: 5 });
     } finally {
@@ -198,20 +214,19 @@ const UserProfileCard = ({
               <AntdStatistic title="ARIX Wallet Balance" value={arixWalletBalance.toFixed(ARIX_DECIMALS)} suffix=" ARIX" className="dashboard-statistic"/>
               {currentArxPrice != null && (<Text className="dashboard-value-equivalent">~${(arixWalletBalance * currentArxPrice).toFixed(USDT_DECIMALS)} USD</Text>)}
               
-              {/* NEW: Enhanced Game/Swap Balance displays from Gemini */}
-              <div style={{ marginTop: 16, padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                <Title level={6} style={{ margin: 0, marginBottom: 8, color: '#1890ff' }}>Game/Swap Balances</Title>
+              <div style={{ marginTop: 16, padding: '12px', backgroundColor: 'var(--app-bg-light)', borderRadius: '8px' }}>
+                <Title level={6} style={{ margin: 0, marginBottom: 8, color: 'var(--app-primary-color)' }}>Game/Swap Balances</Title>
                 <div className="balance-item" style={{ marginBottom: 8 }}>
-                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>ARIX Balance (Game/Swap):</Text>
-                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>{formatBalance(userProfileData?.balance, 4)} ARIX</Text>
+                  <Text className="balance-label" style={{ fontSize: '12px', color: 'var(--app-text-secondary)' }}>ARIX Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8, color: 'var(--app-text-primary)' }}>{formatBalance(userProfileData?.balance, 4)} ARIX</Text>
                 </div>
                 <div className="balance-item" style={{ marginBottom: 8 }}>
-                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>USDT Balance (Game/Swap):</Text>
-                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>${formatBalance(userProfileData?.usdt_balance, 2)}</Text>
+                  <Text className="balance-label" style={{ fontSize: '12px', color: 'var(--app-text-secondary)' }}>USDT Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8, color: 'var(--app-text-primary)' }}>${formatBalance(userProfileData?.usdt_balance, 2)}</Text>
                 </div>
                 <div className="balance-item">
-                  <Text className="balance-label" style={{ fontSize: '12px', color: '#666' }}>TON Balance (Game/Swap):</Text>
-                  <Text className="balance-value" strong style={{ marginLeft: 8 }}>{formatBalance(userProfileData?.ton_balance, 6)} TON</Text>
+                  <Text className="balance-label" style={{ fontSize: '12px', color: 'var(--app-text-secondary)' }}>TON Balance (Game/Swap):</Text>
+                  <Text className="balance-value" strong style={{ marginLeft: 8, color: 'var(--app-text-primary)' }}>{formatBalance(userProfileData?.ton_balance, 6)} TON</Text>
                 </div>
               </div>
               
@@ -223,7 +238,6 @@ const UserProfileCard = ({
               <AntdStatistic title="Total Staked ARIX" value={totalStakedArix.toFixed(ARIX_DECIMALS)} suffix=" ARIX" className="dashboard-statistic"/>
               {currentArxPrice != null && totalStakedArix > 0 && (<Text className="dashboard-value-equivalent">~${totalStakedUsdtEquivalent.toFixed(USDT_DECIMALS)} USD</Text>)}
               
-              {/* Enhanced Claimable displays with Gemini's formatting */}
               <div style={{ marginTop: 16 }}>
                 <AntdStatistic 
                   title="Claimable USDT (from Staking)" 
@@ -256,15 +270,14 @@ const UserProfileCard = ({
                  {currentArxPrice != null && <Text className="dashboard-value-equivalent">~${((arixWalletBalance + totalStakedArix) * currentArxPrice).toFixed(USDT_DECIMALS)} USD</Text>}
                  <AntdStatistic title="Total Claimable Value (USDT + ARIX Rewards)" value={`~$${(claimableUsdtNum + (currentArxPrice ? effectiveClaimableArixNum * currentArxPrice : 0)).toFixed(USDT_DECIMALS)}`} valueStyle={{color: '#A3AECF', fontWeight:'bold'}} className="dashboard-statistic"/>
                  
-                 {/* Enhanced Total Game/Swap Value Summary */}
-                 <div style={{ marginTop: 16, padding: '12px', backgroundColor: '#f0f8ff', borderRadius: '8px' }}>
-                   <Title level={6} style={{ margin: 0, marginBottom: 8, color: '#1890ff' }}>Game/Swap Summary</Title>
+                 <div style={{ marginTop: 16, padding: '12px', backgroundColor: 'var(--app-bg-light)', borderRadius: '8px' }}>
+                   <Title level={6} style={{ margin: 0, marginBottom: 8, color: 'var(--app-primary-color)' }}>Game/Swap Summary</Title>
                    <AntdStatistic 
                      title="Total Game/Swap Value" 
                      value={`~$${(
                        parseFloat(userProfileData?.balance || 0) * (currentArxPrice || 0) +
                        parseFloat(userProfileData?.usdt_balance || 0) +
-                       parseFloat(userProfileData?.ton_balance || 0) * 5 // Rough TON price estimate
+                       parseFloat(userProfileData?.ton_balance || 0) * 2.8 // Rough TON price estimate
                      ).toFixed(2)}`}
                      valueStyle={{color: '#52c41a', fontSize: '16px'}} 
                      className="dashboard-statistic"
